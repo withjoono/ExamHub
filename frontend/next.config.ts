@@ -2,16 +2,16 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: 'export', // Static export for Firebase Hosting
+  images: {
+    unoptimized: true, // Required for static export
+  },
   turbopack: {
     root: process.cwd(),
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:4003/api/:path*",
-      },
-    ]
+  // Remove rewrites for static export - use environment variable instead
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003',
   },
 }
 

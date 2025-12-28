@@ -3,3 +3,17 @@ node_modules/
 .next/
 .env.local
 dist/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Next.js static export
+out/
+frontend/out/
+
+# Environment files
+.env.production.local
+

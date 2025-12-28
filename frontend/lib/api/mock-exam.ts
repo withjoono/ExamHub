@@ -20,7 +20,7 @@ export const mockExamApi = {
    * 모의고사 검색 (연도/학년/월)
    */
   search: (params: SearchMockExamParams) =>
-    api.get<MockExam[]>('/api/mock-exams/search', params),
+    api.get<MockExam[]>('/api/mock-exams/search', params as Record<string, string | number | boolean | undefined>),
 
   /**
    * 모의고사 존재 여부 확인

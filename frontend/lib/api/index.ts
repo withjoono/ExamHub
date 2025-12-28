@@ -8,11 +8,3 @@ export { scoreApi } from './score';
 export { universityApi } from './university';
 
 export * from './types';
-
-
-
-
-
-
-
-

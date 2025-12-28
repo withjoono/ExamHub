@@ -1,13 +1,15 @@
 {
-  "name": "gb-examinfo-frontend",
+  "name": "myexam-frontend",
   "version": "1.0.0",
-  "description": "GB-ExamInfo 모의고사 분석 서비스 프론트엔드",
+  "description": "MyExam 모의고사 분석 서비스 프론트엔드",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build:firebase": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "deploy": "npm run build:firebase && firebase deploy --only hosting"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "1.2.2",

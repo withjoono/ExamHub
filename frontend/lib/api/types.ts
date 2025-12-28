@@ -241,10 +241,45 @@ export interface ScoreConversionRaw {
   standardScore?: number;
 }
 
+// === 채점 ===
+export interface AnswerItem {
+  questionNumber: number;
+  answer: number;
+}
 
+export interface GradeAnswersRequest {
+  mockExamId: number;
+  subject: string;
+  subjectDetail?: string;
+  answers: AnswerItem[];
+}
 
+export interface GradeResultItem {
+  questionNumber: number;
+  studentAnswer: number;
+  correctAnswer: number;
+  isCorrect: boolean;
+  score: number;
+  earnedScore: number;
+  difficulty?: string;
+  correctRate?: number;
+}
 
+export interface GradeResult {
+  mockExamId: number;
+  subject: string;
+  subjectDetail?: string;
+  totalQuestions: number;
+  correctCount: number;
+  totalScore: number;
+  earnedScore: number;
+  results: GradeResultItem[];
+}
 
-
-
-
+export interface CorrectAnswer {
+  questionNumber: number;
+  answer: number;
+  score: number;
+  difficulty?: string;
+  correctRate?: number;
+}

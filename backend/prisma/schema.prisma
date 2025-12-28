@@ -32,6 +32,7 @@ model Student {
   scores             StudentScore[]
   targets            StudentTarget[]
   achievementResults AchievementResult[]
+  answers            StudentAnswer[]
 
   @@index([studentId])
   @@index([year, grade])
@@ -57,6 +58,7 @@ model MockExam {
   admissionCutoffs        AdmissionCutoff[]
   scoreConversionStandard ScoreConversionStandard[]
   scoreConversionRaw      ScoreConversionRaw[]
+  studentAnswers          StudentAnswer[]
 
   @@index([code])
   @@index([grade, year, month])
@@ -122,6 +124,8 @@ model ExamQuestion {
   questionNumber  Int      @map("question_number") // 문제 번호
   score           Int // 배점
   answer          Int // 정답 (1~5)
+  difficulty      String?  @db.VarChar(10) // 난이도 (상, 중상, 중, 중하, 하)
+  correctRate     Decimal? @map("correct_rate") @db.Decimal(5, 2) // 정답률 (%)
   choiceRatio1    Decimal? @map("choice_ratio_1") @db.Decimal(5, 2) // 1번 선택 비율
   choiceRatio2    Decimal? @map("choice_ratio_2") @db.Decimal(5, 2) // 2번 선택 비율
   choiceRatio3    Decimal? @map("choice_ratio_3") @db.Decimal(5, 2) // 3번 선택 비율
@@ -129,7 +133,8 @@ model ExamQuestion {
   choiceRatio5    Decimal? @map("choice_ratio_5") @db.Decimal(5, 2) // 5번 선택 비율
 
   // Relations
-  mockExam MockExam @relation(fields: [mockExamId], references: [id])
+  mockExam       MockExam        @relation(fields: [mockExamId], references: [id])
+  studentAnswers StudentAnswer[]
 
   @@index([mockExamId])
   @@index([subjectAreaCode, subjectCode])
@@ -476,4 +481,42 @@ model AchievementResult {
   @@index([studentId])
   @@index([date])
   @@map("achievement_results")
+}
+
+// ============================================
+// 16. 학생 답안 (오답 노트용)
+// ============================================
+model StudentAnswer {
+  id              Int      @id @default(autoincrement())
+  studentId       Int      @map("student_id")
+  mockExamId      Int      @map("mock_exam_id")
+  examQuestionId  Int      @map("exam_question_id")
+  subjectAreaName String?  @map("subject_area_name") @db.VarChar(50) // 국어, 수학, 영어 등
+  subjectName     String?  @map("subject_name") @db.VarChar(50) // 화법과 작문, 미적분 등
+  questionNumber  Int      @map("question_number") // 문제 번호
+  selectedAnswer  Int      @map("selected_answer") // 학생이 선택한 답 (1~5)
+  correctAnswer   Int      @map("correct_answer") // 정답
+  isCorrect       Boolean  @map("is_correct") // 정답 여부
+  score           Int?     @default(2) // 문제 배점
+  earnedScore     Int?     @map("earned_score") @default(0) // 획득 점수
+
+  // 오답 분석
+  wrongReason     String?  @map("wrong_reason") @db.VarChar(200) // 오답 이유 (학생 메모)
+  reviewCount     Int      @default(0) @map("review_count") // 복습 횟수
+  lastReviewedAt  DateTime? @map("last_reviewed_at") // 마지막 복습 일시
+  isBookmarked    Boolean  @default(false) @map("is_bookmarked") // 북마크 여부
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  student      Student      @relation(fields: [studentId], references: [id])
+  mockExam     MockExam     @relation(fields: [mockExamId], references: [id])
+  examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id])
+
+  @@unique([studentId, examQuestionId])
+  @@index([studentId, mockExamId])
+  @@index([studentId, isCorrect])
+  @@index([studentId, subjectAreaName])
+  @@map("student_answers")
 }

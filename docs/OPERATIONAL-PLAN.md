@@ -22,15 +22,15 @@
 
 | # | 기능 | 프론트엔드 페이지 | 설명 |
 |---|------|------------------|------|
-| 1 | 모의고사 입력 | `/mock-analysis/input` | 모의고사 선택 (연도/학년/월) |
-| 2 | 점수 입력 | `/mock-analysis/input/score` | 원점수/표준점수 입력 (학년별 다른 폼) |
-| 3 | 정답 입력 | `/mock-analysis/input/form` | 문항별 정답 직접 입력 |
-| 4 | 성적 분석 | `/mock-analysis/score-analysis` | 과목별/조합별/반영비율별 분석 |
-| 5 | 대학 예측 | `/mock-analysis/prediction` | 대학 합격 가능성 예측 |
-| 6 | 누적 분석 | `/mock-analysis/statistics` | 여러 회차 성적 추이 분석 |
-| 7 | 결과 관리 | `/mock-analysis/management` | 저장된 분석 결과/오답 관리 |
-| 8 | 목표 대학 | `/mock-analysis/target-university` | 목표 대학 설정 및 비교 |
-| 9 | 오답 노트 | `/mock-analysis/wrong-answers` | 틀린 문제 분석 |
+| 1 | 모의고사 입력 | `/my-exam/input` | 모의고사 선택 (연도/학년/월) |
+| 2 | 점수 입력 | `/my-exam/input/score` | 원점수/표준점수 입력 (학년별 다른 폼) |
+| 3 | 정답 입력 | `/my-exam/input/form` | 문항별 정답 직접 입력 |
+| 4 | 성적 분석 | `/my-exam/score-analysis` | 과목별/조합별/반영비율별 분석 |
+| 5 | 대학 예측 | `/my-exam/prediction` | 대학 합격 가능성 예측 |
+| 6 | 누적 분석 | `/my-exam/statistics` | 여러 회차 성적 추이 분석 |
+| 7 | 결과 관리 | `/my-exam/management` | 저장된 분석 결과/오답 관리 |
+| 8 | 목표 대학 | `/my-exam/target-university` | 목표 대학 설정 및 비교 |
+| 9 | 오답 노트 | `/my-exam/wrong-answers` | 틀린 문제 분석 |
 
 ### 1.2 데이터베이스 모델 (15개)
 
@@ -628,6 +628,8 @@ Week 8:
 ---
 
 *이 문서는 프로젝트 진행에 따라 업데이트됩니다.*
+
+
 
 
 

@@ -3,3 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+
+# Excel data files (large files for DB import)
+/prisma/data/*.xlsx
+/prisma/data/*.xls

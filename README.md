@@ -1,10 +1,10 @@
-# GB-ExamInfo
+# MyExam
 
 > 거북스쿨 모의고사 분석 서비스 - 분리 운영 프로젝트
 
 ## 📋 개요
 
-GB-ExamInfo는 거북스쿨의 **모의고사 분석 서비스**를 분리 운영하기 위한 프로젝트입니다.
+MyExam은 거북스쿨의 **모의고사 분석 서비스**를 분리 운영하기 위한 프로젝트입니다.
 메인 서비스(GB-Front, GB-Back-Nest)와 분리되어 독립적으로 개발/배포됩니다.
 
 ### 주요 기능
@@ -18,9 +18,9 @@ GB-ExamInfo는 거북스쿨의 **모의고사 분석 서비스**를 분리 운�
 ## 🏗️ 프로젝트 구조
 
 ```
-GB-ExamInfo/
-├── frontend/              # React + Vite 프론트엔드
-├── backend/               # NestJS 백엔드 (예정)
+MyExam/
+├── frontend/              # Next.js 프론트엔드
+├── backend/               # NestJS 백엔드
 ├── shared-packages/       # 공유 패키지 (@geobuk/*)
 └── docs/                  # 문서
 ```
@@ -62,8 +62,44 @@ npm run start:dev
 ## 📚 문서
 
 - [아키텍처 문서](./docs/ARCHITECTURE.md)
+- [Firebase 배포 가이드](./FIREBASE_DEPLOYMENT.md)
 - [API 문서](./docs/API.md) (예정)
 - [데이터베이스 스키마](./shared-packages/be-shared-packages/docs/be-DATABASE-SCHEMA.md)
+
+## 🚢 배포
+
+### Firebase Hosting (프론트엔드)
+
+1. Firebase 로그인:
+```bash
+firebase login
+```
+
+2. Firebase 프로젝트 설정:
+- `.firebaserc` 파일에서 프로젝트 ID 설정
+- `frontend/.env.production` 파일에서 백엔드 URL 설정
+
+3. 배포:
+```bash
+# Windows
+.\deploy.ps1
+
+# Linux/Mac
+./deploy.sh
+
+# 또는 수동 배포
+cd frontend
+npm run build:firebase
+cd ..
+firebase deploy --only hosting
+```
+
+상세한 배포 가이드는 [FIREBASE_DEPLOYMENT.md](./FIREBASE_DEPLOYMENT.md)를 참조하세요.
+
+### 백엔드 배포
+
+백엔드는 Google Cloud Run, Heroku, Railway 등에 배포할 수 있습니다.
+Docker를 사용한 배포 가이드는 [FIREBASE_DEPLOYMENT.md](./FIREBASE_DEPLOYMENT.md)를 참조하세요.
 
 ## 🔗 관련 프로젝트
 
@@ -74,6 +110,8 @@ npm run start:dev
 ## 📞 문의
 
 프로젝트 관련 문의는 담당자에게 연락하세요.
+
+
 
 
 

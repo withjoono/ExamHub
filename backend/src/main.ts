@@ -13,6 +13,8 @@ async function bootstrap() {
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:5173', // Vite dev server
+      'https://examhub-app.web.app', // Firebase Hosting
+      'https://examhub-app.firebaseapp.com', // Firebase Hosting alternative
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
@@ -33,7 +35,7 @@ async function bootstrap() {
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('모의고사 분석 API')
-    .setDescription('GB-ExamInfo 모의고사 분석 서비스 API 문서')
+    .setDescription('MyExam 모의고사 분석 서비스 API 문서')
     .setVersion('1.0')
     .addTag('모의고사', '모의고사 관련 API')
     .addTag('점수', '점수 입력/조회 API')

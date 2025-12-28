@@ -55,14 +55,23 @@ export default function CumulativeAnalysis() {
     { subject: "제2외국어", grade: "1.7", height: "h-26" },
   ]
 
-  const subjectAnalysisData = {
+  const subjectAnalysisData: {
+    [key: string]: { 등급: number; 나의점수: number; 표준점수: number; 백분위: number }
+  } = {
     "3월": { 등급: 8, 나의점수: 23.0, 표준점수: 66, 백분위: 4 },
     "6월": { 등급: 8, 나의점수: 20.0, 표준점수: 67, 백분위: 4 },
     "9월": { 등급: 8, 나의점수: 20.0, 표준점수: 71, 백분위: 7 },
     "11월": { 등급: 9, 나의점수: 16.0, 표준점수: 66, 백분위: 3 },
   }
 
-  const allSubjectsData = {
+  const allSubjectsData: {
+    [key: string]: {
+      원점수: { 국어: number; 수학: number; 과목합: number }
+      등급: { 국어: number; 수학: number; 과목합: number }
+      표준점수: { 국어: number; 수학: number; 과목합: number }
+      백분위: { 국어: number; 수학: number; 과목합: number }
+    }
+  } = {
     "3월": {
       원점수: { 국어: 23.0, 수학: 17.0, 과목합: 40.0 },
       등급: { 국어: 8, 수학: 8, 과목합: 8 },
@@ -433,11 +442,11 @@ export default function CumulativeAnalysis() {
               <div className="relative flex space-x-1">
                 <div
                   className="w-6 bg-blue-400 rounded"
-                  style={{ height: `${allSubjectsData[month].원점수.나의점수 * 3}px` }}
+                  style={{ height: `${allSubjectsData[month].원점수.국어 * 3}px` }}
                 ></div>
                 <div
                   className="w-6 bg-pink-400 rounded"
-                  style={{ height: `${allSubjectsData[month].원점수.표준점수 * 2}px` }}
+                  style={{ height: `${allSubjectsData[month].표준점수.국어 * 2}px` }}
                 ></div>
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-[#9c3d9a] rounded-full"></div>
                 {index < months.length - 1 && <div className="absolute -top-5 left-6 w-8 h-0.5 bg-[#9c3d9a]"></div>}

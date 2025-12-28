@@ -16,13 +16,13 @@ import {
 import { cn } from "@/lib/utils"
 
 const navItems = [
-  { href: "/mock-analysis/input", label: "입력", icon: FileText },
-  { href: "/mock-analysis/score-analysis", label: "성적분석", icon: BarChart3 },
-  { href: "/mock-analysis/prediction", label: "대학예측", icon: GraduationCap },
-  { href: "/mock-analysis/statistics", label: "누적분석", icon: TrendingUp },
-  { href: "/mock-analysis/management", label: "분석과 오답", icon: ClipboardList },
-  { href: "/mock-analysis/target-university", label: "목표대학", icon: Target },
-  { href: "/mock-analysis/wrong-answers", label: "오답노트", icon: BookX },
+  { href: "/my-exam/input", label: "입력", icon: FileText },
+  { href: "/my-exam/score-analysis", label: "성적분석", icon: BarChart3 },
+  { href: "/my-exam/prediction", label: "대학예측", icon: GraduationCap },
+  { href: "/my-exam/statistics", label: "누적분석", icon: TrendingUp },
+  { href: "/my-exam/management", label: "분석과 오답", icon: ClipboardList },
+  { href: "/my-exam/target-university", label: "목표대학", icon: Target },
+  { href: "/my-exam/wrong-answers", label: "오답노트", icon: BookX },
 ]
 
 export default function MockAnalysisLayout({
@@ -48,7 +48,7 @@ export default function MockAnalysisLayout({
               <div className="w-8 h-8 bg-gradient-to-br from-[#9c3d9a] to-[#5a1559] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">G</span>
               </div>
-              <span className="text-lg font-bold text-gray-900">GB-ExamInfo</span>
+              <span className="text-lg font-bold text-gray-900">MyExam</span>
             </Link>
             
             <Link 

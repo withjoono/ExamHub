@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { MockExamService } from './mock-exam.service';
 import { SearchMockExamDto } from './dto/search-mock-exam.dto';
 import { MockExamResponseDto } from './dto/mock-exam-response.dto';
+import { GradeAnswersDto, GradeResultDto } from './dto/grade-answers.dto';
 
 @ApiTags('모의고사')
 @Controller('api/mock-exams')
@@ -59,6 +60,28 @@ export class MockExamController {
     return { success: true, data };
   }
 
+  @Get(':id/answers')
+  @ApiOperation({ summary: '모의고사 정답 조회 (과목별)' })
+  @ApiQuery({ name: 'subject', required: true, type: String, description: '과목명 (국어, 수학, 영어 등)' })
+  @ApiQuery({ name: 'subjectDetail', required: false, type: String, description: '세부 과목명 (화법과작문 등)' })
+  async getAnswers(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('subject') subject: string,
+    @Query('subjectDetail') subjectDetail?: string,
+  ) {
+    const data = await this.mockExamService.getAnswers(id, subject, subjectDetail);
+    return { success: true, data };
+  }
+
+  @Post('grade')
+  @ApiOperation({ summary: '채점하기 - 학생 답안과 정답 비교' })
+  @ApiBody({ type: GradeAnswersDto })
+  @ApiResponse({ status: 200, description: '채점 결과', type: GradeResultDto })
+  async gradeAnswers(@Body() gradeDto: GradeAnswersDto) {
+    const data = await this.mockExamService.gradeAnswers(gradeDto);
+    return { success: true, data };
+  }
+
   @Get('code/:code')
   @ApiOperation({ summary: '모의고사 코드로 조회' })
   @ApiResponse({ status: 200, description: '모의고사 상세', type: MockExamResponseDto })
@@ -75,11 +98,4 @@ export class MockExamController {
     return { success: true, data };
   }
 }
-
-
-
-
-
-
-
 

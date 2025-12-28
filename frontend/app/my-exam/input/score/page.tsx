@@ -94,43 +94,55 @@ export default function ScoreInputPage() {
   }
 
   const handleStandardScoreChange = (subject: string, field: string, value: string) => {
-    setStandardScores((prev) => ({
-      ...prev,
-      [subject]: {
-        ...prev[subject as keyof typeof prev],
-        [field]: value,
-      },
-    }))
+    setStandardScores((prev) => {
+      const currentSubject = prev[subject as keyof typeof prev]
+      return {
+        ...prev,
+        [subject]: {
+          ...(typeof currentSubject === 'object' ? currentSubject : {}),
+          [field]: value,
+        },
+      }
+    })
   }
 
   const handleRawScoreChange = (subject: string, field: string, value: string) => {
-    setRawScores((prev) => ({
-      ...prev,
-      [subject]: {
-        ...prev[subject as keyof typeof prev],
-        [field]: value,
-      },
-    }))
+    setRawScores((prev) => {
+      const currentSubject = prev[subject as keyof typeof prev]
+      return {
+        ...prev,
+        [subject]: {
+          ...(typeof currentSubject === 'object' ? currentSubject : {}),
+          [field]: value,
+        },
+      }
+    })
   }
 
   const handleGrade2RawScoreChange = (subject: string, field: string, value: string) => {
-    setGrade2RawScores((prev) => ({
-      ...prev,
-      [subject]: {
-        ...prev[subject as keyof typeof prev],
-        [field]: value,
-      },
-    }))
+    setGrade2RawScores((prev) => {
+      const currentSubject = prev[subject as keyof typeof prev]
+      return {
+        ...prev,
+        [subject]: {
+          ...(typeof currentSubject === 'object' ? currentSubject : {}),
+          [field]: value,
+        },
+      }
+    })
   }
 
   const handleGrade2StandardScoreChange = (subject: string, field: string, value: string) => {
-    setGrade2StandardScores((prev) => ({
-      ...prev,
-      [subject]: {
-        ...prev[subject as keyof typeof prev],
-        [field]: value,
-      },
-    }))
+    setGrade2StandardScores((prev) => {
+      const currentSubject = prev[subject as keyof typeof prev]
+      return {
+        ...prev,
+        [subject]: {
+          ...(typeof currentSubject === 'object' ? currentSubject : {}),
+          [field]: value,
+        },
+      }
+    })
   }
 
   const handleSubmit = () => {

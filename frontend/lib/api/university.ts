@@ -20,7 +20,7 @@ export const universityApi = {
    * 대학 필터링 (지역/계열)
    */
   filter: (params: FilterUniversityParams) =>
-    api.get<University[]>('/api/universities/filter', params),
+    api.get<University[]>('/api/universities/filter', params as Record<string, string | number | boolean | undefined>),
 
   /**
    * 지역 목록 조회

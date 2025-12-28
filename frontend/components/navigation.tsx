@@ -5,6 +5,22 @@ import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react"
 
+interface SubMenuItem {
+  name: string
+  href: string
+}
+
+interface MenuItem {
+  name: string
+  href: string
+  subItems?: SubMenuItem[]
+}
+
+interface MenuGroup {
+  title: string
+  items: MenuItem[]
+}
+
 export function Navigation() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [activeSubDropdown, setActiveSubDropdown] = useState<string | null>(null)
@@ -68,7 +84,7 @@ export function Navigation() {
     }
   }, [])
 
-  const menuItems = [
+  const menuItems: MenuGroup[] = [
     {
       title: "생기부 분석",
       items: [
@@ -81,12 +97,12 @@ export function Navigation() {
     {
       title: "모의고사 분석",
       items: [
-        { name: "입력", href: "/mock-analysis/input" },
-        { name: "성적 분석", href: "/mock-analysis/score-analysis" },
-        { name: "대학 예측", href: "/mock-analysis/prediction" },
-        { name: "누적 분석", href: "/mock-analysis/statistics" },
-        { name: "분석과 오답", href: "/mock-analysis/management" },
-        { name: "목표대학", href: "/mock-analysis/target-university" },
+        { name: "입력", href: "/my-exam/input" },
+        { name: "성적 분석", href: "/my-exam/score-analysis" },
+        { name: "대학 예측", href: "/my-exam/prediction" },
+        { name: "누적 분석", href: "/my-exam/statistics" },
+        { name: "분석과 오답", href: "/my-exam/management" },
+        { name: "목표대학", href: "/my-exam/target-university" },
       ],
     },
     {

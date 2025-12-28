@@ -9,7 +9,7 @@ const notoSansKR = Noto_Sans_KR({
 })
 
 export const metadata: Metadata = {
-  title: "모의고사 분석 - GB-ExamInfo",
+  title: "모의고사 분석 - MyExam",
   description: "모의고사 성적 입력 및 분석 서비스",
 }
 

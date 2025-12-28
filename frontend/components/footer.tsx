@@ -41,7 +41,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/mock-analysis/score-input" className="hover:text-[#7b1e7a]">
+                <Link href="/my-exam/input" className="hover:text-[#7b1e7a]">
                   모의고사 분석
                 </Link>
               </li>

@@ -21,11 +21,11 @@ npm start
 ## 폴더 구조
 
 ```
-migration-mock-analysis/
+MyExam/
 ├── app/
 │   ├── layout.tsx               # 루트 레이아웃
 │   ├── page.tsx                 # 홈 페이지 (메뉴 네비게이션)
-│   └── mock-analysis/           # 모의고사 분석 페이지들
+│   └── my-exam/                 # 모의고사 분석 페이지들
 │       ├── layout.tsx           # 모의고사 분석 레이아웃 (탭 네비게이션)
 │       ├── input/               # 입력 페이지
 │       │   ├── page.tsx         # 시험 선택 (연도/학년/월)
@@ -71,15 +71,15 @@ migration-mock-analysis/
 | 경로 | 설명 |
 |------|------|
 | `/` | 홈 페이지 (메뉴 네비게이션) |
-| `/mock-analysis/input` | 모의고사 시험 선택 (연도, 학년, 월) |
-| `/mock-analysis/input/form` | 답안 직접 입력 |
-| `/mock-analysis/input/score` | 점수 직접 입력 |
-| `/mock-analysis/score-analysis` | 성적 분석 결과 |
-| `/mock-analysis/prediction` | 대학 합격 예측 |
-| `/mock-analysis/statistics` | 누적 성적 통계 |
-| `/mock-analysis/management` | 분석 관리 및 오답 |
-| `/mock-analysis/target-university` | 목표 대학 설정 |
-| `/mock-analysis/wrong-answers` | 오답 노트 |
+| `/my-exam/input` | 모의고사 시험 선택 (연도, 학년, 월) |
+| `/my-exam/input/form` | 답안 직접 입력 |
+| `/my-exam/input/score` | 점수 직접 입력 |
+| `/my-exam/score-analysis` | 성적 분석 결과 |
+| `/my-exam/prediction` | 대학 합격 예측 |
+| `/my-exam/statistics` | 누적 성적 통계 |
+| `/my-exam/management` | 분석 관리 및 오답 |
+| `/my-exam/target-university` | 목표 대학 설정 |
+| `/my-exam/wrong-answers` | 오답 노트 |
 
 ## 기술 스택
 

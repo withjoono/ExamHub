@@ -1,0 +1,14 @@
+# Railway 설정 파일
+# backend 폴더를 루트로 사용
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# backend 폴더의 변경사항만 감지
+[watch]
+include = ["backend/**"]
+

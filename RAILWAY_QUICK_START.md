@@ -115,3 +115,5 @@ backend/src/main.ts에 Firebase URL이 추가되었는지 확인
 
 **Railway 대신 Render를 사용하고 싶다면 `BACKEND_DEPLOYMENT.md`를 참조하세요!**
 
+
+

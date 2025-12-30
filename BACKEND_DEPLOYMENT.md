@@ -170,3 +170,5 @@ Error: Cannot find module '@prisma/client'
 **장기 운영**: Google Cloud Run (Firebase와 통합)
 **예산 제한**: Render (무료 티어 넉넉함)
 
+
+

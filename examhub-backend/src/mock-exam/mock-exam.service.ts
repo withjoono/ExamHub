@@ -1,0 +1,167 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { SearchMockExamDto } from './dto/search-mock-exam.dto';
+import {
+  GradeAnswersDto,
+  GradeResultDto,
+  GradeResultItemDto,
+} from './dto/grade-answers.dto';
+
+@Injectable()
+export class MockExamService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.mockExam.findMany({
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+  }
+
+  async findByGrade(grade: string) {
+    return this.prisma.mockExam.findMany({
+      where: { grade },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+  }
+
+  async search(searchDto: SearchMockExamDto) {
+    const { year, grade, month } = searchDto;
+    const where: any = {};
+    if (year) where.year = year;
+    if (grade) where.grade = grade;
+    if (month) where.month = month;
+    return this.prisma.mockExam.findMany({
+      where,
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
+    });
+  }
+
+  async findByCode(code: string) {
+    const mockExam = await this.prisma.mockExam.findUnique({
+      where: { code },
+      include: { questions: { orderBy: { questionNumber: 'asc' } } },
+    });
+    if (!mockExam) {
+      throw new NotFoundException(`모의고사 코드 ${code}를 찾을 수 없습니다.`);
+    }
+    return mockExam;
+  }
+
+  async findById(id: number) {
+    const mockExam = await this.prisma.mockExam.findUnique({
+      where: { id },
+      include: { questions: { orderBy: { questionNumber: 'asc' } } },
+    });
+    if (!mockExam) {
+      throw new NotFoundException(`모의고사 ID ${id}를 찾을 수 없습니다.`);
+    }
+    return mockExam;
+  }
+
+  async checkExists(year: number, grade: string, month: number) {
+    const mockExam = await this.prisma.mockExam.findFirst({
+      where: { year, grade, month },
+    });
+    return { exists: !!mockExam, mockExam: mockExam || null };
+  }
+
+  async getSubjectAreas() {
+    return this.prisma.subjectArea.findMany({
+      include: { subjectCodes: true },
+    });
+  }
+
+  async getSubjectCodes(subjectAreaId?: number) {
+    const where = subjectAreaId ? { subjectAreaId } : {};
+    return this.prisma.subjectCode.findMany({
+      where,
+      include: { subjectArea: true },
+    });
+  }
+
+  async getAnswers(mockExamId: number, subject: string, subjectDetail?: string) {
+    const where: any = { mockExamId, subjectAreaName: subject };
+    if (subjectDetail) where.subjectName = subjectDetail;
+    return this.prisma.examQuestion.findMany({
+      where,
+      orderBy: { questionNumber: 'asc' },
+      select: {
+        questionNumber: true,
+        answer: true,
+        score: true,
+        difficulty: true,
+        correctRate: true,
+      },
+    });
+  }
+
+  async gradeAnswers(gradeDto: GradeAnswersDto): Promise<GradeResultDto> {
+    const { mockExamId, subject, subjectDetail, answers } = gradeDto;
+    const where: any = { mockExamId, subjectAreaName: subject };
+    if (subjectDetail) where.subjectName = subjectDetail;
+
+    const correctAnswers = await this.prisma.examQuestion.findMany({
+      where,
+      orderBy: { questionNumber: 'asc' },
+    });
+
+    if (correctAnswers.length === 0) {
+      const subjectInfo = subjectDetail ? ` - ${subjectDetail}` : '';
+      throw new NotFoundException(
+        `모의고사 ID ${mockExamId}의 ${subject}${subjectInfo} 정답을 찾을 수 없습니다.`
+      );
+    }
+
+    const answerMap = new Map(
+      correctAnswers.map((q) => [
+        q.questionNumber,
+        {
+          answer: q.answer,
+          score: q.score,
+          difficulty: q.difficulty,
+          correctRate: q.correctRate ? Number(q.correctRate) : null,
+        },
+      ])
+    );
+
+    const results: GradeResultItemDto[] = [];
+    let earnedScore = 0;
+    let correctCount = 0;
+
+    for (const studentAnswer of answers) {
+      const correct = answerMap.get(studentAnswer.questionNumber);
+      if (correct) {
+        const isCorrect = studentAnswer.answer === correct.answer;
+        const questionScore = correct.score || 2;
+        if (isCorrect) {
+          correctCount++;
+          earnedScore += questionScore;
+        }
+        results.push({
+          questionNumber: studentAnswer.questionNumber,
+          studentAnswer: studentAnswer.answer,
+          correctAnswer: correct.answer,
+          isCorrect,
+          score: questionScore,
+          earnedScore: isCorrect ? questionScore : 0,
+          difficulty: correct.difficulty || undefined,
+          correctRate: correct.correctRate || undefined,
+        });
+      }
+    }
+
+    const allQuestionsTotal = correctAnswers.reduce((sum, q) => sum + (q.score || 2), 0);
+
+    return {
+      mockExamId,
+      subject,
+      subjectDetail,
+      totalQuestions: correctAnswers.length,
+      correctCount,
+      totalScore: allQuestionsTotal,
+      earnedScore,
+      results,
+    };
+  }
+}
+

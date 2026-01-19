@@ -1,0 +1,9 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# Excel data files (large files for DB import)
+/prisma/data/*.xlsx
+/prisma/data/*.xls

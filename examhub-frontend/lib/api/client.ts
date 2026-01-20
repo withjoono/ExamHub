@@ -1,7 +1,10 @@
 /**
  * API Client 설정
  * Backend API와 통신하기 위한 기본 설정
+ * SSO 토큰 자동 주입 지원
  */
+
+import { getAccessToken } from '../auth/token-manager';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003';
 
@@ -51,6 +54,12 @@ async function request<T>(
     'Content-Type': 'application/json',
     ...fetchOptions.headers,
   };
+
+  // SSO 토큰 자동 주입 (Hub에서 로그인한 토큰 사용)
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${accessToken}`;
+  }
 
   const response = await fetch(url, {
     ...fetchOptions,

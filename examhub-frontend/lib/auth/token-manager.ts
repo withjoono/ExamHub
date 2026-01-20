@@ -1,11 +1,32 @@
 /**
  * 토큰 관리 유틸리티
  * SSO 토큰 저장, 조회, 삭제 관리
+ *
+ * SSO 및 Zustand persist storage와의 호환성을 위한 fallback 로직 포함
  */
 
 const ACCESS_TOKEN_KEY = 'examhub_access_token';
 const REFRESH_TOKEN_KEY = 'examhub_refresh_token';
 const TOKEN_EXPIRY_KEY = 'examhub_token_expiry';
+const AUTH_STORAGE_KEY = 'auth-storage';
+
+/**
+ * Zustand persist storage에서 토큰 추출 (fallback용)
+ */
+const getTokenFromAuthStorage = (tokenKey: 'accessToken' | 'refreshToken'): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const authStorage = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage);
+      return parsed?.state?.[tokenKey] || null;
+    }
+  } catch (e) {
+    console.error('Failed to parse auth-storage:', e);
+  }
+  return null;
+};
 
 /**
  * 토큰 저장
@@ -29,18 +50,38 @@ export function setTokens(
 
 /**
  * 액세스 토큰 조회
+ * 1. 먼저 직접 저장된 토큰 확인
+ * 2. 없으면 Zustand persist storage에서 확인 (SSO 호환성)
  */
 export function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+
+  // 1. 직접 저장된 토큰 확인
+  const directToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (directToken) {
+    return directToken;
+  }
+
+  // 2. Zustand persist storage에서 확인 (fallback)
+  return getTokenFromAuthStorage('accessToken');
 }
 
 /**
  * 리프레시 토큰 조회
+ * 1. 먼저 직접 저장된 토큰 확인
+ * 2. 없으면 Zustand persist storage에서 확인 (SSO 호환성)
  */
 export function getRefreshToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
+
+  // 1. 직접 저장된 토큰 확인
+  const directToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (directToken) {
+    return directToken;
+  }
+
+  // 2. Zustand persist storage에서 확인 (fallback)
+  return getTokenFromAuthStorage('refreshToken');
 }
 
 /**

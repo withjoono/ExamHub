@@ -4,4 +4,4 @@
 
 export * from './token-manager';
 export * from './hub-login';
-export * from './sso-receiver';
+export * from './user';

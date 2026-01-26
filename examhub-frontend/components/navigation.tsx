@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { ArrowLeft, ChevronDown, Menu, X, Wallet, Bell, Share2, User } from "lucide-react"
-import { getUser, Member } from "@/lib/auth/sso-receiver"
+import { getUser, cacheUser, clearUserCache, type User as UserType } from "@/lib/auth/user"
 import { redirectToHubLogin, getHubUrl } from "@/lib/auth/hub-login"
 import { clearTokens } from "@/lib/auth/token-manager"
 
@@ -14,11 +14,19 @@ interface MenuItem {
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [user, setUserState] = useState<Member | null>(null)
+  const [user, setUserState] = useState<UserType | null>(null)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
   useEffect(() => {
-    setUserState(getUser())
+    // 비동기로 사용자 정보 가져오기
+    async function fetchUser() {
+      const userData = await getUser()
+      setUserState(userData)
+      if (userData) {
+        cacheUser(userData) // 캐시에 저장
+      }
+    }
+    fetchUser()
   }, [])
 
   const toggleMobileMenu = () => {
@@ -31,6 +39,7 @@ export function Navigation() {
 
   const handleLogout = () => {
     clearTokens()
+    clearUserCache()
     setUserState(null)
     window.location.reload()
   }

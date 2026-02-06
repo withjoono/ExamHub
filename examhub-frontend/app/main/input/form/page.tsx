@@ -197,7 +197,7 @@ export default function MockExamFormPage() {
 
       // 3초 후 오답노트 페이지로 이동
       setTimeout(() => {
-        router.push('/my-exam/wrong-answers')
+        router.push('/main/wrong-answers')
       }, 2000)
     } catch (error) {
       console.error('저장 실패:', error)

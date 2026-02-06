@@ -51,13 +51,13 @@ export function Navigation() {
   // ExamHub 메뉴 항목
   const menuItems: MenuItem[] = [
     { name: "ExamHub 홈", href: "/" },
-    { name: "입력", href: "/my-exam/input" },
-    { name: "성적분석", href: "/my-exam/score-analysis" },
-    { name: "대학예측", href: "/my-exam/prediction" },
-    { name: "누적분석", href: "/my-exam/statistics" },
-    { name: "분석과 오답", href: "/my-exam/management" },
-    { name: "목표대학", href: "/my-exam/target-university" },
-    { name: "오답노트", href: "/my-exam/wrong-answers" },
+    { name: "입력", href: "/main/input" },
+    { name: "성적분석", href: "/main/score-analysis" },
+    { name: "대학예측", href: "/main/prediction" },
+    { name: "누적분석", href: "/main/statistics" },
+    { name: "분석과 오답", href: "/main/management" },
+    { name: "목표대학", href: "/main/target-university" },
+    { name: "오답노트", href: "/main/wrong-answers" },
   ]
 
   return (

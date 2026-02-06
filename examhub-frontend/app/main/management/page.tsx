@@ -9,7 +9,7 @@ export default function MockExamManagement() {
   const router = useRouter()
 
   const handleWrongAnswersClick = () => {
-    router.push("/my-exam/wrong-answers")
+    router.push("/main/wrong-answers")
   }
 
   const examData = [

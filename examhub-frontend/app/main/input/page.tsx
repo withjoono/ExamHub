@@ -56,7 +56,7 @@ export default function MockExamInputPage() {
       ...(mockExam?.id && { mockExamId: String(mockExam.id) }),
     })
 
-    router.push(`/my-exam/input/score?${params.toString()}`)
+    router.push(`/main/input/score?${params.toString()}`)
   }
 
   const handleAnswerInput = () => {
@@ -72,7 +72,7 @@ export default function MockExamInputPage() {
       ...(mockExam?.id && { mockExamId: String(mockExam.id) }),
     })
 
-    router.push(`/my-exam/input/form?${params.toString()}`)
+    router.push(`/main/input/form?${params.toString()}`)
   }
 
   const isSelectionComplete = selectedYear && selectedGrade && selectedMonth

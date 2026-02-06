@@ -4,15 +4,16 @@
  */
 
 // Hub Frontend URL (환경 변수 또는 기본값)
+// Hub는 외부 서비스로 포트 3000 사용 (ExamHub와 별개)
 const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || (
   process.env.NODE_ENV === 'production'
     ? 'https://geobukschool.kr'
-    : 'http://localhost:5173'
+    : 'http://localhost:3000'
 );
 
-// ExamHub Frontend URL
+// ExamHub Frontend URL (포트 3003 고정)
 const FRONT_URL = process.env.NEXT_PUBLIC_FRONT_URL || (
-  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3005'
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3003'
 );
 
 /**

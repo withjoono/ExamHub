@@ -1,5 +1,8 @@
-import { Controller, Get, Post, Body, Param, Query, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { HubPermissionGuard } from '../auth/guards/hub-permission.guard';
+import { RequireFeature } from '../auth/decorators/require-feature.decorator';
 import { MockExamService } from './mock-exam.service';
 import { SearchMockExamDto } from './dto/search-mock-exam.dto';
 import { MockExamResponseDto } from './dto/mock-exam-response.dto';
@@ -96,6 +99,76 @@ export class MockExamController {
   async findById(@Param('id', ParseIntPipe) id: number) {
     const data = await this.mockExamService.findById(id);
     return { success: true, data };
+  }
+
+  // ========== SSO 권한 테스트 엔드포인트 ==========
+
+  @Get('test/basic')
+  @ApiOperation({ summary: '[권한 테스트] 기본 점수 조회 - 권한 불필요' })
+  @ApiResponse({ status: 200, description: '무료 사용자도 접근 가능' })
+  async testBasic() {
+    return {
+      success: true,
+      message: '기본 점수 조회 - 무료 (권한 체크 없음)',
+      data: {
+        feature: 'basic',
+        requiredPermission: 'none',
+      },
+    };
+  }
+
+  @Get('test/detailed')
+  @UseGuards(AuthGuard('jwt'), HubPermissionGuard)
+  @RequireFeature('mock-exam')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[권한 테스트] 상세 모의고사 - mock-exam 권한 필요' })
+  @ApiResponse({ status: 200, description: 'mock-exam 권한이 있으면 접근 가능' })
+  @ApiResponse({ status: 403, description: '권한이 없거나 구독이 만료됨' })
+  async testDetailed() {
+    return {
+      success: true,
+      message: '상세 모의고사 분석 - basic 이상 플랜 필요',
+      data: {
+        feature: 'detailed',
+        requiredPermission: 'mock-exam',
+      },
+    };
+  }
+
+  @Get('test/analysis')
+  @UseGuards(AuthGuard('jwt'), HubPermissionGuard)
+  @RequireFeature('analysis')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[권한 테스트] 심화 분석 - analysis 권한 필요' })
+  @ApiResponse({ status: 200, description: 'analysis 권한이 있으면 접근 가능' })
+  @ApiResponse({ status: 403, description: '권한이 없거나 구독이 만료됨' })
+  async testAnalysis() {
+    return {
+      success: true,
+      message: '심화 분석 - premium 플랜 필요',
+      data: {
+        feature: 'analysis',
+        requiredPermission: 'analysis',
+      },
+    };
+  }
+
+  @Get('test/statistics')
+  @UseGuards(AuthGuard('jwt'), HubPermissionGuard)
+  @RequireFeature('statistics')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[권한 테스트] 통계 분석 - statistics 권한 필요' })
+  @ApiResponse({ status: 200, description: 'statistics 권한이 있으면 접근 가능' })
+  @ApiResponse({ status: 403, description: '권한이 없거나 구독이 만료됨' })
+  async testStatistics() {
+    return {
+      success: true,
+      message: '통계 분석 - premium 플랜 필요',
+      data: {
+        feature: 'statistics',
+        requiredPermission: 'statistics',
+      },
+    };
   }
 }
 

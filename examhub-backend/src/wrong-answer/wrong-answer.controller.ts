@@ -12,7 +12,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { WrongAnswerService } from './wrong-answer.service';
 import {
-  GradeAnswersDto,
+  WrongAnswerGradeDto,
   FilterWrongAnswerDto,
   UpdateWrongReasonDto,
 } from './dto/wrong-answer-request.dto';
@@ -27,12 +27,12 @@ import {
 @ApiTags('오답노트')
 @Controller('api/wrong-answers')
 export class WrongAnswerController {
-  constructor(private readonly wrongAnswerService: WrongAnswerService) {}
+  constructor(private readonly wrongAnswerService: WrongAnswerService) { }
 
   @Post('grade')
   @ApiOperation({ summary: '답안 채점', description: '학생 답안을 채점하고 저장합니다.' })
   @ApiResponse({ status: 201, description: '채점 결과', type: GradeResultResponseDto })
-  async gradeAnswers(@Body() gradeAnswersDto: GradeAnswersDto) {
+  async gradeAnswers(@Body() gradeAnswersDto: WrongAnswerGradeDto) {
     const data = await this.wrongAnswerService.gradeAnswers(gradeAnswersDto);
     return { success: true, data };
   }

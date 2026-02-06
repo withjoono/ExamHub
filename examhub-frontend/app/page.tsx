@@ -1,7 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { setTokens, getAccessToken } from "@/lib/auth/token-manager"
+import { api } from "@/lib/api/client"
+import { hubApi } from "@/lib/api/hub-client"
 import {
   FileText,
   BarChart3,
@@ -25,7 +29,9 @@ import {
   Lock
 } from "lucide-react"
 
-function LandingPage() {
+function LandingPage({ hubLoginUrl }: { hubLoginUrl?: string }) {
+  const loginLink = hubLoginUrl || "/login";
+
   const examTypes = [
     { title: "교육청/평가원/수능", description: "공식 모의고사 및 수능 성적 분석", icon: FileText, color: "bg-blue-500" },
     { title: "사설 모의고사", description: "메가스터디, 대성, 이투스 등 사설 모의고사", icon: BookOpen, color: "bg-purple-500" },
@@ -64,7 +70,7 @@ function LandingPage() {
                 <p className="text-xs text-gray-500">모의고사 분석 서비스</p>
               </div>
             </div>
-            <Link href="/login" className="px-4 py-2 bg-[#7b1e7a] text-white rounded-lg hover:bg-[#5a1559] transition-colors">로그인</Link>
+            <Link href={loginLink} className="px-4 py-2 bg-[#7b1e7a] text-white rounded-lg hover:bg-[#5a1559] transition-colors">로그인</Link>
           </div>
         </div>
       </header>
@@ -164,7 +170,7 @@ function LandingPage() {
             <Link href="/my-exam" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#7b1e7a] rounded-xl hover:bg-gray-100 transition-colors font-semibold shadow-lg">
               <UserPlus className="w-5 h-5" />무료로 시작하기
             </Link>
-            <Link href="/login" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white border border-white/30 rounded-xl hover:bg-white/20 transition-colors font-semibold">
+            <Link href={loginLink} className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-white border border-white/30 rounded-xl hover:bg-white/20 transition-colors font-semibold">
               이미 계정이 있으신가요?<ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -304,6 +310,82 @@ function Dashboard() {
 }
 
 export default function HomePage() {
-  const [isLoggedIn] = useState(false)
-  return isLoggedIn ? <Dashboard /> : <LandingPage />
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const initAuth = async () => {
+      setIsLoading(true);
+
+      // 1. SSO 코드 처리 (Hub에서 넘어온 경우)
+      // 동적 import로 processSSOLogin 로드 (클라이언트 전용)
+      const { processSSOLogin } = await import('@/lib/utils/sso-helper');
+      const ssoSuccess = await processSSOLogin();
+
+      if (ssoSuccess) {
+        console.log('✅ Hub에서 SSO 자동 로그인 완료');
+        setIsLoggedIn(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. URL에서 직접 토큰 확인 (레거시 지원)
+      const accessToken = searchParams.get('accessToken');
+      const refreshToken = searchParams.get('refreshToken');
+      const tokenExpiry = searchParams.get('tokenExpiry');
+
+      if (accessToken && refreshToken) {
+        setTokens(accessToken, refreshToken, tokenExpiry ? parseInt(tokenExpiry) : 7200);
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+        setIsLoggedIn(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. 저장된 토큰으로 로그인 상태 확인
+      if (!getAccessToken()) {
+        setIsLoggedIn(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // Hub 인증 서버를 통해 토큰 유효성 검증
+      const user = await hubApi.get('/auth/me');
+      if (user) {
+        console.log('[checkLogin] 로그인 확인됨:', user);
+        setIsLoggedIn(true);
+      } else {
+        console.log('[checkLogin] 로그인 실패 또는 토큰 만료');
+        setIsLoggedIn(false);
+      }
+
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, [searchParams]);
+
+  // 로딩 중일 때 스피너 표시
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">로그인 확인 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoggedIn) {
+    return <Dashboard />
+  }
+
+  // Hub 로그인 URL
+  const hubLoginUrl = "http://localhost:3000/auth/login?redirect=" + encodeURIComponent("http://localhost:3003");
+
+  return <LandingPage hubLoginUrl={hubLoginUrl} />
 }

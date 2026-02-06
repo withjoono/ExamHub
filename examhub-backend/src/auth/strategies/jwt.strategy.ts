@@ -15,11 +15,14 @@ import { Request } from 'express';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(configService: ConfigService<AllConfigType>) {
-    const secret = configService.get('AUTH_SECRET', { infer: false });
+    const authConfig = configService.get('auth', { infer: true });
+    const secret = authConfig?.secret || process.env.AUTH_SECRET || 'examhub-secret-key-change-in-production';
+    console.log('JwtStrategy Loaded Secret (Starts with):', secret.substring(0, 5));
     super({
       jwtFromRequest: JwtStrategy.extractJwtFromRequestOrCookie,
-      // Secret는 환경변수에서 직접 사용
-      secretOrKey: secret || 'examhub-secret-key-change-in-production',
+      // Secret must be base64-decoded to match jwt.service.ts signing
+      secretOrKey: Buffer.from(secret, 'base64'),
+      algorithms: ['HS512'],
     });
   }
 
@@ -32,14 +35,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     // 1. Authorization 헤더에서 Bearer 토큰 추출
     const authHeader = req.headers?.authorization;
     if (authHeader?.startsWith('Bearer ')) {
+      console.log('Found token in Header');
       return authHeader.substring(7);
     }
 
     // 2. HttpOnly 쿠키에서 access_token 추출
     if (req.cookies?.access_token) {
+      console.log('Found token in Cookie');
       return req.cookies.access_token;
     }
 
+    console.log('No token found in Header or Cookie');
     return null;
   }
 

@@ -15,7 +15,7 @@ import { Type } from 'class-transformer';
 /**
  * 개별 문제 답안 DTO
  */
-export class AnswerItemDto {
+export class WrongAnswerItemDto {
   @ApiProperty({ description: '문제 번호', example: 1 })
   @IsInt()
   @Min(1)
@@ -32,7 +32,7 @@ export class AnswerItemDto {
 /**
  * 답안 일괄 채점 요청 DTO
  */
-export class GradeAnswersDto {
+export class WrongAnswerGradeDto {
   @ApiProperty({ description: '학생 ID' })
   @IsInt()
   studentId: number;
@@ -53,7 +53,7 @@ export class GradeAnswersDto {
 
   @ApiProperty({
     description: '답안 목록',
-    type: [AnswerItemDto],
+    type: [WrongAnswerItemDto],
     example: [
       { questionNumber: 1, selectedAnswer: 3 },
       { questionNumber: 2, selectedAnswer: 2 },
@@ -61,8 +61,8 @@ export class GradeAnswersDto {
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AnswerItemDto)
-  answers: AnswerItemDto[];
+  @Type(() => WrongAnswerItemDto)
+  answers: WrongAnswerItemDto[];
 }
 
 /**

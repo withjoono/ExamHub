@@ -29,26 +29,42 @@ MyExam/
 
 ## 🚀 빠른 시작
 
-### 프론트엔드 실행
+### 전체 서버 실행 (권장)
+
+```powershell
+# Windows PowerShell
+.\start-examhub.ps1
+```
 
 ```bash
-cd frontend
+# Linux/Mac
+./start-examhub.sh
+```
+
+### 개별 실행
+
+**프론트엔드:**
+```bash
+cd examhub-frontend
 npm install
 npm run dev
 ```
+- 로컬 서버: http://localhost:3003
 
-- 로컬 서버: http://localhost:3000
-
-### 백엔드 실행 (예정)
-
+**백엔드:**
 ```bash
-cd backend
+cd examhub-backend
 npm install
 npm run start:dev
 ```
-
 - API 서버: http://localhost:4003
 - Swagger: http://localhost:4003/api-docs
+
+### 포트 정보
+- **ExamHub 프론트엔드**: 3003 (고정)
+- **ExamHub 백엔드**: 4003 (고정)
+- **PostgreSQL**: 5433
+- **Hub 연동** (외부): Hub Frontend(3000), Hub Backend(4000)
 
 ## 🔧 기술 스택
 

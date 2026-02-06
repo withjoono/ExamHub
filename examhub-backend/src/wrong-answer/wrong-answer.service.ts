@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  GradeAnswersDto,
+  WrongAnswerGradeDto,
   FilterWrongAnswerDto,
   UpdateWrongReasonDto,
 } from './dto/wrong-answer-request.dto';
@@ -15,12 +15,12 @@ import {
 
 @Injectable()
 export class WrongAnswerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * 답안 채점 및 저장
    */
-  async gradeAnswers(dto: GradeAnswersDto): Promise<GradeResultResponseDto> {
+  async gradeAnswers(dto: WrongAnswerGradeDto): Promise<GradeResultResponseDto> {
     const { studentId, mockExamId, subjectAreaName, subjectName, answers } = dto;
 
     // 학생 확인

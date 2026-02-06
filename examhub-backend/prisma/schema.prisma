@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,514 +6,388 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================
-// 1. 학생 정보 (인적사항)
-// ============================================
 model Student {
-  id            Int      @id @default(autoincrement())
-  studentId     String   @unique @map("student_id") @db.VarChar(20) // 예: ST25000001
-  year          Int      // 예: 2025
-  schoolLevel   String?  @map("school_level") @db.VarChar(10) // 초/중/고
-  schoolName    String?  @map("school_name") @db.VarChar(100) // 학교명
-  grade         String?  @db.VarChar(10) // 학년 (H1, H2, H3)
-  name          String   @db.VarChar(50) // 학생명
-  schoolType    String?  @map("school_type") @db.VarChar(20) // 학교타입 (일반고, 특목고 등)
-  phone         String?  @db.VarChar(20) // 학생 연락처
-  parentPhone   String?  @map("parent_phone") @db.VarChar(20) // 학부모 연락처
-  email         String?  @db.VarChar(100) // 학생 이메일
-  parentEmail   String?  @map("parent_email") @db.VarChar(100) // 학부모 이메일
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  scores             StudentScore[]
-  targets            StudentTarget[]
+  id                 Int                 @id @default(autoincrement())
+  studentId          String              @unique @map("student_id") @db.VarChar(20)
+  year               Int
+  schoolLevel        String?             @map("school_level") @db.VarChar(10)
+  schoolName         String?             @map("school_name") @db.VarChar(100)
+  grade              String?             @db.VarChar(10)
+  name               String              @db.VarChar(50)
+  schoolType         String?             @map("school_type") @db.VarChar(20)
+  phone              String?             @db.VarChar(20)
+  parentPhone        String?             @map("parent_phone") @db.VarChar(20)
+  email              String?             @db.VarChar(100)
+  parentEmail        String?             @map("parent_email") @db.VarChar(100)
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
   achievementResults AchievementResult[]
   answers            StudentAnswer[]
+  scores             StudentScore[]
+  targets            StudentTarget[]
 
   @@index([studentId])
   @@index([year, grade])
-  @@map("students")
+  @@map("eh_students")
 }
 
-// ============================================
-// 2. 모의고사
-// ============================================
 model MockExam {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique @db.VarChar(20) // 예: H32403
-  name      String   @db.VarChar(100) // 예: 고3 24년 3월 교육청 모의
-  grade     String?  @db.VarChar(10) // H1, H2, H3
-  year      Int? // 2024
-  month     Int? // 3, 6, 9, 10, 11
-  type      String?  @db.VarChar(20) // 교육청, 평가원, 수능
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  questions               ExamQuestion[]
-  studentScores           StudentScore[]
+  id                      Int                       @id @default(autoincrement())
+  code                    String                    @unique @db.VarChar(20)
+  name                    String                    @db.VarChar(100)
+  grade                   String?                   @db.VarChar(10)
+  year                    Int?
+  month                   Int?
+  type                    String?                   @db.VarChar(20)
+  createdAt               DateTime                  @default(now()) @map("created_at")
   admissionCutoffs        AdmissionCutoff[]
-  scoreConversionStandard ScoreConversionStandard[]
+  questions               ExamQuestion[]
   scoreConversionRaw      ScoreConversionRaw[]
+  scoreConversionStandard ScoreConversionStandard[]
   studentAnswers          StudentAnswer[]
+  studentScores           StudentScore[]
 
   @@index([code])
   @@index([grade, year, month])
-  @@map("mock_exams")
+  @@map("eh_mock_exams")
 }
 
-// ============================================
-// 3. 교과 영역
-// ============================================
 model SubjectArea {
-  id   Int    @id @default(autoincrement())
-  code String @unique @db.VarChar(10) // S10, S20, S30, ...
-  name String @db.VarChar(50) // 국어, 수학, 영어, 사탐, 과탐, 한국사, 제2외국어
-
-  // Relations
+  id           Int           @id @default(autoincrement())
+  code         String        @unique @db.VarChar(10)
+  name         String        @db.VarChar(50)
   subjectCodes SubjectCode[]
 
-  @@map("subject_areas")
+  @@map("eh_subject_areas")
 }
 
-// ============================================
-// 4. 세부 교과
-// ============================================
 model SubjectCode {
-  id            Int    @id @default(autoincrement())
-  subjectAreaId Int    @map("subject_area_id")
-  code          String @unique @db.VarChar(10) // S10, S11, S12, ...
-  name          String @db.VarChar(50) // 고1 국어, 고2 국어, 화법과 작문 등
-
-  // Relations
-  subjectArea SubjectArea @relation(fields: [subjectAreaId], references: [id])
+  id            Int         @id @default(autoincrement())
+  subjectAreaId Int         @map("subject_area_id")
+  code          String      @unique @db.VarChar(10)
+  name          String      @db.VarChar(50)
+  subjectArea   SubjectArea @relation(fields: [subjectAreaId], references: [id])
 
   @@index([subjectAreaId])
-  @@map("subject_codes")
+  @@map("eh_subject_codes")
 }
 
-// ============================================
-// 5. 과목 목차
-// ============================================
 model SubjectChapter {
   id              Int     @id @default(autoincrement())
-  subjectAreaCode String? @map("subject_area_code") @db.VarChar(10) // subjectArea (10, 20, ...)
-  subjectCode     String? @map("subject_code") @db.VarChar(10) // subjectCode (11, 12, ...)
-  majorName       String? @map("major_name") @db.VarChar(100) // 생활과 윤리, 윤리와 사상 등
-  majorCode       String? @map("major_code") @db.VarChar(10) // major code
-  minorName       String? @map("minor_name") @db.VarChar(200) // 01. 실천 윤리와 윤리 문제에 대한 탐구
-  minorCode       String? @map("minor_code") @db.VarChar(10) // minor code
+  subjectAreaCode String? @map("subject_area_code") @db.VarChar(10)
+  subjectCode     String? @map("subject_code") @db.VarChar(10)
+  majorName       String? @map("major_name") @db.VarChar(100)
+  majorCode       String? @map("major_code") @db.VarChar(10)
+  minorName       String? @map("minor_name") @db.VarChar(200)
+  minorCode       String? @map("minor_code") @db.VarChar(10)
 
   @@index([subjectAreaCode, subjectCode])
-  @@map("subject_chapters")
+  @@map("eh_subject_chapters")
 }
 
-// ============================================
-// 6. 모의고사 문제
-// ============================================
 model ExamQuestion {
-  id              Int      @id @default(autoincrement())
-  mockExamId      Int      @map("mock_exam_id")
-  subjectAreaCode String?  @map("subject_area_code") @db.VarChar(10) // 교과 코드 (60=국어)
-  subjectAreaName String?  @map("subject_area_name") @db.VarChar(50) // 국어, 수학, 영어 등
-  subjectCode     String?  @map("subject_code") @db.VarChar(10) // 세부교과 코드 (63=화법과작문)
-  subjectName     String?  @map("subject_name") @db.VarChar(50) // 화법과 작문, 언어와 매체 등
-  questionNumber  Int      @map("question_number") // 문제 번호
-  score           Int // 배점
-  answer          Int // 정답 (1~5)
-  difficulty      String?  @db.VarChar(10) // 난이도 (상, 중상, 중, 중하, 하)
-  correctRate     Decimal? @map("correct_rate") @db.Decimal(5, 2) // 정답률 (%)
-  choiceRatio1    Decimal? @map("choice_ratio_1") @db.Decimal(5, 2) // 1번 선택 비율
-  choiceRatio2    Decimal? @map("choice_ratio_2") @db.Decimal(5, 2) // 2번 선택 비율
-  choiceRatio3    Decimal? @map("choice_ratio_3") @db.Decimal(5, 2) // 3번 선택 비율
-  choiceRatio4    Decimal? @map("choice_ratio_4") @db.Decimal(5, 2) // 4번 선택 비율
-  choiceRatio5    Decimal? @map("choice_ratio_5") @db.Decimal(5, 2) // 5번 선택 비율
-
-  // Relations
-  mockExam       MockExam        @relation(fields: [mockExamId], references: [id])
-  studentAnswers StudentAnswer[]
+  id              Int             @id @default(autoincrement())
+  mockExamId      Int             @map("mock_exam_id")
+  subjectAreaCode String?         @map("subject_area_code") @db.VarChar(10)
+  subjectAreaName String?         @map("subject_area_name") @db.VarChar(50)
+  subjectCode     String?         @map("subject_code") @db.VarChar(10)
+  subjectName     String?         @map("subject_name") @db.VarChar(50)
+  questionNumber  Int             @map("question_number")
+  score           Int
+  answer          Int
+  choiceRatio1    Decimal?        @map("choice_ratio_1") @db.Decimal(5, 2)
+  choiceRatio2    Decimal?        @map("choice_ratio_2") @db.Decimal(5, 2)
+  choiceRatio3    Decimal?        @map("choice_ratio_3") @db.Decimal(5, 2)
+  choiceRatio4    Decimal?        @map("choice_ratio_4") @db.Decimal(5, 2)
+  choiceRatio5    Decimal?        @map("choice_ratio_5") @db.Decimal(5, 2)
+  correctRate     Decimal?        @map("correct_rate") @db.Decimal(5, 2)
+  difficulty      String?         @db.VarChar(10)
+  mockExam        MockExam        @relation(fields: [mockExamId], references: [id])
+  studentAnswers  StudentAnswer[]
 
   @@index([mockExamId])
   @@index([subjectAreaCode, subjectCode])
-  @@map("exam_questions")
+  @@map("eh_exam_questions")
 }
 
-// ============================================
-// 7. 학생 모의고사 성적
-// ============================================
 model StudentScore {
-  id         Int @id @default(autoincrement())
-  studentId  Int @map("student_id")
-  mockExamId Int @map("mock_exam_id")
-
-  // 국어
-  koreanSelection  String?  @map("korean_selection") @db.VarChar(20) // 선택과목 (화작/언매)
-  koreanRaw        Int?     @map("korean_raw") // 원점수
-  koreanStandard   Int?     @map("korean_standard") // 표준점수
-  koreanPercentile Decimal? @map("korean_percentile") @db.Decimal(5, 2) // 백분위
-  koreanGrade      Int?     @map("korean_grade") // 등급 (1~9)
-
-  // 영어 (등급제)
-  englishRaw   Int? @map("english_raw")
-  englishGrade Int? @map("english_grade")
-
-  // 수학
-  mathSelection  String?  @map("math_selection") @db.VarChar(20) // 선택과목 (확통/미적/기하)
-  mathRaw        Int?     @map("math_raw")
-  mathStandard   Int?     @map("math_standard")
-  mathPercentile Decimal? @map("math_percentile") @db.Decimal(5, 2)
-  mathGrade      Int?     @map("math_grade")
-
-  // 탐구1
-  inquiry1Selection  String?  @map("inquiry1_selection") @db.VarChar(50) // 선택과목명
+  id                 Int      @id @default(autoincrement())
+  studentId          Int      @map("student_id")
+  mockExamId         Int      @map("mock_exam_id")
+  koreanSelection    String?  @map("korean_selection") @db.VarChar(20)
+  koreanRaw          Int?     @map("korean_raw")
+  koreanStandard     Int?     @map("korean_standard")
+  koreanPercentile   Decimal? @map("korean_percentile") @db.Decimal(5, 2)
+  koreanGrade        Int?     @map("korean_grade")
+  englishRaw         Int?     @map("english_raw")
+  englishGrade       Int?     @map("english_grade")
+  mathSelection      String?  @map("math_selection") @db.VarChar(20)
+  mathRaw            Int?     @map("math_raw")
+  mathStandard       Int?     @map("math_standard")
+  mathPercentile     Decimal? @map("math_percentile") @db.Decimal(5, 2)
+  mathGrade          Int?     @map("math_grade")
+  inquiry1Selection  String?  @map("inquiry1_selection") @db.VarChar(50)
   inquiry1Raw        Int?     @map("inquiry1_raw")
   inquiry1Standard   Int?     @map("inquiry1_standard")
   inquiry1Percentile Decimal? @map("inquiry1_percentile") @db.Decimal(5, 2)
   inquiry1Grade      Int?     @map("inquiry1_grade")
-
-  // 탐구2
   inquiry2Selection  String?  @map("inquiry2_selection") @db.VarChar(50)
   inquiry2Raw        Int?     @map("inquiry2_raw")
   inquiry2Standard   Int?     @map("inquiry2_standard")
   inquiry2Percentile Decimal? @map("inquiry2_percentile") @db.Decimal(5, 2)
   inquiry2Grade      Int?     @map("inquiry2_grade")
-
-  // 한국사
-  historyRaw   Int? @map("history_raw")
-  historyGrade Int? @map("history_grade")
-
-  // 제2외국어
-  foreignSelection String? @map("foreign_selection") @db.VarChar(50)
-  foreignRaw       Int?    @map("foreign_raw")
-  foreignGrade     Int?    @map("foreign_grade")
-
-  // 합산 점수
-  totalStandardSum   Int?     @map("total_standard_sum") // 국수탐 표준점수 합
-  totalPercentileSum Decimal? @map("total_percentile_sum") @db.Decimal(6, 2) // 국수탐 백분위 합
-  topCumulativeStd   Decimal? @map("top_cumulative_std") @db.Decimal(6, 2) // 국영수탐 상위누백(표점)
-  topCumulativeRaw   Decimal? @map("top_cumulative_raw") @db.Decimal(6, 2) // 국영수탐 상위누백(원점)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  student  Student  @relation(fields: [studentId], references: [id])
-  mockExam MockExam @relation(fields: [mockExamId], references: [id])
+  historyRaw         Int?     @map("history_raw")
+  historyGrade       Int?     @map("history_grade")
+  foreignSelection   String?  @map("foreign_selection") @db.VarChar(50)
+  foreignRaw         Int?     @map("foreign_raw")
+  foreignGrade       Int?     @map("foreign_grade")
+  totalStandardSum   Int?     @map("total_standard_sum")
+  totalPercentileSum Decimal? @map("total_percentile_sum") @db.Decimal(6, 2)
+  topCumulativeStd   Decimal? @map("top_cumulative_std") @db.Decimal(6, 2)
+  topCumulativeRaw   Decimal? @map("top_cumulative_raw") @db.Decimal(6, 2)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  mockExam           MockExam @relation(fields: [mockExamId], references: [id])
+  student            Student  @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, mockExamId])
   @@index([studentId])
   @@index([mockExamId])
-  @@map("student_scores")
+  @@map("eh_student_scores")
 }
 
-// ============================================
-// 8. 학생 목표대학
-// ============================================
 model StudentTarget {
   id             Int      @id @default(autoincrement())
   studentId      Int      @map("student_id")
-  departmentCode String?  @map("department_code") @db.VarChar(20) // 대학학과코드 (예: U230)
-  priority       Int      @default(1) // 우선순위
+  departmentCode String?  @map("department_code") @db.VarChar(20)
+  priority       Int      @default(1)
   createdAt      DateTime @default(now()) @map("created_at")
-
-  // Relations
-  student Student @relation(fields: [studentId], references: [id])
+  student        Student  @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
-  @@map("student_targets")
+  @@map("eh_student_targets")
 }
 
-// ============================================
-// 9. 대학
-// ============================================
 model University {
-  id             Int      @id @default(autoincrement())
-  code           String   @unique @db.VarChar(10) // U001, U002, ...
-  name           String   @db.VarChar(100) // 대학명
-  shortName      String?  @map("short_name") @db.VarChar(50) // 약칭 (디지스트, 지스트 등)
-  region         String?  @db.VarChar(50) // 지역 (서울, 경기, 대구 등)
-  totalScore     Decimal? @map("total_score") @db.Decimal(10, 2) // 환산점수 총점
-  conversionRate Decimal? @map("conversion_rate") @db.Decimal(10, 6) // 1000점 통일 환산율
-  status         String   @default("존립") @db.VarChar(20) // 존립, 폐과, 생성, 변경
-
-  // Relations
-  departments Department[]
+  id             Int          @id @default(autoincrement())
+  code           String       @unique @db.VarChar(10)
+  name           String       @db.VarChar(100)
+  shortName      String?      @map("short_name") @db.VarChar(50)
+  region         String?      @db.VarChar(50)
+  totalScore     Decimal?     @map("total_score") @db.Decimal(10, 2)
+  conversionRate Decimal?     @map("conversion_rate") @db.Decimal(10, 6)
+  status         String       @default("존립") @db.VarChar(20)
+  departments    Department[]
 
   @@index([code])
   @@index([region])
-  @@map("universities")
+  @@map("eh_universities")
 }
 
-// ============================================
-// 10. 학과
-// ============================================
 model Department {
-  id             Int    @id @default(autoincrement())
-  code           String @unique @db.VarChar(20) // 대학학과코드 (U0011)
-  universityId   Int    @map("university_id")
-  departmentCode String? @map("department_code") @db.VarChar(10) // 학과코드 (1, 2, ...)
-  name           String @db.VarChar(100) // 모집단위명
-
-  // 기본 정보
-  admissionType    String? @map("admission_type") @db.VarChar(20) // 전형유형 (N, ...)
-  admissionGroup   String? @map("admission_group") @db.VarChar(10) // 모집군 (가, 나, 다, 라)
-  category         String? @db.VarChar(20) // 계열 (자연, 인문, 통합)
-  subCategory      String? @map("sub_category") @db.VarChar(50) // 상세계열
-  quota            Int? // 모집인원
-  selectionMethod  String? @map("selection_method") @db.VarChar(20) // 선발방식
-
-  // 수능 요소
-  scoreElements     String? @map("score_elements") @db.VarChar(50) // 수능요소 (표점+변표 등)
-  scoreCombination  String? @map("score_combination") @db.VarChar(50) // 수능조합 (국수영탐(2) 등)
-  requiredSubjects  String? @map("required_subjects") @db.VarChar(100) // 필수
-  optionalSubjects  String? @map("optional_subjects") @db.VarChar(100) // 선택
-  inquiryCount      Int?    @map("inquiry_count") // 탐구과목수
-
-  // 반영비율
-  koreanRatio  String? @map("korean_ratio") @db.VarChar(20) // 국어 반영비율
-  mathRatio    String? @map("math_ratio") @db.VarChar(20) // 수학 반영비율
-  englishRatio String? @map("english_ratio") @db.VarChar(20) // 영어 반영비율
-  inquiryRatio String? @map("inquiry_ratio") @db.VarChar(20) // 탐구 반영비율
-  historyRatio String? @map("history_ratio") @db.VarChar(20) // 한국사 반영비율
-  foreignRatio String? @map("foreign_ratio") @db.VarChar(20) // 제2외국어 반영비율
-
-  // 선택과목
-  koreanSelection String? @map("korean_selection") @db.VarChar(50) // 국어 선택과목
-  mathSelection   String? @map("math_selection") @db.VarChar(50) // 수학 선택과목
-
-  // 가산점
-  probBonus      Decimal? @map("prob_bonus") @db.Decimal(5, 2) // 확률과 통계 가산점
-  calcBonus      Decimal? @map("calc_bonus") @db.Decimal(5, 2) // 미적분 가산점
-  geometryBonus  Decimal? @map("geometry_bonus") @db.Decimal(5, 2) // 기하 가산점
-  inquiryType    String?  @map("inquiry_type") @db.VarChar(20) // 탐구 유형
-  socialBonus    Decimal? @map("social_bonus") @db.Decimal(5, 2) // 사회탐구 가산점
-  scienceBonus   Decimal? @map("science_bonus") @db.Decimal(5, 2) // 과학탐구 가산점
-  mathScienceReq String?  @map("math_science_req") @db.VarChar(50) // 수탐선택 (미적기하+과탐 필수 등)
-
-  // 영어 등급별 점수
-  englishScoreType String?  @map("english_score_type") @db.VarChar(20) // 적용기준
-  englishGrade1    Decimal? @map("english_grade_1") @db.Decimal(6, 2)
-  englishGrade2    Decimal? @map("english_grade_2") @db.Decimal(6, 2)
-  englishGrade3    Decimal? @map("english_grade_3") @db.Decimal(6, 2)
-  englishGrade4    Decimal? @map("english_grade_4") @db.Decimal(6, 2)
-  englishGrade5    Decimal? @map("english_grade_5") @db.Decimal(6, 2)
-  englishGrade6    Decimal? @map("english_grade_6") @db.Decimal(6, 2)
-  englishGrade7    Decimal? @map("english_grade_7") @db.Decimal(6, 2)
-  englishGrade8    Decimal? @map("english_grade_8") @db.Decimal(6, 2)
-  englishGrade9    Decimal? @map("english_grade_9") @db.Decimal(6, 2)
-
-  // 한국사 등급별 점수
-  historyScoreType String?  @map("history_score_type") @db.VarChar(20)
-  historyGrade1    Decimal? @map("history_grade_1") @db.Decimal(6, 2)
-  historyGrade2    Decimal? @map("history_grade_2") @db.Decimal(6, 2)
-  historyGrade3    Decimal? @map("history_grade_3") @db.Decimal(6, 2)
-  historyGrade4    Decimal? @map("history_grade_4") @db.Decimal(6, 2)
-  historyGrade5    Decimal? @map("history_grade_5") @db.Decimal(6, 2)
-  historyGrade6    Decimal? @map("history_grade_6") @db.Decimal(6, 2)
-  historyGrade7    Decimal? @map("history_grade_7") @db.Decimal(6, 2)
-  historyGrade8    Decimal? @map("history_grade_8") @db.Decimal(6, 2)
-  historyGrade9    Decimal? @map("history_grade_9") @db.Decimal(6, 2)
-  historyMinReq    String?  @map("history_min_req") @db.VarChar(50) // 최저기준
-
-  status    String   @default("존립") @db.VarChar(20)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  university       University        @relation(fields: [universityId], references: [id])
+  id               Int               @id @default(autoincrement())
+  code             String            @unique @db.VarChar(20)
+  universityId     Int               @map("university_id")
+  departmentCode   String?           @map("department_code") @db.VarChar(10)
+  name             String            @db.VarChar(100)
+  admissionType    String?           @map("admission_type") @db.VarChar(20)
+  admissionGroup   String?           @map("admission_group") @db.VarChar(10)
+  category         String?           @db.VarChar(20)
+  subCategory      String?           @map("sub_category") @db.VarChar(50)
+  quota            Int?
+  selectionMethod  String?           @map("selection_method") @db.VarChar(20)
+  scoreElements    String?           @map("score_elements") @db.VarChar(50)
+  scoreCombination String?           @map("score_combination") @db.VarChar(50)
+  requiredSubjects String?           @map("required_subjects") @db.VarChar(100)
+  optionalSubjects String?           @map("optional_subjects") @db.VarChar(100)
+  inquiryCount     Int?              @map("inquiry_count")
+  koreanRatio      String?           @map("korean_ratio") @db.VarChar(20)
+  mathRatio        String?           @map("math_ratio") @db.VarChar(20)
+  englishRatio     String?           @map("english_ratio") @db.VarChar(20)
+  inquiryRatio     String?           @map("inquiry_ratio") @db.VarChar(20)
+  historyRatio     String?           @map("history_ratio") @db.VarChar(20)
+  foreignRatio     String?           @map("foreign_ratio") @db.VarChar(20)
+  koreanSelection  String?           @map("korean_selection") @db.VarChar(50)
+  mathSelection    String?           @map("math_selection") @db.VarChar(50)
+  probBonus        Decimal?          @map("prob_bonus") @db.Decimal(5, 2)
+  calcBonus        Decimal?          @map("calc_bonus") @db.Decimal(5, 2)
+  geometryBonus    Decimal?          @map("geometry_bonus") @db.Decimal(5, 2)
+  inquiryType      String?           @map("inquiry_type") @db.VarChar(20)
+  socialBonus      Decimal?          @map("social_bonus") @db.Decimal(5, 2)
+  scienceBonus     Decimal?          @map("science_bonus") @db.Decimal(5, 2)
+  mathScienceReq   String?           @map("math_science_req") @db.VarChar(50)
+  englishScoreType String?           @map("english_score_type") @db.VarChar(20)
+  englishGrade1    Decimal?          @map("english_grade_1") @db.Decimal(6, 2)
+  englishGrade2    Decimal?          @map("english_grade_2") @db.Decimal(6, 2)
+  englishGrade3    Decimal?          @map("english_grade_3") @db.Decimal(6, 2)
+  englishGrade4    Decimal?          @map("english_grade_4") @db.Decimal(6, 2)
+  englishGrade5    Decimal?          @map("english_grade_5") @db.Decimal(6, 2)
+  englishGrade6    Decimal?          @map("english_grade_6") @db.Decimal(6, 2)
+  englishGrade7    Decimal?          @map("english_grade_7") @db.Decimal(6, 2)
+  englishGrade8    Decimal?          @map("english_grade_8") @db.Decimal(6, 2)
+  englishGrade9    Decimal?          @map("english_grade_9") @db.Decimal(6, 2)
+  historyScoreType String?           @map("history_score_type") @db.VarChar(20)
+  historyGrade1    Decimal?          @map("history_grade_1") @db.Decimal(6, 2)
+  historyGrade2    Decimal?          @map("history_grade_2") @db.Decimal(6, 2)
+  historyGrade3    Decimal?          @map("history_grade_3") @db.Decimal(6, 2)
+  historyGrade4    Decimal?          @map("history_grade_4") @db.Decimal(6, 2)
+  historyGrade5    Decimal?          @map("history_grade_5") @db.Decimal(6, 2)
+  historyGrade6    Decimal?          @map("history_grade_6") @db.Decimal(6, 2)
+  historyGrade7    Decimal?          @map("history_grade_7") @db.Decimal(6, 2)
+  historyGrade8    Decimal?          @map("history_grade_8") @db.Decimal(6, 2)
+  historyGrade9    Decimal?          @map("history_grade_9") @db.Decimal(6, 2)
+  historyMinReq    String?           @map("history_min_req") @db.VarChar(50)
+  status           String            @default("존립") @db.VarChar(20)
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
   admissionCutoffs AdmissionCutoff[]
+  university       University        @relation(fields: [universityId], references: [id])
 
   @@index([universityId])
   @@index([code])
   @@index([category, subCategory])
-  @@map("departments")
+  @@map("eh_departments")
 }
 
-// ============================================
-// 11. 입결 데이터
-// ============================================
 model AdmissionCutoff {
-  id           Int  @id @default(autoincrement())
-  departmentId Int  @map("department_id")
-  mockExamId   Int? @map("mock_exam_id")
-  year         Int? // 입결 년도 (22, 23, 24)
-  scoreType    String? @map("score_type") @db.VarChar(20) // 'raw', 'standard', 'percentile'
-
-  // 최초컷
-  firstCutScore      Decimal? @map("first_cut_score") @db.Decimal(10, 4) // 점수
-  firstCutPercentile Decimal? @map("first_cut_percentile") @db.Decimal(10, 6) // 누백
-
-  // 추합컷
-  finalCutScore      Decimal? @map("final_cut_score") @db.Decimal(10, 4)
-  finalCutPercentile Decimal? @map("final_cut_percentile") @db.Decimal(10, 6)
-
-  // 위험도별 점수 (모의고사 기준)
-  riskPlus5  Decimal? @map("risk_plus_5") @db.Decimal(10, 6) // +5 위험도
-  riskPlus4  Decimal? @map("risk_plus_4") @db.Decimal(10, 6)
-  riskPlus3  Decimal? @map("risk_plus_3") @db.Decimal(10, 6)
-  riskPlus2  Decimal? @map("risk_plus_2") @db.Decimal(10, 6)
-  riskPlus1  Decimal? @map("risk_plus_1") @db.Decimal(10, 6)
-  riskMinus1 Decimal? @map("risk_minus_1") @db.Decimal(10, 6)
-  riskMinus2 Decimal? @map("risk_minus_2") @db.Decimal(10, 6)
-  riskMinus3 Decimal? @map("risk_minus_3") @db.Decimal(10, 6)
-  riskMinus4 Decimal? @map("risk_minus_4") @db.Decimal(10, 6)
-  riskMinus5 Decimal? @map("risk_minus_5") @db.Decimal(10, 6)
-
-  // 경쟁률/충원율
-  competitionRate Decimal? @map("competition_rate") @db.Decimal(6, 2)
-  additionalRate  Decimal? @map("additional_rate") @db.Decimal(6, 2) // 충원율
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  department Department @relation(fields: [departmentId], references: [id])
-  mockExam   MockExam?  @relation(fields: [mockExamId], references: [id])
+  id                 Int        @id @default(autoincrement())
+  departmentId       Int        @map("department_id")
+  mockExamId         Int?       @map("mock_exam_id")
+  year               Int?
+  scoreType          String?    @map("score_type") @db.VarChar(20)
+  firstCutScore      Decimal?   @map("first_cut_score") @db.Decimal(10, 4)
+  firstCutPercentile Decimal?   @map("first_cut_percentile") @db.Decimal(10, 6)
+  finalCutScore      Decimal?   @map("final_cut_score") @db.Decimal(10, 4)
+  finalCutPercentile Decimal?   @map("final_cut_percentile") @db.Decimal(10, 6)
+  riskPlus5          Decimal?   @map("risk_plus_5") @db.Decimal(10, 6)
+  riskPlus4          Decimal?   @map("risk_plus_4") @db.Decimal(10, 6)
+  riskPlus3          Decimal?   @map("risk_plus_3") @db.Decimal(10, 6)
+  riskPlus2          Decimal?   @map("risk_plus_2") @db.Decimal(10, 6)
+  riskPlus1          Decimal?   @map("risk_plus_1") @db.Decimal(10, 6)
+  riskMinus1         Decimal?   @map("risk_minus_1") @db.Decimal(10, 6)
+  riskMinus2         Decimal?   @map("risk_minus_2") @db.Decimal(10, 6)
+  riskMinus3         Decimal?   @map("risk_minus_3") @db.Decimal(10, 6)
+  riskMinus4         Decimal?   @map("risk_minus_4") @db.Decimal(10, 6)
+  riskMinus5         Decimal?   @map("risk_minus_5") @db.Decimal(10, 6)
+  competitionRate    Decimal?   @map("competition_rate") @db.Decimal(6, 2)
+  additionalRate     Decimal?   @map("additional_rate") @db.Decimal(6, 2)
+  createdAt          DateTime   @default(now()) @map("created_at")
+  department         Department @relation(fields: [departmentId], references: [id])
+  mockExam           MockExam?  @relation(fields: [mockExamId], references: [id])
 
   @@index([departmentId])
   @@index([year])
   @@index([mockExamId])
-  @@map("admission_cutoffs")
+  @@map("eh_admission_cutoffs")
 }
 
-// ============================================
-// 12. 표준점수 변환표
-// ============================================
 model ScoreConversionStandard {
   id            Int      @id @default(autoincrement())
   mockExamId    Int      @map("mock_exam_id")
-  subject       String   @db.VarChar(50) // 국어, 수학(이과), 수학(문과) 등
-  standardScore Int      @map("standard_score") // 표준점수
-  percentile    Decimal? @db.Decimal(6, 2) // 백분위
-  grade         Int? // 등급 (1~9)
-  cumulativePct Decimal? @map("cumulative_pct") @db.Decimal(10, 6) // 상위누적
-
-  // Relations
-  mockExam MockExam @relation(fields: [mockExamId], references: [id])
+  subject       String   @db.VarChar(50)
+  standardScore Int      @map("standard_score")
+  percentile    Decimal? @db.Decimal(6, 2)
+  grade         Int?
+  cumulativePct Decimal? @map("cumulative_pct") @db.Decimal(10, 6)
+  mockExam      MockExam @relation(fields: [mockExamId], references: [id])
 
   @@index([mockExamId])
   @@index([subject, standardScore])
-  @@map("score_conversion_standard")
+  @@map("eh_score_conversion_standard")
 }
 
-// ============================================
-// 13. 원점수 변환표
-// ============================================
 model ScoreConversionRaw {
-  id             Int    @id @default(autoincrement())
-  mockExamId     Int    @map("mock_exam_id")
-  subject        String @db.VarChar(50) // 국어, 수학, 영어 등
-  subjectType    String? @map("subject_type") @db.VarChar(50) // 선택과목 (언매, 화작 등)
-  commonScore    Int?   @map("common_score") // 공통 점수
-  selectionScore Int?   @map("selection_score") // 선택 점수
-  standardScore  Int?   @map("standard_score") // 변환된 표준점수
-
-  // Relations
-  mockExam MockExam @relation(fields: [mockExamId], references: [id])
+  id             Int      @id @default(autoincrement())
+  mockExamId     Int      @map("mock_exam_id")
+  subject        String   @db.VarChar(50)
+  subjectType    String?  @map("subject_type") @db.VarChar(50)
+  commonScore    Int?     @map("common_score")
+  selectionScore Int?     @map("selection_score")
+  standardScore  Int?     @map("standard_score")
+  mockExam       MockExam @relation(fields: [mockExamId], references: [id])
 
   @@index([mockExamId])
   @@index([subject, subjectType])
-  @@map("score_conversion_raw")
+  @@map("eh_score_conversion_raw")
 }
 
-// ============================================
-// 14. 멘토링/수업
-// ============================================
 model Mentoring {
   id          Int       @id @default(autoincrement())
-  classId     String    @unique @map("class_id") @db.VarChar(30) // 예: MK10S0125011601
-  grade       String?   @db.VarChar(10) // K10, K00 등
-  subject     String?   @db.VarChar(10) // S01, S02 등
-  startDate   DateTime? @map("start_date") @db.Date // 수업시작날짜
-  className   String?   @map("class_name") @db.VarChar(100) // 수업명
-  teacherName String?   @map("teacher_name") @db.VarChar(50) // 선생님명
-  weeklyCount Int?      @map("weekly_count") // 주당수업회수
-  duration    String?   @db.VarChar(10) // 1회 수업시간 (3H 등)
-
-  // 일정1
-  day1       String?   @map("day_1") @db.VarChar(10) // 요일
-  startTime1 DateTime? @map("start_time_1") @db.Time() // 시작시간
-  endTime1   DateTime? @map("end_time_1") @db.Time() // 끝시간
-
-  // 일정2
-  day2       String?   @map("day_2") @db.VarChar(10)
-  startTime2 DateTime? @map("start_time_2") @db.Time()
-  endTime2   DateTime? @map("end_time_2") @db.Time()
-
-  fee       Int?    @default(0) // 수업료
-  feeType   String? @map("fee_type") @db.VarChar(20) // 수업료기준 (월간, 회당)
-  createdAt DateTime @default(now()) @map("created_at")
+  classId     String    @unique @map("class_id") @db.VarChar(30)
+  grade       String?   @db.VarChar(10)
+  subject     String?   @db.VarChar(10)
+  startDate   DateTime? @map("start_date") @db.Date
+  className   String?   @map("class_name") @db.VarChar(100)
+  teacherName String?   @map("teacher_name") @db.VarChar(50)
+  weeklyCount Int?      @map("weekly_count")
+  duration    String?   @db.VarChar(10)
+  day1        String?   @map("day_1") @db.VarChar(10)
+  startTime1  DateTime? @map("start_time_1") @db.Time(6)
+  endTime1    DateTime? @map("end_time_1") @db.Time(6)
+  day2        String?   @map("day_2") @db.VarChar(10)
+  startTime2  DateTime? @map("start_time_2") @db.Time(6)
+  endTime2    DateTime? @map("end_time_2") @db.Time(6)
+  fee         Int?      @default(0)
+  feeType     String?   @map("fee_type") @db.VarChar(20)
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   @@index([grade])
   @@index([teacherName])
-  @@map("mentoring")
+  @@map("eh_mentoring")
 }
 
-// ============================================
-// 15. 성취 결과
-// ============================================
 model AchievementResult {
   id              Int       @id @default(autoincrement())
-  resultId        String    @unique @map("result_id") @db.VarChar(30) // 성취결과 ID
+  resultId        String    @unique @map("result_id") @db.VarChar(30)
   studentId       Int       @map("student_id")
-  missionId       String?   @map("mission_id") @db.VarChar(30) // 미션 ID
-  date            DateTime? @db.Date // 날짜
-  startTime       DateTime? @map("start_time") @db.Time() // 시작시간
-  endTime         DateTime? @map("end_time") @db.Time() // 끝시간
-  category        String?   @db.VarChar(20) // 분류 (학습, 테스트 등)
-  subject         String?   @db.VarChar(20) // 과목
-  subCategory     String?   @map("sub_category") @db.VarChar(20) // 분류 (수업, 과제 등)
-  content         String?   @db.VarChar(100) // 내용
-  amount          Int? // 분량
-  achievementRate Decimal?  @map("achievement_rate") @db.Decimal(5, 2) // 성취율
-  correctCount    Int?      @map("correct_count") // 맞은문항수
-  totalCount      Int?      @map("total_count") // 전체문항수
-  score           Int? // 점수
-  focusLevel      Decimal?  @map("focus_level") @db.Decimal(5, 2) // 몰입도
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  student Student @relation(fields: [studentId], references: [id])
+  missionId       String?   @map("mission_id") @db.VarChar(30)
+  date            DateTime? @db.Date
+  startTime       DateTime? @map("start_time") @db.Time(6)
+  endTime         DateTime? @map("end_time") @db.Time(6)
+  category        String?   @db.VarChar(20)
+  subject         String?   @db.VarChar(20)
+  subCategory     String?   @map("sub_category") @db.VarChar(20)
+  content         String?   @db.VarChar(100)
+  amount          Int?
+  achievementRate Decimal?  @map("achievement_rate") @db.Decimal(5, 2)
+  correctCount    Int?      @map("correct_count")
+  totalCount      Int?      @map("total_count")
+  score           Int?
+  focusLevel      Decimal?  @map("focus_level") @db.Decimal(5, 2)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  student         Student   @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
   @@index([date])
-  @@map("achievement_results")
+  @@map("eh_achievement_results")
 }
 
-// ============================================
-// 16. 학생 답안 (오답 노트용)
-// ============================================
 model StudentAnswer {
-  id              Int      @id @default(autoincrement())
-  studentId       Int      @map("student_id")
-  mockExamId      Int      @map("mock_exam_id")
-  examQuestionId  Int      @map("exam_question_id")
-  subjectAreaName String?  @map("subject_area_name") @db.VarChar(50) // 국어, 수학, 영어 등
-  subjectName     String?  @map("subject_name") @db.VarChar(50) // 화법과 작문, 미적분 등
-  questionNumber  Int      @map("question_number") // 문제 번호
-  selectedAnswer  Int      @map("selected_answer") // 학생이 선택한 답 (1~5)
-  correctAnswer   Int      @map("correct_answer") // 정답
-  isCorrect       Boolean  @map("is_correct") // 정답 여부
-  score           Int?     @default(2) // 문제 배점
-  earnedScore     Int?     @map("earned_score") @default(0) // 획득 점수
-
-  // 오답 분석
-  wrongReason     String?  @map("wrong_reason") @db.VarChar(200) // 오답 이유 (학생 메모)
-  reviewCount     Int      @default(0) @map("review_count") // 복습 횟수
-  lastReviewedAt  DateTime? @map("last_reviewed_at") // 마지막 복습 일시
-  isBookmarked    Boolean  @default(false) @map("is_bookmarked") // 북마크 여부
-
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  student      Student      @relation(fields: [studentId], references: [id])
-  mockExam     MockExam     @relation(fields: [mockExamId], references: [id])
-  examQuestion ExamQuestion @relation(fields: [examQuestionId], references: [id])
+  id              Int          @id @default(autoincrement())
+  studentId       Int          @map("student_id")
+  mockExamId      Int          @map("mock_exam_id")
+  examQuestionId  Int          @map("exam_question_id")
+  subjectAreaName String?      @map("subject_area_name") @db.VarChar(50)
+  subjectName     String?      @map("subject_name") @db.VarChar(50)
+  questionNumber  Int          @map("question_number")
+  selectedAnswer  Int          @map("selected_answer")
+  correctAnswer   Int          @map("correct_answer")
+  isCorrect       Boolean      @map("is_correct")
+  score           Int?         @default(2)
+  earnedScore     Int?         @default(0) @map("earned_score")
+  wrongReason     String?      @map("wrong_reason") @db.VarChar(200)
+  reviewCount     Int          @default(0) @map("review_count")
+  lastReviewedAt  DateTime?    @map("last_reviewed_at")
+  isBookmarked    Boolean      @default(false) @map("is_bookmarked")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  examQuestion    ExamQuestion @relation(fields: [examQuestionId], references: [id])
+  mockExam        MockExam     @relation(fields: [mockExamId], references: [id])
+  student         Student      @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, examQuestionId])
   @@index([studentId, mockExamId])
   @@index([studentId, isCorrect])
   @@index([studentId, subjectAreaName])
-  @@map("student_answers")
+  @@map("eh_student_answers")
 }

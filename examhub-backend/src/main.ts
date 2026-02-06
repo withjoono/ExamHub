@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -10,13 +10,12 @@ async function bootstrap() {
   // Cookie Parser 설정 (HttpOnly Cookie 지원)
   app.use(cookieParser());
 
-  // CORS 설정 - Cloud Run 환경 지원
+  // CORS 설정 - ExamHub 포트: 3003 (프론트엔드), 4003 (백엔드)
   const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
+    // ExamHub 프론트엔드
     'http://localhost:3003',
-    'http://localhost:3005',
-    'http://localhost:5173',
+    // 거북스쿨 Hub (SSO 연동용)
+    'http://localhost:3000',
     // Firebase Hosting
     'https://examhub-app.web.app',
     'https://examhub-app.firebaseapp.com',
@@ -70,14 +69,13 @@ async function bootstrap() {
     },
   });
 
-  // Cloud Run은 PORT 환경변수 사용 (기본 8080)
-  const port = process.env.PORT ?? 4003;
+  // ExamHub 백엔드 포트: 4003 고정
+  const port = 4003;
 
-  // Cloud Run에서는 0.0.0.0으로 바인딩 필요
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 ExamHub Backend is running on port ${port}`);
-  console.log(`📚 API Documentation: /api-docs`);
+  console.log(`📚 API Documentation: http://localhost:${port}/api-docs`);
 }
 
 void bootstrap();

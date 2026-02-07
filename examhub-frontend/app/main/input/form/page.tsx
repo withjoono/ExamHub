@@ -2,14 +2,27 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { useDevAuth } from "@/components/auth/DevLogin"
+import { getUser, type User } from "@/lib/auth/user"
 import { mockExamApi } from "@/lib/api/mock-exam"
 import { api } from "@/lib/api/client"
 
 export default function MockExamFormPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { studentId, isLoggedIn, isLoading: authLoading } = useDevAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchUser() {
+      const userData = await getUser()
+      setUser(userData)
+      setAuthLoading(false)
+    }
+    fetchUser()
+  }, [])
+
+  const isLoggedIn = !!user
+  const studentId = user?.id ?? null
 
   const year = searchParams.get("year") || ""
   const grade = searchParams.get("grade") || ""
@@ -55,11 +68,16 @@ export default function MockExamFormPage() {
   const [answers, setAnswers] = useState<{ [key: string]: number | string }>({})
   const [inquiry1Subject, setInquiry1Subject] = useState("")
   const [inquiry2Subject, setInquiry2Subject] = useState("")
+  const [koreanSelection, setKoreanSelection] = useState("")
+  const [mathSelection, setMathSelection] = useState("")
+
+  const koreanSubjects = ["화법과작문", "언어와매체"]
+  const mathSubjects = ["확률과통계", "미적분", "기하"]
   const [secondForeignLanguage, setSecondForeignLanguage] = useState("")
 
   const inquirySubjects = {
-    사회탐구: ["생활과 윤리", "윤리와 사상", "사회·문화", "한국 지리", "세계 지리", "동아시아사", "세계사"],
-    과학탐구: ["물리학Ⅰ", "물리학Ⅱ", "화학Ⅰ", "화학Ⅱ", "생명과학Ⅰ", "생명과학Ⅱ", "지구과학Ⅰ", "지구과학Ⅱ"],
+    사회탐구: ["생활과윤리", "윤리와사상", "한국지리", "세계지리", "동아시아사", "세계사", "경제", "정치와법", "사회문화"],
+    과학탐구: ["물리학 I", "물리학 II", "화학 I", "화학 II", "생명과학 I", "생명과학 II", "지구과학 I", "지구과학 II"],
   }
 
   const secondForeignLanguageSubjects = [
@@ -139,7 +157,7 @@ export default function MockExamFormPage() {
   const handleSave = async () => {
     // 로그인 확인
     if (!isLoggedIn || !studentId) {
-      setSaveMessage({ type: 'error', text: '로그인이 필요합니다. 상단의 개발 로그인 배너에서 로그인해주세요.' })
+      setSaveMessage({ type: 'error', text: '로그인이 필요합니다. 상단 네비게이션 바에서 로그인해주세요.' })
       return
     }
 
@@ -176,9 +194,13 @@ export default function MockExamFormPage() {
       // 각 과목별로 API 호출 & 결과 수집
       const allResults: any[] = []
       for (const [subjectAreaName, subjectAnswers] of Object.entries(answersBySubject)) {
-        // 탐구 과목 처리
+        // 세부과목 처리
         let actualSubjectName: string | undefined
-        if (subjectAreaName === '탐구1') {
+        if (subjectAreaName === '국어' && grade === '고3' && koreanSelection) {
+          actualSubjectName = koreanSelection
+        } else if (subjectAreaName === '수학' && grade === '고3' && mathSelection) {
+          actualSubjectName = mathSelection
+        } else if (subjectAreaName === '탐구1') {
           actualSubjectName = inquiry1Subject
         } else if (subjectAreaName === '탐구2') {
           actualSubjectName = inquiry2Subject
@@ -186,10 +208,18 @@ export default function MockExamFormPage() {
           actualSubjectName = secondForeignLanguage
         }
 
+        // 탐구 과목의 subjectAreaName을 DB값에 맞게 변환
+        let apiSubjectAreaName = subjectAreaName
+        if (subjectAreaName === '탐구1' || subjectAreaName === '탐구2') {
+          const selected = subjectAreaName === '탐구1' ? inquiry1Subject : inquiry2Subject
+          const isSocial = inquirySubjects.사회탐구.includes(selected)
+          apiSubjectAreaName = isSocial ? '사회탐구' : '과학탐구'
+        }
+
         const res = await api.post<any>('/api/wrong-answers/grade', {
           studentId,
           mockExamId,
-          subjectAreaName: subjectAreaName.replace('1', '').replace('2', ''), // 탐구1 -> 탐구
+          subjectAreaName: apiSubjectAreaName,
           subjectName: actualSubjectName,
           answers: subjectAnswers,
         })
@@ -534,10 +564,62 @@ export default function MockExamFormPage() {
             {/* Main Content */}
             <div className="flex-1 p-8">
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">{selectedSubject}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  {selectedSubject}
+                  {selectedSubject === "국어" && grade === "고3" && koreanSelection && (
+                    <span className="ml-2 text-sm text-[#7b1e7a] font-normal">({koreanSelection})</span>
+                  )}
+                  {selectedSubject === "수학" && grade === "고3" && mathSelection && (
+                    <span className="ml-2 text-sm text-[#7b1e7a] font-normal">({mathSelection})</span>
+                  )}
+                </h3>
 
                 <div className="space-y-6">
-                  {selectedSubject === "수학" ? (
+                  {selectedSubject === "국어" && grade === "고3" ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">선택과목</label>
+                        <select
+                          value={koreanSelection}
+                          onChange={(e) => setKoreanSelection(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7b1e7a] focus:border-[#7b1e7a]"
+                        >
+                          <option value="">선택과목을 선택하세요</option>
+                          {koreanSubjects.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {koreanSelection && (
+                        <div className="mt-4">
+                          <h4 className="text-md font-medium text-gray-900 mb-4">{koreanSelection}</h4>
+                          {renderKoreanEnglishQuestions()}
+                        </div>
+                      )}
+                    </div>
+                  ) : selectedSubject === "수학" && grade === "고3" ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">선택과목</label>
+                        <select
+                          value={mathSelection}
+                          onChange={(e) => setMathSelection(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7b1e7a] focus:border-[#7b1e7a]"
+                        >
+                          <option value="">선택과목을 선택하세요</option>
+                          {mathSubjects.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                      {mathSelection && (
+                        <div className="mt-4">
+                          <h4 className="text-md font-medium text-gray-900 mb-4">{mathSelection}</h4>
+                          {renderGrade3MathQuestions()}
+                        </div>
+                      )}
+                    </div>
+                  ) : selectedSubject === "수학" ? (
                     grade === "고2" ? (
                       renderGrade2MathQuestions()
                     ) : (
@@ -636,7 +718,7 @@ export default function MockExamFormPage() {
                   {/* 로그인 안내 */}
                   {!authLoading && !isLoggedIn && (
                     <div className="bg-yellow-100 text-yellow-800 p-4 rounded-md border border-yellow-300">
-                      ⚠️ 답안을 저장하려면 상단의 노란색 배너에서 먼저 로그인해주세요.
+                      ⚠️ 답안을 저장하려면 상단 네비게이션 바에서 먼저 로그인해주세요.
                     </div>
                   )}
 

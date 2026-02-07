@@ -9,7 +9,7 @@ import {
 
 @Injectable()
 export class MockExamService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.mockExam.findMany({
@@ -19,16 +19,22 @@ export class MockExamService {
 
   async findByGrade(grade: string) {
     return this.prisma.mockExam.findMany({
-      where: { grade },
+      where: { grade: this.gradeToCode(grade) },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
+  }
+
+  // Helper: 학년 표시명 → DB 코드 변환 ("고3" → "H3")
+  private gradeToCode(grade: string): string {
+    const map: Record<string, string> = { '고1': 'H1', '고2': 'H2', '고3': 'H3' };
+    return map[grade] || grade;
   }
 
   async search(searchDto: SearchMockExamDto) {
     const { year, grade, month } = searchDto;
     const where: any = {};
     if (year) where.year = year;
-    if (grade) where.grade = grade;
+    if (grade) where.grade = this.gradeToCode(grade);
     if (month) where.month = month;
     return this.prisma.mockExam.findMany({
       where,
@@ -60,7 +66,7 @@ export class MockExamService {
 
   async checkExists(year: number, grade: string, month: number) {
     const mockExam = await this.prisma.mockExam.findFirst({
-      where: { year, grade, month },
+      where: { year, grade: this.gradeToCode(grade), month },
     });
     return { exists: !!mockExam, mockExam: mockExam || null };
   }

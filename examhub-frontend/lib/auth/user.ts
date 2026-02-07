@@ -3,7 +3,7 @@
  * Hub 백엔드 /auth/me API를 사용하여 사용자 정보를 가져옵니다
  */
 
-import { getAccessToken } from './token-manager';
+import { getAccessToken, clearTokens } from './token-manager';
 
 export interface User {
   id: number;
@@ -38,7 +38,14 @@ export async function getUser(): Promise<User | null> {
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch user info:', response.status);
+      if (response.status === 401) {
+        // 토큰이 만료되었거나 유효하지 않음 → 로컬 토큰 정리
+        console.warn('Token expired or invalid, clearing local tokens');
+        clearTokens();
+        clearUserCache();
+      } else {
+        console.error('Failed to fetch user info:', response.status);
+      }
       return null;
     }
 

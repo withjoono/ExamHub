@@ -1,0 +1,71 @@
+[dotenv@17.2.3] injecting env (11) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+mockExamId=38 subjects:
+  area="국어" name="국어"
+  area="국어" name="언어와매체"
+  area="국어" name="화법과작문"
+  area="수학" name="기하"
+  area="수학" name="수학"
+  area="수학" name="미적분"
+  area="수학" name="확률과통계"
+  area="영어" name="영어"
+  area="한국사" name="한국사"
+  area="과학탐구" name="과학탐구"
+  area="과학탐구" name="생명과학 I"
+  area="과학탐구" name="지구과학 I"
+  area="과학탐구" name="물리학 I"
+  area="과학탐구" name="화학 I"
+  area="과학탐구" name="생명과학 II"
+  area="과학탐구" name="지구과학 II"
+  area="과학탐구" name="물리학 II"
+  area="과학탐구" name="화학 II"
+  area="사회탐구" name="경제"
+  area="사회탐구" name="세계사"
+  area="사회탐구" name="사회문화"
+  area="사회탐구" name="사회탐구"
+  area="사회탐구" name="세계지리"
+  area="사회탐구" name="정치와법"
+  area="사회탐구" name="한국지리"
+  area="사회탐구" name="동아시아사"
+  area="사회탐구" name="생활과윤리"
+  area="사회탐구" name="윤리와사상"
+
+Count by subject:
+  국어 / 국어: 90 questions
+  국어 / 언어와매체: 45 questions
+  국어 / 화법과작문: 45 questions
+  수학 / 기하: 21 questions
+  수학 / 수학: 42 questions
+  수학 / 미적분: 21 questions
+  수학 / 확률과통계: 21 questions
+  영어 / 영어: 90 questions
+  한국사 / 한국사: 40 questions
+  과학탐구 / 과학탐구: 40 questions
+  과학탐구 / 생명과학 I: 20 questions
+  과학탐구 / 지구과학 I: 20 questions
+  과학탐구 / 물리학 I: 20 questions
+  과학탐구 / 화학 I: 20 questions
+  과학탐구 / 생명과학 II: 20 questions
+  과학탐구 / 지구과학 II: 20 questions
+  과학탐구 / 물리학 II: 20 questions
+  과학탐구 / 화학 II: 20 questions
+  사회탐구 / 경제: 20 questions
+  사회탐구 / 세계사: 20 questions
+  사회탐구 / 사회문화: 20 questions
+  사회탐구 / 사회탐구: 40 questions
+  사회탐구 / 세계지리: 20 questions
+  사회탐구 / 정치와법: 20 questions
+  사회탐구 / 한국지리: 20 questions
+  사회탐구 / 동아시아사: 20 questions
+  사회탐구 / 생활과윤리: 20 questions
+  사회탐구 / 윤리와사상: 20 questions
+
+mockExam 38: {
+  id: 38,
+  code: 'H3-2025-05',
+  name: '2025.05.08 학력평가',
+  grade: 'H3',
+  year: 2025,
+  month: 5,
+  type: '학력평가',
+  created_at: 2026-02-06T18:37:12.521Z
+}

@@ -2,47 +2,47 @@ require('dotenv').config();
 const { Client } = require('pg');
 
 const c = new Client({
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    user: process.env.DB_USER || 'tsuser',
-    password: process.env.DB_PASSWORD || 'tsuser1234',
-    database: process.env.DB_NAME || 'geobukschool_dev',
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  user: process.env.DB_USER || 'tsuser',
+  password: process.env.DB_PASSWORD || 'tsuser1234',
+  database: process.env.DB_NAME || 'geobukschool_dev',
 });
 
 // Helper: parse exam_name like "2025.11.13 수능" → { year: 2025, month: 11 }
 function parseExamName(examName) {
-    const match = examName.match(/^(\d{4})\.(\d{2})\.\d{2}\s+(.+)$/);
-    if (match) {
-        return { year: parseInt(match[1]), month: parseInt(match[2]), type: match[3] };
-    }
-    return { year: null, month: null, type: examName };
+  const match = examName.match(/^(\d{4})\.(\d{2})\.\d{2}\s+(.+)$/);
+  if (match) {
+    return { year: parseInt(match[1]), month: parseInt(match[2]), type: match[3] };
+  }
+  return { year: null, month: null, type: examName };
 }
 
 // Helper: grade Korean → code ("고3" → "H3", "고1" → "H1")
 function gradeToCode(grade) {
-    const map = { '고1': 'H1', '고2': 'H2', '고3': 'H3' };
-    return map[grade] || grade;
+  const map = { '고1': 'H1', '고2': 'H2', '고3': 'H3' };
+  return map[grade] || grade;
 }
 
 // Helper: subject Korean → area code
 function subjectToAreaCode(subject) {
-    const map = {
-        '국어': 'KOR', '수학': 'MATH', '영어': 'ENG',
-        '한국사': 'HIST', '사회탐구': 'SOC', '과학탐구': 'SCI',
-        '제2외국어': 'FOR', '통합사회': 'SOC_INT', '통합과학': 'SCI_INT',
-    };
-    return map[subject] || subject;
+  const map = {
+    '국어': 'KOR', '수학': 'MATH', '영어': 'ENG',
+    '한국사': 'HIST', '사회탐구': 'SOC', '과학탐구': 'SCI',
+    '제2외국어': 'FOR', '통합사회': 'SOC_INT', '통합과학': 'SCI_INT',
+  };
+  return map[subject] || subject;
 }
 
 async function seed() {
-    await c.connect();
-    console.log('Connected OK');
+  await c.connect();
+  console.log('Connected OK');
 
-    // ========== 1. Create tables ==========
-    console.log('\n=== Creating tables ===');
+  // ========== 1. Create tables ==========
+  console.log('\n=== Creating tables ===');
 
-    // eh_students
-    await c.query(`
+  // eh_students
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_students (
       id SERIAL PRIMARY KEY,
       student_id VARCHAR(20) UNIQUE NOT NULL,
@@ -60,10 +60,10 @@ async function seed() {
       updated_at TIMESTAMP DEFAULT NOW()
     );
   `);
-    console.log('  ✓ eh_students');
+  console.log('  ✓ eh_students');
 
-    // eh_mock_exams
-    await c.query(`
+  // eh_mock_exams
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_mock_exams (
       id SERIAL PRIMARY KEY,
       code VARCHAR(20) UNIQUE NOT NULL,
@@ -75,20 +75,20 @@ async function seed() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
-    console.log('  ✓ eh_mock_exams');
+  console.log('  ✓ eh_mock_exams');
 
-    // eh_subject_areas
-    await c.query(`
+  // eh_subject_areas
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_subject_areas (
       id SERIAL PRIMARY KEY,
       code VARCHAR(10) UNIQUE NOT NULL,
       name VARCHAR(50) NOT NULL
     );
   `);
-    console.log('  ✓ eh_subject_areas');
+  console.log('  ✓ eh_subject_areas');
 
-    // eh_subject_codes
-    await c.query(`
+  // eh_subject_codes
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_subject_codes (
       id SERIAL PRIMARY KEY,
       subject_area_id INTEGER REFERENCES eh_subject_areas(id),
@@ -96,10 +96,10 @@ async function seed() {
       name VARCHAR(50) NOT NULL
     );
   `);
-    console.log('  ✓ eh_subject_codes');
+  console.log('  ✓ eh_subject_codes');
 
-    // eh_subject_chapters
-    await c.query(`
+  // eh_subject_chapters
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_subject_chapters (
       id SERIAL PRIMARY KEY,
       subject_area_code VARCHAR(10),
@@ -110,10 +110,10 @@ async function seed() {
       minor_code VARCHAR(10)
     );
   `);
-    console.log('  ✓ eh_subject_chapters');
+  console.log('  ✓ eh_subject_chapters');
 
-    // eh_exam_questions
-    await c.query(`
+  // eh_exam_questions
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_exam_questions (
       id SERIAL PRIMARY KEY,
       mock_exam_id INTEGER REFERENCES eh_mock_exams(id),
@@ -133,12 +133,12 @@ async function seed() {
       difficulty VARCHAR(10)
     );
   `);
-    await c.query('CREATE INDEX IF NOT EXISTS idx_eq_mock_exam_id ON eh_exam_questions(mock_exam_id)');
-    await c.query('CREATE INDEX IF NOT EXISTS idx_eq_subject ON eh_exam_questions(subject_area_code, subject_code)');
-    console.log('  ✓ eh_exam_questions');
+  await c.query('CREATE INDEX IF NOT EXISTS idx_eq_mock_exam_id ON eh_exam_questions(mock_exam_id)');
+  await c.query('CREATE INDEX IF NOT EXISTS idx_eq_subject ON eh_exam_questions(subject_area_code, subject_code)');
+  console.log('  ✓ eh_exam_questions');
 
-    // eh_student_scores
-    await c.query(`
+  // eh_student_scores
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_student_scores (
       id SERIAL PRIMARY KEY,
       student_id INTEGER REFERENCES eh_students(id),
@@ -179,10 +179,10 @@ async function seed() {
       UNIQUE(student_id, mock_exam_id)
     );
   `);
-    console.log('  ✓ eh_student_scores');
+  console.log('  ✓ eh_student_scores');
 
-    // eh_student_answers
-    await c.query(`
+  // eh_student_answers
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_student_answers (
       id SERIAL PRIMARY KEY,
       student_id INTEGER REFERENCES eh_students(id),
@@ -205,13 +205,13 @@ async function seed() {
       UNIQUE(student_id, exam_question_id)
     );
   `);
-    await c.query('CREATE INDEX IF NOT EXISTS idx_sa_student ON eh_student_answers(student_id)');
-    await c.query('CREATE INDEX IF NOT EXISTS idx_sa_mock_exam ON eh_student_answers(mock_exam_id)');
-    await c.query('CREATE INDEX IF NOT EXISTS idx_sa_subject ON eh_student_answers(student_id, subject_area_name)');
-    console.log('  ✓ eh_student_answers');
+  await c.query('CREATE INDEX IF NOT EXISTS idx_sa_student ON eh_student_answers(student_id)');
+  await c.query('CREATE INDEX IF NOT EXISTS idx_sa_mock_exam ON eh_student_answers(mock_exam_id)');
+  await c.query('CREATE INDEX IF NOT EXISTS idx_sa_subject ON eh_student_answers(student_id, subject_area_name)');
+  console.log('  ✓ eh_student_answers');
 
-    // Additional tables for complete schema
-    await c.query(`
+  // Additional tables for complete schema
+  await c.query(`
     CREATE TABLE IF NOT EXISTS eh_student_targets (
       id SERIAL PRIMARY KEY,
       student_id INTEGER REFERENCES eh_students(id),
@@ -220,205 +220,210 @@ async function seed() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
-    console.log('  ✓ eh_student_targets');
+  console.log('  ✓ eh_student_targets');
 
-    // ========== 2. Seed test student ==========
-    console.log('\n=== Seeding test student ===');
-    const existingStudent = await c.query("SELECT id FROM eh_students WHERE student_id = 'test001'");
-    let studentId;
-    if (existingStudent.rows.length === 0) {
-        const r = await c.query(
-            "INSERT INTO eh_students (student_id, year, grade, name) VALUES ('test001', 2025, '고3', '테스트학생') RETURNING id"
-        );
-        studentId = r.rows[0].id;
-        console.log('  ✓ Created test student ID:', studentId);
-    } else {
-        studentId = existingStudent.rows[0].id;
-        console.log('  ✓ Test student already exists, ID:', studentId);
-    }
-
-    // ========== 3. Seed subject areas ==========
-    console.log('\n=== Seeding subject areas ===');
-    const subjectAreas = [
-        { code: 'KOR', name: '국어' },
-        { code: 'MATH', name: '수학' },
-        { code: 'ENG', name: '영어' },
-        { code: 'HIST', name: '한국사' },
-        { code: 'SOC', name: '사회탐구' },
-        { code: 'SCI', name: '과학탐구' },
-        { code: 'FOR', name: '제2외국어' },
-        { code: 'SOC_INT', name: '통합사회' },
-        { code: 'SCI_INT', name: '통합과학' },
-    ];
-    for (const sa of subjectAreas) {
-        await c.query(
-            `INSERT INTO eh_subject_areas (code, name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING`,
-            [sa.code, sa.name]
-        );
-    }
-    console.log('  ✓ Subject areas seeded');
-
-    // ========== 4. Seed mock exams from eh_mock_answer ==========
-    console.log('\n=== Seeding mock exams ===');
-    const distinctExams = await c.query(
-        "SELECT DISTINCT grade, exam_name FROM eh_mock_answer ORDER BY exam_name"
+  // ========== 2. Seed test student ==========
+  console.log('\n=== Seeding test student ===');
+  const existingStudent = await c.query("SELECT id FROM eh_students WHERE student_id = 'test001'");
+  let studentId;
+  if (existingStudent.rows.length === 0) {
+    const r = await c.query(
+      "INSERT INTO eh_students (student_id, year, grade, name) VALUES ('test001', 2025, '고3', '테스트학생') RETURNING id"
     );
-    console.log(`  Found ${distinctExams.rows.length} distinct grade+exam combos`);
+    studentId = r.rows[0].id;
+    console.log('  ✓ Created test student ID:', studentId);
+  } else {
+    studentId = existingStudent.rows[0].id;
+    console.log('  ✓ Test student already exists, ID:', studentId);
+  }
 
-    const mockExamMap = new Map(); // key: "grade|exam_name" → mockExamId
+  // ========== 3. Seed subject areas ==========
+  console.log('\n=== Seeding subject areas ===');
+  const subjectAreas = [
+    { code: 'KOR', name: '국어' },
+    { code: 'MATH', name: '수학' },
+    { code: 'ENG', name: '영어' },
+    { code: 'HIST', name: '한국사' },
+    { code: 'SOC', name: '사회탐구' },
+    { code: 'SCI', name: '과학탐구' },
+    { code: 'FOR', name: '제2외국어' },
+    { code: 'SOC_INT', name: '통합사회' },
+    { code: 'SCI_INT', name: '통합과학' },
+  ];
+  for (const sa of subjectAreas) {
+    await c.query(
+      `INSERT INTO eh_subject_areas (code, name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING`,
+      [sa.code, sa.name]
+    );
+  }
+  console.log('  ✓ Subject areas seeded');
 
-    for (const row of distinctExams.rows) {
-        const { year, month, type } = parseExamName(row.exam_name);
-        const gradeCode = gradeToCode(row.grade);
-        const code = `${gradeCode}-${year}-${String(month).padStart(2, '0')}`;
+  // ========== 4. Seed mock exams from eh_mock_answer ==========
+  console.log('\n=== Seeding mock exams ===');
+  const distinctExams = await c.query(
+    "SELECT DISTINCT grade, exam_name FROM eh_mock_answer ORDER BY exam_name"
+  );
+  console.log(`  Found ${distinctExams.rows.length} distinct grade+exam combos`);
 
-        const existing = await c.query("SELECT id FROM eh_mock_exams WHERE code = $1", [code]);
-        let examId;
-        if (existing.rows.length === 0) {
-            const r = await c.query(
-                `INSERT INTO eh_mock_exams (code, name, grade, year, month, type)
+  const mockExamMap = new Map(); // key: "grade|exam_name" → mockExamId
+
+  for (const row of distinctExams.rows) {
+    const { year, month, type } = parseExamName(row.exam_name);
+    const gradeCode = gradeToCode(row.grade);
+    const code = `${gradeCode}-${year}-${String(month).padStart(2, '0')}`;
+
+    const existing = await c.query("SELECT id FROM eh_mock_exams WHERE code = $1", [code]);
+    let examId;
+    if (existing.rows.length === 0) {
+      const r = await c.query(
+        `INSERT INTO eh_mock_exams (code, name, grade, year, month, type)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-                [code, row.exam_name, gradeCode, year, month, type]
-            );
-            examId = r.rows[0].id;
-        } else {
-            examId = existing.rows[0].id;
-        }
-        mockExamMap.set(`${row.grade}|${row.exam_name}`, examId);
-    }
-    console.log(`  ✓ ${mockExamMap.size} mock exams seeded`);
-
-    // ========== 5. Seed exam questions from eh_mock_answer ==========
-    console.log('\n=== Seeding exam questions ===');
-
-    // Check if already seeded
-    const eqCount = await c.query("SELECT COUNT(*) FROM eh_exam_questions");
-    if (parseInt(eqCount.rows[0].count) > 0) {
-        console.log(`  ✓ Already seeded (${eqCount.rows[0].count} rows). Skipping.`);
+        [code, row.exam_name, gradeCode, year, month, type]
+      );
+      examId = r.rows[0].id;
     } else {
-        // Load all mock_answer data
-        const allAnswers = await c.query(
-            "SELECT grade, exam_name, subject, subject_detail, question_number, answer, difficulty, score, correct_rate, choice_ratio_1, choice_ratio_2, choice_ratio_3, choice_ratio_4, choice_ratio_5 FROM eh_mock_answer ORDER BY id"
-        );
-        console.log(`  Processing ${allAnswers.rows.length} rows...`);
-
-        const BATCH = 500;
-        let inserted = 0;
-
-        await c.query('BEGIN');
-        try {
-            for (let i = 0; i < allAnswers.rows.length; i += BATCH) {
-                const batch = allAnswers.rows.slice(i, i + BATCH);
-                const values = [];
-                const placeholders = [];
-
-                batch.forEach((row, batchIdx) => {
-                    const mockExamId = mockExamMap.get(`${row.grade}|${row.exam_name}`);
-                    if (!mockExamId) return;
-
-                    const areaCode = subjectToAreaCode(row.subject);
-                    const offset = batchIdx * 14;
-
-                    // Parse correct_rate: "90%" → 90.00
-                    let cr = null;
-                    if (row.correct_rate) {
-                        const parsed = parseFloat(row.correct_rate.replace('%', ''));
-                        if (!isNaN(parsed)) cr = parsed;
-                    }
-
-                    // Parse choice ratios: "1%" → 1.00
-                    const parseRatio = (r) => {
-                        if (!r) return null;
-                        const p = parseFloat(r.replace('%', ''));
-                        return isNaN(p) ? null : p;
-                    };
-
-                    placeholders.push(
-                        `($${offset + 1},$${offset + 2},$${offset + 3},$${offset + 4},$${offset + 5},$${offset + 6},$${offset + 7},$${offset + 8},$${offset + 9},$${offset + 10},$${offset + 11},$${offset + 12},$${offset + 13},$${offset + 14})`
-                    );
-                    values.push(
-                        mockExamId,
-                        areaCode,
-                        row.subject,
-                        null, // subject_code (세부과목 코드는 별도 매핑 필요)
-                        row.subject_detail || null,
-                        row.question_number,
-                        row.score || 2,
-                        row.answer,
-                        parseRatio(row.choice_ratio_1),
-                        parseRatio(row.choice_ratio_2),
-                        parseRatio(row.choice_ratio_3),
-                        parseRatio(row.choice_ratio_4),
-                        parseRatio(row.choice_ratio_5),
-                        cr
-                    );
-                });
-
-                if (placeholders.length > 0) {
-                    await c.query(
-                        `INSERT INTO eh_exam_questions (mock_exam_id, subject_area_code, subject_area_name, subject_code, subject_name, question_number, score, answer, choice_ratio_1, choice_ratio_2, choice_ratio_3, choice_ratio_4, choice_ratio_5, correct_rate)
-             VALUES ${placeholders.join(', ')}`,
-                        values
-                    );
-                }
-
-                inserted += batch.length;
-                if (inserted % 5000 === 0 || inserted === allAnswers.rows.length) {
-                    console.log(`  Inserted ${inserted}/${allAnswers.rows.length} questions...`);
-                }
-            }
-            await c.query('COMMIT');
-            console.log(`  ✓ ${inserted} exam questions seeded`);
-        } catch (e) {
-            await c.query('ROLLBACK');
-            throw e;
-        }
+      examId = existing.rows[0].id;
     }
+    mockExamMap.set(`${row.grade}|${row.exam_name}`, examId);
+  }
+  console.log(`  ✓ ${mockExamMap.size} mock exams seeded`);
 
-    // Also add difficulty column update
-    console.log('\n=== Updating difficulty from eh_mock_answer ===');
-    await c.query(`
-    UPDATE eh_exam_questions eq SET difficulty = ma.difficulty
-    FROM eh_mock_answer ma
-    JOIN eh_mock_exams me ON me.name = ma.exam_name AND me.grade = (
-      CASE ma.grade WHEN '고1' THEN 'H1' WHEN '고2' THEN 'H2' WHEN '고3' THEN 'H3' ELSE ma.grade END
-    )
-    WHERE eq.mock_exam_id = me.id
-      AND eq.subject_area_name = ma.subject
-      AND COALESCE(eq.subject_name, '') = COALESCE(ma.subject_detail, '')
-      AND eq.question_number = ma.question_number
-      AND eq.difficulty IS NULL
+  // ========== 5. Seed exam questions from eh_mock_answer ==========
+  console.log('\n=== Seeding exam questions ===');
+
+  // Check if already seeded
+  const eqCount = await c.query("SELECT COUNT(*) FROM eh_exam_questions");
+  if (parseInt(eqCount.rows[0].count) > 0) {
+    console.log(`  ✓ Already seeded (${eqCount.rows[0].count} rows). Skipping.`);
+  } else {
+    // Load all mock_answer data
+    const allAnswers = await c.query(
+      "SELECT grade, exam_name, subject, subject_detail, question_number, answer, difficulty, score, correct_rate, choice_ratio_1, choice_ratio_2, choice_ratio_3, choice_ratio_4, choice_ratio_5 FROM eh_mock_answer ORDER BY id"
+    );
+    console.log(`  Processing ${allAnswers.rows.length} rows...`);
+
+    const BATCH = 500;
+    let inserted = 0;
+
+    await c.query('BEGIN');
+    try {
+      for (let i = 0; i < allAnswers.rows.length; i += BATCH) {
+        const batch = allAnswers.rows.slice(i, i + BATCH);
+        const values = [];
+        const placeholders = [];
+
+        batch.forEach((row, batchIdx) => {
+          const mockExamId = mockExamMap.get(`${row.grade}|${row.exam_name}`);
+          if (!mockExamId) return;
+
+          const areaCode = subjectToAreaCode(row.subject);
+          const offset = batchIdx * 14;
+
+          // Parse correct_rate: "90%" → 90.00
+          let cr = null;
+          if (row.correct_rate) {
+            const parsed = parseFloat(row.correct_rate.replace('%', ''));
+            if (!isNaN(parsed)) cr = parsed;
+          }
+
+          // Parse choice ratios: "1%" → 1.00
+          const parseRatio = (r) => {
+            if (!r) return null;
+            const p = parseFloat(r.replace('%', ''));
+            return isNaN(p) ? null : p;
+          };
+
+          placeholders.push(
+            `($${offset + 1},$${offset + 2},$${offset + 3},$${offset + 4},$${offset + 5},$${offset + 6},$${offset + 7},$${offset + 8},$${offset + 9},$${offset + 10},$${offset + 11},$${offset + 12},$${offset + 13},$${offset + 14})`
+          );
+          values.push(
+            mockExamId,
+            areaCode,
+            row.subject,
+            null, // subject_code (세부과목 코드는 별도 매핑 필요)
+            row.subject_detail || null,
+            row.question_number,
+            row.score || 2,
+            row.answer,
+            parseRatio(row.choice_ratio_1),
+            parseRatio(row.choice_ratio_2),
+            parseRatio(row.choice_ratio_3),
+            parseRatio(row.choice_ratio_4),
+            parseRatio(row.choice_ratio_5),
+            cr
+          );
+        });
+
+        if (placeholders.length > 0) {
+          await c.query(
+            `INSERT INTO eh_exam_questions (mock_exam_id, subject_area_code, subject_area_name, subject_code, subject_name, question_number, score, answer, choice_ratio_1, choice_ratio_2, choice_ratio_3, choice_ratio_4, choice_ratio_5, correct_rate)
+             VALUES ${placeholders.join(', ')}`,
+            values
+          );
+        }
+
+        inserted += batch.length;
+        if (inserted % 5000 === 0 || inserted === allAnswers.rows.length) {
+          console.log(`  Inserted ${inserted}/${allAnswers.rows.length} questions...`);
+        }
+      }
+      await c.query('COMMIT');
+      console.log(`  ✓ ${inserted} exam questions seeded`);
+    } catch (e) {
+      await c.query('ROLLBACK');
+      throw e;
+    }
+  }
+
+  // Auto-convert correct_rate to 9-level difficulty (상상~하하)
+  // 정답률이 낮을수록 어려운 문제 → 상상(최상난이도)
+  // 정답률이 높을수록 쉬운 문제 → 하하(최하난이도)
+  console.log('\n=== Auto-converting correct_rate → 9-level difficulty ===');
+  await c.query(`
+    UPDATE eh_exam_questions SET difficulty = 
+      CASE 
+        WHEN correct_rate IS NULL THEN NULL
+        WHEN correct_rate < 11.2  THEN '상상'
+        WHEN correct_rate < 22.3  THEN '상중'
+        WHEN correct_rate < 33.4  THEN '상하'
+        WHEN correct_rate < 44.5  THEN '중상'
+        WHEN correct_rate < 55.6  THEN '중중'
+        WHEN correct_rate < 66.7  THEN '중하'
+        WHEN correct_rate < 77.8  THEN '하상'
+        WHEN correct_rate < 88.9  THEN '하중'
+        ELSE '하하'
+      END
   `);
-    console.log('  ✓ Difficulty updated');
+  console.log('  ✓ Difficulty updated (9-level: 상상~하하)');
 
-    // ========== 6. Verification ==========
-    console.log('\n=== Verification ===');
+  // ========== 6. Verification ==========
+  console.log('\n=== Verification ===');
 
-    let r = await c.query('SELECT COUNT(*) FROM eh_students');
-    console.log('  eh_students:', r.rows[0].count);
+  let r = await c.query('SELECT COUNT(*) FROM eh_students');
+  console.log('  eh_students:', r.rows[0].count);
 
-    r = await c.query('SELECT COUNT(*) FROM eh_mock_exams');
-    console.log('  eh_mock_exams:', r.rows[0].count);
+  r = await c.query('SELECT COUNT(*) FROM eh_mock_exams');
+  console.log('  eh_mock_exams:', r.rows[0].count);
 
-    r = await c.query('SELECT COUNT(*) FROM eh_exam_questions');
-    console.log('  eh_exam_questions:', r.rows[0].count);
+  r = await c.query('SELECT COUNT(*) FROM eh_exam_questions');
+  console.log('  eh_exam_questions:', r.rows[0].count);
 
-    r = await c.query('SELECT COUNT(*) FROM eh_subject_areas');
-    console.log('  eh_subject_areas:', r.rows[0].count);
+  r = await c.query('SELECT COUNT(*) FROM eh_subject_areas');
+  console.log('  eh_subject_areas:', r.rows[0].count);
 
-    r = await c.query('SELECT COUNT(*) FROM eh_student_answers');
-    console.log('  eh_student_answers:', r.rows[0].count);
+  r = await c.query('SELECT COUNT(*) FROM eh_student_answers');
+  console.log('  eh_student_answers:', r.rows[0].count);
 
-    r = await c.query('SELECT COUNT(*) FROM eh_student_scores');
-    console.log('  eh_student_scores:', r.rows[0].count);
+  r = await c.query('SELECT COUNT(*) FROM eh_student_scores');
+  console.log('  eh_student_scores:', r.rows[0].count);
 
-    // Sample mock exam
-    r = await c.query('SELECT id, code, name, grade, year, month FROM eh_mock_exams LIMIT 5');
-    console.log('\n  Sample mock exams:');
-    r.rows.forEach(row => console.log(`    ${row.id}: ${row.code} | ${row.name} | grade=${row.grade} year=${row.year} month=${row.month}`));
+  // Sample mock exam
+  r = await c.query('SELECT id, code, name, grade, year, month FROM eh_mock_exams LIMIT 5');
+  console.log('\n  Sample mock exams:');
+  r.rows.forEach(row => console.log(`    ${row.id}: ${row.code} | ${row.name} | grade=${row.grade} year=${row.year} month=${row.month}`));
 
-    // Sample questions
-    r = await c.query(`
+  // Sample questions
+  r = await c.query(`
     SELECT eq.id, me.code, eq.subject_area_name, eq.subject_name, eq.question_number, eq.answer, eq.score, eq.difficulty
     FROM eh_exam_questions eq
     JOIN eh_mock_exams me ON me.id = eq.mock_exam_id
@@ -426,15 +431,15 @@ async function seed() {
     ORDER BY eq.subject_area_name, eq.question_number
     LIMIT 10
   `);
-    console.log('\n  Sample questions (H3-2025-11):');
-    r.rows.forEach(row => console.log(`    Q${row.question_number}: ${row.subject_area_name}/${row.subject_name} ans=${row.answer} score=${row.score} diff=${row.difficulty}`));
+  console.log('\n  Sample questions (H3-2025-11):');
+  r.rows.forEach(row => console.log(`    Q${row.question_number}: ${row.subject_area_name}/${row.subject_name} ans=${row.answer} score=${row.score} diff=${row.difficulty}`));
 
-    await c.end();
-    console.log('\n✅ Seed complete!');
+  await c.end();
+  console.log('\n✅ Seed complete!');
 }
 
 seed().catch(e => {
-    console.error('Seed failed:', e.message);
-    console.error(e.stack);
-    process.exit(1);
+  console.error('Seed failed:', e.message);
+  console.error(e.stack);
+  process.exit(1);
 });

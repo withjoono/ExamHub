@@ -195,7 +195,6 @@ export class WrongAnswerService {
         examQuestion: {
           select: {
             difficulty: true,
-            correctRate: true,
           },
         },
       },
@@ -223,7 +222,6 @@ export class WrongAnswerService {
       createdAt: a.createdAt,
       updatedAt: a.updatedAt,
       difficulty: a.examQuestion?.difficulty || undefined,
-      correctRate: a.examQuestion?.correctRate ? Number(a.examQuestion.correctRate) : undefined,
       mockExamName: a.mockExam?.name,
       mockExamYear: a.mockExam?.year || undefined,
       mockExamMonth: a.mockExam?.month || undefined,

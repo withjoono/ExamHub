@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { ArrowLeft, ChevronDown, Menu, X, Wallet, Bell, Share2, User } from "lucide-react"
 import { getUser, cacheUser, clearUserCache, type User as UserType } from "@/lib/auth/user"
-import { redirectToHubLogin, getHubUrl } from "@/lib/auth/hub-login"
+import { redirectToHubLogin, getHubUrl, getHubLoginUrl } from "@/lib/auth/hub-login"
 import { clearTokens } from "@/lib/auth/token-manager"
 
 interface MenuItem {
@@ -24,6 +24,17 @@ export function Navigation() {
       setUserState(userData)
       if (userData) {
         cacheUser(userData) // 캐시에 저장
+        return
+      }
+
+      // 토큰이 없고, SSO 자동 로그인을 아직 시도하지 않았으면 Hub으로 리다이렉트
+      // sessionStorage로 1회만 시도 (무한 리다이렉트 방지)
+      const ssoAttempted = sessionStorage.getItem('examhub_sso_attempted')
+      if (!ssoAttempted) {
+        sessionStorage.setItem('examhub_sso_attempted', 'true')
+        // Hub 로그인 페이지로 이동 (이미 Hub에 로그인되어 있으면 자동으로 SSO 코드 생성 후 복귀)
+        // getHubLoginUrl()은 내부적으로 redirect_uri를 포함함
+        window.location.href = getHubLoginUrl(window.location.pathname)
       }
     }
     fetchUser()

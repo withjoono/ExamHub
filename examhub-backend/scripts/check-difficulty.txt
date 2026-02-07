@@ -1,0 +1,22 @@
+[dotenv@17.2.3] injecting env (11) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+Existing difficulty values: [
+  { difficulty: '중하' },
+  { difficulty: '최상' },
+  { difficulty: '하' },
+  { difficulty: '중' },
+  { difficulty: '상' },
+  { difficulty: '중상' }
+]
+Sample correct_rate+difficulty: [
+  { correct_rate: '52.00', difficulty: '중상' },
+  { correct_rate: '55.00', difficulty: '중상' },
+  { correct_rate: '96.00', difficulty: '하' },
+  { correct_rate: '95.00', difficulty: '하' },
+  { correct_rate: '71.00', difficulty: '중' },
+  { correct_rate: '91.00', difficulty: '하' },
+  { correct_rate: '90.00', difficulty: '하' },
+  { correct_rate: '89.00', difficulty: '중하' },
+  { correct_rate: '69.00', difficulty: '중' },
+  { correct_rate: '75.00', difficulty: '중' }
+]
+Counts: { total: '42801', has_cr: '42801', has_diff: '42801' }

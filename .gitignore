@@ -17,3 +17,4 @@ frontend/out/
 # Environment files
 .env.production.local
 
+nul

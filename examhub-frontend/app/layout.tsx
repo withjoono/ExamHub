@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Noto_Sans_KR } from "next/font/google"
 import "@/styles/globals.css"
+import { SSOListener } from "@/components/auth/sso-listener"
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={`${notoSansKR.variable} font-sans antialiased`}>
+        <SSOListener />
         {children}
       </body>
     </html>

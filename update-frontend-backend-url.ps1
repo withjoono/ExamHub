@@ -70,3 +70,18 @@ Write-Host "  API 문서: $BackendUrl/api-docs" -ForegroundColor White
 Write-Host ""
 Write-Host "✅ 전체 배포가 완료되었습니다!" -ForegroundColor Green
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

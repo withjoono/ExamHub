@@ -20,8 +20,8 @@ export function getStudentId(): number {
     return Number(stored);
   }
 
-  // 새 ID 생성 (timestamp 기반)
-  const newId = Date.now();
+  // 새 ID 생성 (기본 테스트 학생 ID)
+  const newId = 1;
   localStorage.setItem(STUDENT_ID_KEY, String(newId));
   return newId;
 }

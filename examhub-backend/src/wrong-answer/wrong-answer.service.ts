@@ -23,12 +23,20 @@ export class WrongAnswerService {
   async gradeAnswers(dto: WrongAnswerGradeDto): Promise<GradeResultResponseDto> {
     const { studentId, mockExamId, subjectAreaName, subjectName, answers } = dto;
 
-    // 학생 확인
-    const student = await this.prisma.student.findUnique({
+    // 학생 확인 (없으면 자동 생성)
+    let student = await this.prisma.student.findUnique({
       where: { id: studentId },
     });
     if (!student) {
-      throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
+      // 학생이 없으면 자동 생성
+      student = await this.prisma.student.create({
+        data: {
+          id: studentId,
+          studentId: `student_${studentId}`,
+          year: new Date().getFullYear(),
+          name: `학생${studentId}`,
+        },
+      });
     }
 
     // 모의고사 확인

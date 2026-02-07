@@ -391,3 +391,25 @@ model StudentAnswer {
   @@index([studentId, subjectAreaName])
   @@map("eh_student_answers")
 }
+
+model MockAnswer {
+  id             Int      @id @default(autoincrement())
+  grade          String?  @map("grade") @db.VarChar(10)
+  examName       String?  @map("exam_name") @db.VarChar(100)
+  subject        String?  @map("subject") @db.VarChar(50)
+  subjectDetail  String?  @map("subject_detail") @db.VarChar(50)
+  questionNumber Int?     @map("question_number")
+  answer         Int?
+  difficulty     String?  @db.VarChar(10)
+  score          Int?
+  correctRate    String?  @map("correct_rate") @db.VarChar(10)
+  choiceRatio1   String?  @map("choice_ratio_1") @db.VarChar(10)
+  choiceRatio2   String?  @map("choice_ratio_2") @db.VarChar(10)
+  choiceRatio3   String?  @map("choice_ratio_3") @db.VarChar(10)
+  choiceRatio4   String?  @map("choice_ratio_4") @db.VarChar(10)
+  choiceRatio5   String?  @map("choice_ratio_5") @db.VarChar(10)
+
+  @@index([grade, examName])
+  @@index([subject, subjectDetail])
+  @@map("eh_mock_answer")
+}

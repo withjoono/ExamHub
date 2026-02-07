@@ -10,25 +10,18 @@ import {
   BookX,
   Zap,
   Users,
-  Trophy,
   Star,
   Crown,
   School,
   BookOpen,
-  PenTool,
-  Award,
-  ChevronRight,
-  Swords,
-  UserPlus
+  UserPlus,
+  ChevronRight
 } from "lucide-react"
 
 export default function MyExamPage() {
   const examTypes = [
     { title: "교육청/평가원/수능", description: "공식 모의고사 및 수능 성적 분석", icon: FileText, color: "bg-blue-500" },
     { title: "사설 모의고사", description: "메가스터디, 대성, 이투스 등 사설 모의고사", icon: BookOpen, color: "bg-purple-500" },
-    { title: "학원/과외 테스트", description: "학원 및 과외 시험 성적 관리", icon: PenTool, color: "bg-green-500" },
-    { title: "내신", description: "학교 내신 성적 분석 및 관리", icon: Award, color: "bg-orange-500" },
-    { title: "경쟁", description: "친구들과 함께하는 모의고사 배틀", icon: Swords, color: "bg-red-500" },
   ]
 
   const freeFeatures = [
@@ -36,14 +29,12 @@ export default function MyExamPage() {
     { title: "취약 범위 분석", description: "과목별 취약 단원 및 유형 자동 분석", icon: Target },
     { title: "성적 추이", description: "시험별 성적 변화 추이 그래프 제공", icon: TrendingUp },
     { title: "오답 관리", description: "틀린 문제 자동 저장 및 복습 관리", icon: BookX },
-    { title: "모의고사 배틀", description: "친구들과 점수 비교 및 랭킹 경쟁", icon: Swords },
   ]
 
   const premiumFeatures = [
     { title: "대학 예측", description: "성적 기반 합격 가능 대학 예측 서비스", icon: GraduationCap },
     { title: "오답 관리 프리미엄", description: "AI 기반 오답 분석 및 맞춤 학습 추천", icon: Star },
     { title: "목표 대학 비교", description: "목표 대학 등급컷과 내 성적 실시간 비교", icon: Target },
-    { title: "배틀 프리미엄", description: "전국 단위 랭킹 및 상위권 학생 비교 분석", icon: Trophy },
     { title: "마이 그룹", description: "스터디 그룹 생성 및 그룹 내 성적 비교", icon: Users },
   ]
 
@@ -55,11 +46,9 @@ export default function MyExamPage() {
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
             이젠 내가 푼 단 한문제도<br /><span className="text-[#7b1e7a]">버리는 일이 없도록!</span>
           </h2>
-          <p className="text-gray-600 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-            교육청, 평가원, 수능, 사설 모의고사부터 학원/과외 시험, 내신까지<br className="hidden md:block" />모든 시험을 한 곳에서 관리하고 분석하세요.
-          </p>
+
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16 max-w-2xl mx-auto">
           {examTypes.map((exam) => (
             <Link key={exam.title} href="/main/input" className="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-lg hover:shadow-gray-200/50 transition-all duration-300 hover:-translate-y-1 text-center cursor-pointer">
               <div className={`w-12 h-12 ${exam.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
@@ -80,7 +69,7 @@ export default function MyExamPage() {
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">기본 기능은 <span className="text-green-600">무료</span>로 제공됩니다</h3>
             <p className="text-gray-600">회원가입만 하면 바로 사용할 수 있어요</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {freeFeatures.map((feature) => (
               <div key={feature.title} className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
                 <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-green-200">
@@ -104,7 +93,7 @@ export default function MyExamPage() {
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">프리미엄 기능으로 <span className="text-[#7b1e7a]">성적 향상</span>을 경험하세요</h3>
             <p className="text-gray-600">더 정밀한 분석과 맞춤형 학습 추천을 제공합니다</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {premiumFeatures.map((feature) => (
               <div key={feature.title} className="bg-white rounded-2xl p-6 border border-[#7b1e7a]/20 hover:border-[#7b1e7a]/40 transition-colors shadow-sm">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#9c3d9a] to-[#5a1559] rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-[#d4a5d3]/30">

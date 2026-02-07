@@ -18,6 +18,7 @@ export default function MockExamFormPage() {
   const [mockExamId, setMockExamId] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [gradeResults, setGradeResults] = useState<any[]>([])
 
   // 모의고사 ID 조회
   useEffect(() => {
@@ -172,7 +173,8 @@ export default function MockExamFormPage() {
         answersBySubject[subject].push({ questionNumber, selectedAnswer })
       })
 
-      // 각 과목별로 API 호출
+      // 각 과목별로 API 호출 & 결과 수집
+      const allResults: any[] = []
       for (const [subjectAreaName, subjectAnswers] of Object.entries(answersBySubject)) {
         // 탐구 과목 처리
         let actualSubjectName: string | undefined
@@ -184,21 +186,20 @@ export default function MockExamFormPage() {
           actualSubjectName = secondForeignLanguage
         }
 
-        await api.post('/api/wrong-answers/grade', {
+        const res = await api.post<any>('/api/wrong-answers/grade', {
           studentId,
           mockExamId,
           subjectAreaName: subjectAreaName.replace('1', '').replace('2', ''), // 탐구1 -> 탐구
           subjectName: actualSubjectName,
           answers: subjectAnswers,
         })
+        if (res) {
+          allResults.push({ ...res, displayName: actualSubjectName || subjectAreaName })
+        }
       }
 
-      setSaveMessage({ type: 'success', text: '답안이 저장되었습니다!' })
-
-      // 3초 후 오답노트 페이지로 이동
-      setTimeout(() => {
-        router.push('/main/wrong-answers')
-      }, 2000)
+      setGradeResults(allResults)
+      setSaveMessage({ type: 'success', text: '채점이 완료되었습니다!' })
     } catch (error) {
       console.error('저장 실패:', error)
       setSaveMessage({ type: 'error', text: error instanceof Error ? error.message : '저장에 실패했습니다.' })
@@ -238,11 +239,10 @@ export default function MockExamFormPage() {
             <button
               key={option}
               onClick={() => handleAnswerSelect(questionNum, option)}
-              className={`w-10 h-10 rounded-full border-2 font-medium text-sm transition-colors ${
-                selectedAnswer === option
-                  ? "bg-[#7b1e7a] border-[#7b1e7a] text-white"
-                  : "bg-white border-gray-300 text-gray-700 hover:border-[#d4a5d3]"
-              }`}
+              className={`w-10 h-10 rounded-full border-2 font-medium text-sm transition-colors ${selectedAnswer === option
+                ? "bg-[#7b1e7a] border-[#7b1e7a] text-white"
+                : "bg-white border-gray-300 text-gray-700 hover:border-[#d4a5d3]"
+                }`}
             >
               {option}
             </button>
@@ -264,11 +264,10 @@ export default function MockExamFormPage() {
             <button
               key={option}
               onClick={() => handleAnswerSelect(questionNum, option)}
-              className={`w-10 h-10 rounded-full border-2 font-medium text-sm transition-colors ${
-                selectedAnswer === option
-                  ? "bg-[#7b1e7a] border-[#7b1e7a] text-white"
-                  : "bg-white border-gray-300 text-gray-700 hover:border-[#d4a5d3]"
-              }`}
+              className={`w-10 h-10 rounded-full border-2 font-medium text-sm transition-colors ${selectedAnswer === option
+                ? "bg-[#7b1e7a] border-[#7b1e7a] text-white"
+                : "bg-white border-gray-300 text-gray-700 hover:border-[#d4a5d3]"
+                }`}
             >
               {option}
             </button>
@@ -521,11 +520,10 @@ export default function MockExamFormPage() {
                   <button
                     key={subject}
                     onClick={() => setSelectedSubject(subject)}
-                    className={`w-full text-left px-4 py-3 mb-2 rounded-md text-sm font-medium transition-colors ${
-                      selectedSubject === subject
-                        ? "bg-[#f3e8f3] text-[#7b1e7a] border border-[#d4a5d3]"
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
-                    }`}
+                    className={`w-full text-left px-4 py-3 mb-2 rounded-md text-sm font-medium transition-colors ${selectedSubject === subject
+                      ? "bg-[#f3e8f3] text-[#7b1e7a] border border-[#d4a5d3]"
+                      : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      }`}
                   >
                     {subject}
                   </button>
@@ -564,15 +562,73 @@ export default function MockExamFormPage() {
                   )}
                 </div>
 
-                {/* Save Button */}
+                {/* Save Button & Results */}
                 <div className="mt-8 space-y-4">
+                  {/* 채점 결과 */}
+                  {gradeResults.length > 0 && (
+                    <div className="bg-gradient-to-r from-[#f3e8f3] to-[#e8f0fe] rounded-lg p-6 border border-[#d4a5d3]">
+                      <h3 className="text-xl font-bold text-[#7b1e7a] mb-4">📊 채점 결과</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {gradeResults.map((result, idx) => (
+                          <div key={idx} className="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                              {result.displayName}
+                              {result.subjectName && <span className="text-sm text-gray-500 ml-1">({result.subjectName})</span>}
+                            </h4>
+                            <div className="flex items-center gap-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-[#7b1e7a]">
+                                  {result.correctCount}/{result.totalQuestions}
+                                </div>
+                                <div className="text-xs text-gray-500">정답</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">
+                                  {result.earnedScore}/{result.totalScore}
+                                </div>
+                                <div className="text-xs text-gray-500">점수</div>
+                              </div>
+                              <div className="text-center">
+                                <div className={`text-2xl font-bold ${result.correctRate >= 80 ? 'text-green-600' :
+                                  result.correctRate >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                  }`}>
+                                  {result.correctRate}%
+                                </div>
+                                <div className="text-xs text-gray-500">정답률</div>
+                              </div>
+                            </div>
+                            {result.wrongCount > 0 && (
+                              <div className="mt-3 text-sm text-red-600">
+                                오답: {result.results?.filter((r: any) => !r.isCorrect).map((r: any) => `${r.questionNumber}번`).join(', ')}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex justify-center">
+                        <button
+                          onClick={() => router.push('/main/wrong-answers')}
+                          className="px-6 py-2 bg-[#7b1e7a] text-white rounded-md hover:bg-[#5a165a] transition-colors"
+                        >
+                          오답노트 보기 →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* 상태 메시지 */}
-                  {saveMessage && (
-                    <div className={`p-4 rounded-md ${
-                      saveMessage.type === 'success'
-                        ? 'bg-green-100 text-green-800 border border-green-300'
-                        : 'bg-red-100 text-red-800 border border-red-300'
-                    }`}>
+                  {saveMessage && gradeResults.length === 0 && (
+                    <div className={`p-4 rounded-md ${saveMessage.type === 'success'
+                      ? 'bg-green-100 text-green-800 border border-green-300'
+                      : 'bg-red-100 text-red-800 border border-red-300'
+                      }`}>
+                      {saveMessage.text}
+                    </div>
+                  )}
+
+                  {/* 에러 메시지 */}
+                  {saveMessage?.type === 'error' && (
+                    <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-300">
                       {saveMessage.text}
                     </div>
                   )}
@@ -591,19 +647,20 @@ export default function MockExamFormPage() {
                     </div>
                   )}
 
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving || !isLoggedIn}
-                      className={`px-8 py-3 rounded-md font-medium transition-colors ${
-                        isSaving || !isLoggedIn
+                  {gradeResults.length === 0 && (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaving || !isLoggedIn}
+                        className={`px-8 py-3 rounded-md font-medium transition-colors ${isSaving || !isLoggedIn
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-[#7b1e7a] hover:bg-[#5a165a] text-white'
-                      }`}
-                    >
-                      {isSaving ? '저장 중...' : '저장하기'}
-                    </button>
-                  </div>
+                          }`}
+                      >
+                        {isSaving ? '채점 중...' : '채점하기'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

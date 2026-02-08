@@ -1,15 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { api } from "@/lib/api/client"
+import { getUser, type User } from "@/lib/auth/user"
 
 export default function ScoreInputPage() {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<"raw" | "standard">("raw")
+  const [user, setUser] = useState<User | null>(null)
+  const [mockExamId, setMockExamId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const [grade1StandardScores, setGrade1StandardScores] = useState({
     korean: "",
@@ -79,6 +84,94 @@ export default function ScoreInputPage() {
   const grade = searchParams.get("grade") || ""
   const month = searchParams.get("month") || ""
 
+  // 초기 데이터 로드 (사용자 & 모의고사 ID 검사)
+  useEffect(() => {
+    async function init() {
+      // 1. 사용자 정보
+      const userData = await getUser()
+      setUser(userData)
+
+      // 2. 모의고사 ID 확인 및 성적 조회
+      if (year && grade && month) {
+        try {
+          const res = await api.get<any>(
+            `/api/mock-exams/check?year=${year}&grade=${grade}&month=${month}`
+          )
+          if (res && res.exists && res.mockExam) {
+            const mId = res.mockExam.id
+            setMockExamId(mId)
+            console.log("Mock Exam Found:", mId)
+
+            // 기존 성적 조회
+            if (userData) {
+              try {
+                const scoreRes = await api.get<any>(`/api/scores/student/${userData.id}/exam/${mId}`)
+                if (scoreRes && scoreRes.data) {
+                  const s = scoreRes.data
+                  console.log("Found existing score:", s)
+
+                  if (grade === "고1") {
+                    setGrade1Scores({
+                      korean: s.koreanRaw?.toString() || "",
+                      math: s.mathRaw?.toString() || "",
+                      english: s.englishRaw?.toString() || "",
+                      koreanHistory: s.historyRaw?.toString() || "",
+                      integratedScience: s.inquiry1Raw?.toString() || "",
+                      integratedSocial: s.inquiry2Raw?.toString() || "",
+                    })
+                    setGrade1StandardScores({
+                      korean: s.koreanStandard?.toString() || "",
+                      koreanGrade: s.koreanGrade?.toString() || "",
+                      koreanPercentile: s.koreanPercentile?.toString() || "",
+                      math: s.mathStandard?.toString() || "",
+                      mathGrade: s.mathGrade?.toString() || "",
+                      mathPercentile: s.mathPercentile?.toString() || "",
+                      english: "",
+                      englishGrade: s.englishGrade?.toString() || "",
+                      koreanHistory: "",
+                      koreanHistoryGrade: s.historyGrade?.toString() || "",
+                      integratedScience: "",
+                      integratedScienceGrade: s.inquiry1Grade?.toString() || "",
+                      integratedSciencePercentile: s.inquiry1Percentile?.toString() || "",
+                      integratedSocial: "",
+                      integratedSocialGrade: s.inquiry2Grade?.toString() || "",
+                      integratedSocialPercentile: s.inquiry2Percentile?.toString() || "",
+                    })
+                  } else if (grade === "고2") {
+                    setGrade2RawScores({
+                      korean: { raw: s.koreanRaw?.toString() || "", grade: s.koreanGrade?.toString() || "", percentile: s.koreanPercentile?.toString() || "" },
+                      math: { raw: s.mathRaw?.toString() || "", grade: s.mathGrade?.toString() || "", percentile: s.mathPercentile?.toString() || "" },
+                      english: { grade: s.englishGrade?.toString() || "" },
+                      koreanHistory: { grade: s.historyGrade?.toString() || "" },
+                      inquiry1: { subject: s.inquiry1Selection || "", raw: s.inquiry1Raw?.toString() || "", grade: s.inquiry1Grade?.toString() || "", percentile: s.inquiry1Percentile?.toString() || "" },
+                      inquiry2: { subject: s.inquiry2Selection || "", raw: s.inquiry2Raw?.toString() || "", grade: s.inquiry2Grade?.toString() || "", percentile: s.inquiry2Percentile?.toString() || "" },
+                    })
+                    setGrade2StandardScores({
+                      korean: { raw: s.koreanStandard?.toString() || "" },
+                      math: { raw: s.mathStandard?.toString() || "" },
+                      english: { raw: s.englishRaw?.toString() || "" }, // Note: Grade 2 Standard State usually only has raw field in this UI
+                      koreanHistory: { raw: s.historyRaw?.toString() || "" },
+                      inquiry1: { subject: s.inquiry1Selection || "", raw: s.inquiry1Standard?.toString() || "" },
+                      inquiry2: { subject: s.inquiry2Selection || "", raw: s.inquiry2Standard?.toString() || "" },
+                    })
+                  }
+                }
+              } catch (err) {
+                console.log("No existing score found or error:", err)
+              }
+            }
+
+          } else {
+            console.warn("Mock Exam not found for:", { year, grade, month })
+          }
+        } catch (e) {
+          console.error("Failed to check mock exam:", e)
+        }
+      }
+    }
+    init()
+  }, [year, grade, month])
+
   const handleGrade1ScoreChange = (subject: string, value: string) => {
     setGrade1Scores((prev) => ({
       ...prev,
@@ -145,23 +238,37 @@ export default function ScoreInputPage() {
     })
   }
 
-  const handleSubmit = () => {
-    if (grade === "고1") {
-      if (activeTab === "raw") {
-        console.log("고1 원점수 입력:", grade1Scores)
-      } else {
-        console.log("고1 표준점수 입력:", grade1StandardScores)
+  // 성적 제출 헬퍼 함수
+  const submitScore = async (payload: any) => {
+    if (!mockExamId) {
+      alert("모의고사 정보를 찾을 수 없어 저장할 수 없습니다.\n올바른 경로로 접근했는지 확인해주세요.")
+      return
+    }
+    if (!user) {
+      alert("로그인이 필요합니다.")
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const data = {
+        studentId: user.id,
+        mockExamId: mockExamId,
+        ...payload
       }
-    } else if (grade === "고2") {
-      if (activeTab === "raw") {
-        console.log("고2 표준점수 입력:", grade2StandardScores)
-      } else {
-        console.log("고2 원점수 입력:", grade2RawScores)
-      }
-    } else {
-      console.log("원점수 입력:", rawScores)
+      console.log("Sending score payload:", data)
+      await api.post('/api/scores', data)
+      alert("성적이 성공적으로 저장되었습니다.")
+    } catch (e) {
+      console.error("Score save failed:", e)
+      alert("성적 저장에 실패했습니다. " + (e instanceof Error ? e.message : ""))
+    } finally {
+      setIsLoading(false)
     }
   }
+
+  // Legacy handleSubmit removed
+
 
   const Grade2RawScoreInput = () => (
     <div className="space-y-6">
@@ -442,8 +549,24 @@ export default function ScoreInputPage() {
       <div className="flex gap-4 justify-center mt-8">
         <Button
           onClick={() => {
-            console.log("고2 원점수 입력 저장:", grade2RawScores)
-            alert("성적이 저장되었습니다.")
+            submitScore({
+              koreanRaw: Number(grade2RawScores.korean.raw) || 0,
+              koreanGrade: Number(grade2RawScores.korean.grade) || 0,
+              koreanPercentile: Number(grade2RawScores.korean.percentile) || 0,
+              mathRaw: Number(grade2RawScores.math.raw) || 0,
+              mathGrade: Number(grade2RawScores.math.grade) || 0,
+              mathPercentile: Number(grade2RawScores.math.percentile) || 0,
+              englishGrade: Number(grade2RawScores.english.grade) || 0,
+              historyGrade: Number(grade2RawScores.koreanHistory.grade) || 0,
+              inquiry1Selection: grade2RawScores.inquiry1.subject || undefined,
+              inquiry1Raw: Number(grade2RawScores.inquiry1.raw) || 0,
+              inquiry1Grade: Number(grade2RawScores.inquiry1.grade) || 0,
+              inquiry1Percentile: Number(grade2RawScores.inquiry1.percentile) || 0,
+              inquiry2Selection: grade2RawScores.inquiry2.subject || undefined,
+              inquiry2Raw: Number(grade2RawScores.inquiry2.raw) || 0,
+              inquiry2Grade: Number(grade2RawScores.inquiry2.grade) || 0,
+              inquiry2Percentile: Number(grade2RawScores.inquiry2.percentile) || 0,
+            })
           }}
           className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2"
         >
@@ -646,8 +769,16 @@ export default function ScoreInputPage() {
       <div className="flex gap-4 justify-center mt-8">
         <Button
           onClick={() => {
-            console.log("고2 표준점수 입력 저장:", grade2StandardScores)
-            alert("성적이 저장되었습니다.")
+            submitScore({
+              koreanRaw: Number(grade2StandardScores.korean.raw) || 0,
+              mathRaw: Number(grade2StandardScores.math.raw) || 0,
+              englishRaw: Number(grade2StandardScores.english.raw) || 0,
+              historyRaw: Number(grade2StandardScores.koreanHistory.raw) || 0,
+              inquiry1Selection: grade2StandardScores.inquiry1.subject || undefined,
+              inquiry1Raw: Number(grade2StandardScores.inquiry1.raw) || 0,
+              inquiry2Selection: grade2StandardScores.inquiry2.subject || undefined,
+              inquiry2Raw: Number(grade2StandardScores.inquiry2.raw) || 0,
+            })
           }}
           className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2"
         >
@@ -804,8 +935,16 @@ export default function ScoreInputPage() {
       <div className="flex gap-3 justify-center pt-6">
         <Button
           onClick={() => {
-            console.log("[v0] Saving Grade 1 raw scores:", grade1Scores)
-            alert("원점수가 저장되었습니다.")
+            submitScore({
+              koreanRaw: Number(grade1Scores.korean) || 0,
+              mathRaw: Number(grade1Scores.math) || 0,
+              englishRaw: Number(grade1Scores.english) || 0,
+              historyRaw: Number(grade1Scores.koreanHistory) || 0,
+              inquiry1Selection: "통합과학",
+              inquiry1Raw: Number(grade1Scores.integratedScience) || 0,
+              inquiry2Selection: "통합사회",
+              inquiry2Raw: Number(grade1Scores.integratedSocial) || 0,
+            })
           }}
           className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-8"
         >
@@ -1058,8 +1197,22 @@ export default function ScoreInputPage() {
       <div className="flex gap-3 justify-center pt-6">
         <Button
           onClick={() => {
-            console.log("[v0] Saving Grade 1 standard scores:", grade1StandardScores)
-            alert("표준점수가 저장되었습니다.")
+            submitScore({
+              koreanStandard: Number(grade1StandardScores.korean) || 0,
+              koreanGrade: Number(grade1StandardScores.koreanGrade) || 0,
+              koreanPercentile: Number(grade1StandardScores.koreanPercentile) || 0,
+              mathStandard: Number(grade1StandardScores.math) || 0,
+              mathGrade: Number(grade1StandardScores.mathGrade) || 0,
+              mathPercentile: Number(grade1StandardScores.mathPercentile) || 0,
+              englishGrade: Number(grade1StandardScores.englishGrade) || 0,
+              historyGrade: Number(grade1StandardScores.koreanHistoryGrade) || 0,
+              inquiry1Selection: "통합과학",
+              inquiry1Grade: Number(grade1StandardScores.integratedScienceGrade) || 0,
+              inquiry1Percentile: Number(grade1StandardScores.integratedSciencePercentile) || 0,
+              inquiry2Selection: "통합사회",
+              inquiry2Grade: Number(grade1StandardScores.integratedSocialGrade) || 0,
+              inquiry2Percentile: Number(grade1StandardScores.integratedSocialPercentile) || 0,
+            })
           }}
           className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-8"
         >
@@ -1122,6 +1275,28 @@ export default function ScoreInputPage() {
         subject1: "",
       },
     })
+
+    // Load detailed scores for Grade 3 Standard
+    useEffect(() => {
+      if (user && mockExamId) {
+        api.get<any>(`/api/scores/student/${user.id}/exam/${mockExamId}`)
+          .then(res => {
+            if (res && res.data) {
+              const s = res.data
+              setStandardScores({
+                korean: { standard: s.koreanStandard?.toString() || "", grade: s.koreanGrade?.toString() || "", percentile: s.koreanPercentile?.toString() || "" },
+                math: { standard: s.mathStandard?.toString() || "", grade: s.mathGrade?.toString() || "", percentile: s.mathPercentile?.toString() || "" },
+                english: { grade: s.englishGrade?.toString() || "" },
+                koreanHistory: { grade: s.historyGrade?.toString() || "" },
+                inquiry1: { subject: s.inquiry1Selection || "", standard: s.inquiry1Standard?.toString() || "", grade: s.inquiry1Grade?.toString() || "", percentile: s.inquiry1Percentile?.toString() || "" },
+                inquiry2: { subject: s.inquiry2Selection || "", standard: s.inquiry2Standard?.toString() || "", grade: s.inquiry2Grade?.toString() || "", percentile: s.inquiry2Percentile?.toString() || "" },
+                secondLanguage: { category: s.foreignSelection || "", subject1: s.foreignGrade?.toString() || "" },
+              })
+            }
+          })
+          .catch(e => console.log("G3 Std fetch error (ignored)", e))
+      }
+    }, [user, mockExamId])
 
     const inquirySubjects = [
       "물리학I",
@@ -1400,10 +1575,10 @@ export default function ScoreInputPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-            <Select
-              value={standardScores.inquiry2.subject}
-              onValueChange={(value) => handleStandardScoreChange("inquiry2", "subject", value)}
-            >
+              <Select
+                value={standardScores.inquiry2.subject}
+                onValueChange={(value) => handleStandardScoreChange("inquiry2", "subject", value)}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="과목을 선택하세요" />
                 </SelectTrigger>
@@ -1503,8 +1678,26 @@ export default function ScoreInputPage() {
         <div className="flex gap-4 justify-center mt-8">
           <Button
             onClick={() => {
-              console.log("고3 표준점수 입력 저장:", standardScores)
-              alert("성적이 저장되었습니다.")
+              submitScore({
+                koreanStandard: Number(standardScores.korean.standard) || 0,
+                koreanGrade: Number(standardScores.korean.grade) || 0,
+                koreanPercentile: Number(standardScores.korean.percentile) || 0,
+                mathStandard: Number(standardScores.math.standard) || 0,
+                mathGrade: Number(standardScores.math.grade) || 0,
+                mathPercentile: Number(standardScores.math.percentile) || 0,
+                englishGrade: Number(standardScores.english.grade) || 0,
+                historyGrade: Number(standardScores.koreanHistory.grade) || 0,
+                inquiry1Selection: standardScores.inquiry1.subject || undefined,
+                inquiry1Standard: Number(standardScores.inquiry1.standard) || 0,
+                inquiry1Grade: Number(standardScores.inquiry1.grade) || 0,
+                inquiry1Percentile: Number(standardScores.inquiry1.percentile) || 0,
+                inquiry2Selection: standardScores.inquiry2.subject || undefined,
+                inquiry2Standard: Number(standardScores.inquiry2.standard) || 0,
+                inquiry2Grade: Number(standardScores.inquiry2.grade) || 0,
+                inquiry2Percentile: Number(standardScores.inquiry2.percentile) || 0,
+                foreignSelection: standardScores.secondLanguage.category === "기타" ? "기타" : standardScores.secondLanguage.category || undefined,
+                foreignGrade: Number(standardScores.secondLanguage.subject1) || 0,
+              })
             }}
             className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2"
           >
@@ -1537,6 +1730,28 @@ export default function ScoreInputPage() {
         category: "",
       },
     })
+
+    // Load detailed scores for Grade 3 Raw
+    useEffect(() => {
+      if (user && mockExamId) {
+        api.get<any>(`/api/scores/student/${user.id}/exam/${mockExamId}`)
+          .then(res => {
+            if (res && res.data) {
+              const s = res.data
+              setRawScores({
+                korean: { raw: s.koreanRaw?.toString() || "", selectedSubject: s.koreanSelection || "화법과 작문" },
+                math: { raw: s.mathRaw?.toString() || "", selectedSubject: s.mathSelection || "확률과 통계" },
+                english: { raw: s.englishRaw?.toString() || "" },
+                koreanHistory: { raw: s.historyRaw?.toString() || "" },
+                inquiry1: { subject: s.inquiry1Selection || "", raw: s.inquiry1Raw?.toString() || "" },
+                inquiry2: { subject: s.inquiry2Selection || "", raw: s.inquiry2Raw?.toString() || "" },
+                secondLanguage: { category: s.foreignSelection || "" },
+              })
+            }
+          })
+          .catch(e => console.log("G3 Raw fetch error (ignored)", e))
+      }
+    }, [user, mockExamId])
 
     const inquirySubjects = [
       "물리학I",
@@ -1741,10 +1956,10 @@ export default function ScoreInputPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-            <Select
-              value={rawScores.inquiry1.subject}
-              onValueChange={(value) => handleRawScoreChange("inquiry1", "subject", value)}
-            >
+              <Select
+                value={rawScores.inquiry1.subject}
+                onValueChange={(value) => handleRawScoreChange("inquiry1", "subject", value)}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="과목을 선택하세요" />
                 </SelectTrigger>
@@ -1786,10 +2001,10 @@ export default function ScoreInputPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-            <Select
-              value={rawScores.inquiry2.subject}
-              onValueChange={(value) => handleRawScoreChange("inquiry2", "subject", value)}
-            >
+              <Select
+                value={rawScores.inquiry2.subject}
+                onValueChange={(value) => handleRawScoreChange("inquiry2", "subject", value)}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="과목을 선택하세요" />
                 </SelectTrigger>
@@ -1854,8 +2069,20 @@ export default function ScoreInputPage() {
         <div className="flex gap-4 justify-center mt-8">
           <Button
             onClick={() => {
-              console.log("고3 원점수 입력 저장:", rawScores)
-              alert("성적이 저장되었습니다.")
+              submitScore({
+                koreanRaw: Number(rawScores.korean.raw) || 0,
+                koreanSelection: rawScores.korean.selectedSubject || undefined,
+                mathRaw: Number(rawScores.math.raw) || 0,
+                mathSelection: rawScores.math.selectedSubject || undefined,
+                englishRaw: Number(rawScores.english.raw) || 0,
+                historyRaw: Number(rawScores.koreanHistory.raw) || 0,
+                inquiry1Selection: rawScores.inquiry1.subject || undefined,
+                inquiry1Raw: Number(rawScores.inquiry1.raw) || 0,
+                inquiry2Selection: rawScores.inquiry2.subject || undefined,
+                inquiry2Raw: Number(rawScores.inquiry2.raw) || 0,
+                foreignSelection: rawScores.secondLanguage.category || undefined,
+                // foreignRaw logic missing in state, skipping
+              })
             }}
             className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2"
           >
@@ -1942,17 +2169,15 @@ export default function ScoreInputPage() {
               <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
                 <button
                   onClick={() => setActiveTab("raw")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === "raw" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === "raw" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   원점수 입력
                 </button>
                 <button
                   onClick={() => setActiveTab("standard")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === "standard" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                  }`}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === "standard" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                    }`}
                 >
                   표준점수 입력
                 </button>

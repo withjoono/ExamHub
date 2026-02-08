@@ -126,6 +126,78 @@ export class WrongAnswerService {
       });
     }
 
+    // 성적 테이블(eh_student_scores) 업데이트
+    // 현재 과목(Area)에 따라 점수 필드 매핑
+    const scoreUpdateData: any = {};
+
+    // 과목별 점수 매핑 로직
+    // 국어(Korean) -> koreanRaw
+    // 수학(Math) -> mathRaw
+    // 영어(English) -> englishRaw (절대평가 등급은 별도 계산 필요하지만 일단 원점수 저장)
+    // 한국사(History) -> historyRaw
+    // 탐구(Inquiry) -> inquiry1Raw / inquiry2Raw (선택과목명으로 구분 필요)
+
+    if (subjectAreaName === '국어') {
+      scoreUpdateData.koreanRaw = earnedScore;
+      if (dto.subjectName) scoreUpdateData.koreanSelection = dto.subjectName;
+    } else if (subjectAreaName === '수학') {
+      scoreUpdateData.mathRaw = earnedScore;
+      if (dto.subjectName) scoreUpdateData.mathSelection = dto.subjectName;
+    } else if (subjectAreaName === '영어') {
+      scoreUpdateData.englishRaw = earnedScore;
+    } else if (subjectAreaName === '한국사') {
+      scoreUpdateData.historyRaw = earnedScore;
+    } else if (subjectAreaName === '사회탐구' || subjectAreaName === '과학탐구') {
+      // 탐구는 1, 2 과목 구분 필요 -> 기존 점수 조회해서 비어있는 곳에 넣거나
+      // dto에 inquiryIndex가 있으면 좋겠지만, 지금은 subjectName으로 판단
+      // 지금은 단순하게: 기존 점수가 있으면 inquiry2, 없으면 inquiry1 (단, 같은 과목이면 덮어쓰기)
+
+      // 기존 점수 조회
+      const existingScore = await this.prisma.studentScore.findUnique({
+        where: {
+          studentId_mockExamId: {
+            studentId,
+            mockExamId,
+          },
+        },
+      });
+
+      if (existingScore) {
+        if (existingScore.inquiry1Selection === subjectName) {
+          scoreUpdateData.inquiry1Raw = earnedScore;
+          scoreUpdateData.inquiry1Selection = subjectName;
+        } else if (existingScore.inquiry2Selection === subjectName) {
+          scoreUpdateData.inquiry2Raw = earnedScore;
+          scoreUpdateData.inquiry2Selection = subjectName;
+        } else if (!existingScore.inquiry1Selection) {
+          scoreUpdateData.inquiry1Raw = earnedScore;
+          scoreUpdateData.inquiry1Selection = subjectName;
+        } else {
+          scoreUpdateData.inquiry2Raw = earnedScore;
+          scoreUpdateData.inquiry2Selection = subjectName;
+        }
+      } else {
+        scoreUpdateData.inquiry1Raw = earnedScore;
+        scoreUpdateData.inquiry1Selection = subjectName;
+      }
+    }
+
+    // 점수 저장 (upsert)
+    await this.prisma.studentScore.upsert({
+      where: {
+        studentId_mockExamId: {
+          studentId,
+          mockExamId,
+        },
+      },
+      update: scoreUpdateData,
+      create: {
+        studentId,
+        mockExamId,
+        ...scoreUpdateData,
+      },
+    });
+
     return {
       studentId,
       mockExamId,

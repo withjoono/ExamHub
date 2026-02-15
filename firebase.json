@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "examhub",
     "public": "examhub-frontend/out",
     "ignore": [
       "firebase.json",
@@ -21,21 +22,3 @@
     ]
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

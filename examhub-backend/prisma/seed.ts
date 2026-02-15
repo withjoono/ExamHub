@@ -396,12 +396,12 @@ async function main() {
   console.log(`✅ Created ${departments.length} departments`);
 
   // 6. 샘플 학생 데이터
-  const students = await Promise.all([
-    prisma.student.upsert({
-      where: { studentId: 'ST25000001' },
+  const members = await Promise.all([
+    prisma.member.upsert({
+      where: { memberId: 'ST25000001' },
       update: {},
       create: {
-        studentId: 'ST25000001',
+        memberId: 'ST25000001',
         year: 2025,
         schoolLevel: '고',
         schoolName: '경기고등학교',
@@ -414,11 +414,11 @@ async function main() {
         parentEmail: 'parent1@example.com',
       },
     }),
-    prisma.student.upsert({
-      where: { studentId: 'ST25000002' },
+    prisma.member.upsert({
+      where: { memberId: 'ST25000002' },
       update: {},
       create: {
-        studentId: 'ST25000002',
+        memberId: 'ST25000002',
         year: 2025,
         schoolLevel: '고',
         schoolName: '서울고등학교',
@@ -432,7 +432,7 @@ async function main() {
       },
     }),
   ]);
-  console.log(`✅ Created ${students.length} students`);
+  console.log(`✅ Created ${members.length} members`);
 
   console.log('✨ Seeding completed!');
 }

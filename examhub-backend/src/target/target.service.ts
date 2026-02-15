@@ -21,22 +21,22 @@ const MAX_TARGETS = 5;
 
 @Injectable()
 export class TargetService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * 목표 대학 목록 조회
    */
   async findByStudent(studentId: number): Promise<TargetListResponseDto> {
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
     const targets = await this.prisma.studentTarget.findMany({
-      where: { studentId },
+      where: { memberId: studentId },
       orderBy: { priority: 'asc' },
     });
 
@@ -63,7 +63,7 @@ export class TargetService {
 
       targetDtos.push({
         id: target.id,
-        studentId: target.studentId,
+        studentId: target.memberId,
         priority: target.priority,
         departmentCode: target.departmentCode || undefined,
         universityName,
@@ -88,11 +88,11 @@ export class TargetService {
     const { studentId, departmentId, priority = 1 } = createDto;
 
     // 학생 확인
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
@@ -108,7 +108,7 @@ export class TargetService {
 
     // 최대 개수 확인
     const existingCount = await this.prisma.studentTarget.count({
-      where: { studentId },
+      where: { memberId: studentId },
     });
 
     if (existingCount >= MAX_TARGETS) {
@@ -120,7 +120,7 @@ export class TargetService {
     // 중복 확인
     const existing = await this.prisma.studentTarget.findFirst({
       where: {
-        studentId,
+        memberId: studentId,
         departmentCode: department.code,
       },
     });
@@ -132,7 +132,7 @@ export class TargetService {
     // 생성
     const target = await this.prisma.studentTarget.create({
       data: {
-        studentId,
+        memberId: studentId,
         departmentCode: department.code,
         priority,
       },
@@ -140,7 +140,7 @@ export class TargetService {
 
     return {
       id: target.id,
-      studentId: target.studentId,
+      studentId: target.memberId,
       priority: target.priority,
       departmentCode: target.departmentCode || undefined,
       universityName: department.university?.name,
@@ -210,7 +210,7 @@ export class TargetService {
 
     return {
       id: updated.id,
-      studentId: updated.studentId,
+      studentId: updated.memberId,
       priority: updated.priority,
       departmentCode: updated.departmentCode || undefined,
       universityName,
@@ -244,16 +244,16 @@ export class TargetService {
     studentId: number,
     params?: ComparisonRequestDto,
   ): Promise<TargetComparisonResponseDto> {
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
     // 목표 대학 조회
-    const targetWhere: any = { studentId };
+    const targetWhere: any = { memberId: studentId };
     if (params?.targetId) {
       targetWhere.id = params.targetId;
     }
@@ -273,7 +273,7 @@ export class TargetService {
     }
 
     // 학생 점수 조회
-    const scoreWhere: any = { studentId };
+    const scoreWhere: any = { memberId: studentId };
     if (params?.startYear || params?.endYear) {
       scoreWhere.mockExam = {};
       if (params.startYear) {
@@ -369,8 +369,8 @@ export class TargetService {
       const avgScoreDiff =
         scoreDiffs.length > 0
           ? Math.round(
-              (scoreDiffs.reduce((a, b) => a + b, 0) / scoreDiffs.length) * 100,
-            ) / 100
+            (scoreDiffs.reduce((a, b) => a + b, 0) / scoreDiffs.length) * 100,
+          ) / 100
           : undefined;
 
       comparisons.push({

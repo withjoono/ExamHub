@@ -8,7 +8,7 @@ export class StudentAnswerDto {
   id: number;
 
   @ApiProperty({ description: '학생 ID' })
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ description: '모의고사 ID' })
   mockExamId: number;
@@ -84,7 +84,7 @@ export class WrongAnswerDetailDto extends StudentAnswerDto {
  */
 export class WrongAnswerListResponseDto {
   @ApiProperty({ description: '학생 ID' })
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ description: '오답 목록', type: [WrongAnswerDetailDto] })
   items: WrongAnswerDetailDto[];
@@ -127,7 +127,7 @@ export class GradeResultItemDto {
  */
 export class GradeResultResponseDto {
   @ApiProperty({ description: '학생 ID' })
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ description: '모의고사 ID' })
   mockExamId: number;
@@ -188,7 +188,7 @@ export class SubjectWrongStatDto {
  */
 export class WrongAnswerSummaryDto {
   @ApiProperty({ description: '학생 ID' })
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ description: '총 답안 수' })
   totalAnswers: number;
@@ -243,7 +243,7 @@ export class MockExamWrongStatDto {
  */
 export class WrongAnswerByExamResponseDto {
   @ApiProperty({ description: '학생 ID' })
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ description: '모의고사별 통계', type: [MockExamWrongStatDto] })
   exams: MockExamWrongStatDto[];

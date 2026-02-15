@@ -10,7 +10,7 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mockExamService: MockExamService,
-  ) {}
+  ) { }
 
   // Mock Exam CRUD
   async createMockExam(dto: CreateMockExamDto) {
@@ -167,7 +167,7 @@ export class AdminService {
       // Find existing score or create new one
       const existingScore = await this.prisma.studentScore.findFirst({
         where: {
-          studentId: dto.studentId,
+          memberId: dto.memberId,
           mockExamId: dto.mockExamId,
         },
       });
@@ -180,7 +180,7 @@ export class AdminService {
       } else {
         await this.prisma.studentScore.create({
           data: {
-            studentId: dto.studentId,
+            memberId: dto.memberId,
             mockExamId: dto.mockExamId,
             ...scoreData,
           },
@@ -215,7 +215,7 @@ export class AdminService {
     return this.prisma.studentScore.findMany({
       where: { mockExamId: examId },
       include: {
-        student: {
+        member: {
           select: {
             id: true,
             name: true,
@@ -231,7 +231,7 @@ export class AdminService {
   // Get grading status by student
   async getGradingByStudent(studentId: number) {
     return this.prisma.studentScore.findMany({
-      where: { studentId },
+      where: { memberId: studentId },
       include: {
         mockExam: {
           select: {

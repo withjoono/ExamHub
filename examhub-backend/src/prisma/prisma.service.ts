@@ -6,8 +6,7 @@ import { Pool } from 'pg';
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+  implements OnModuleInit, OnModuleDestroy {
   constructor() {
     // PostgreSQL 연결 풀 생성
     const connectionString = process.env.DATABASE_URL;
@@ -52,6 +51,6 @@ export class PrismaService
     await this.subjectArea.deleteMany();
     await this.mockExam.deleteMany();
     await this.mentoring.deleteMany();
-    await this.student.deleteMany();
+    await this.member.deleteMany();
   }
 }

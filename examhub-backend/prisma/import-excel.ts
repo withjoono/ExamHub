@@ -86,8 +86,8 @@ async function importStudents(data: unknown[]) {
     const email = String(row['학생이메일'] || '').trim() || null;
     const parentEmail = String(row['학부모이메일'] || '').trim() || null;
 
-    await prisma.student.upsert({
-      where: { studentId },
+    await prisma.member.upsert({
+      where: { memberId: studentId },
       update: {
         name,
         year,
@@ -101,7 +101,7 @@ async function importStudents(data: unknown[]) {
         parentEmail,
       },
       create: {
-        studentId,
+        memberId: studentId,
         name,
         year,
         schoolLevel,
@@ -301,8 +301,8 @@ async function importUniversitiesAndDepartments(data: unknown[]) {
 async function importStudentTargets(data: unknown[]) {
   console.log('🎯 Importing student targets...');
 
-  const students = await prisma.student.findMany();
-  const studentMap = new Map(students.map((s) => [s.studentId, s.id]));
+  const students = await prisma.member.findMany();
+  const studentMap = new Map(students.map((s) => [s.memberId, s.id]));
 
   let count = 0;
   for (const row of data as any[]) {
@@ -316,12 +316,12 @@ async function importStudentTargets(data: unknown[]) {
 
     // 기존 데이터 확인 후 생성
     const existing = await prisma.studentTarget.findFirst({
-      where: { studentId, departmentCode },
+      where: { memberId: studentId, departmentCode },
     });
 
     if (!existing) {
       await prisma.studentTarget.create({
-        data: { studentId, departmentCode, priority: count + 1 },
+        data: { memberId: studentId, departmentCode, priority: count + 1 },
       });
       count++;
     }

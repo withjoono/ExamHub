@@ -41,18 +41,18 @@ export class WrongAnswerController {
   @ApiOperation({ summary: '오답 목록 조회', description: '학생의 오답 목록을 필터링하여 조회합니다.' })
   @ApiResponse({ status: 200, description: '오답 목록', type: WrongAnswerListResponseDto })
   async findWrongAnswers(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId', ParseIntPipe) memberId: number,
     @Query() filter: FilterWrongAnswerDto,
   ) {
-    const data = await this.wrongAnswerService.findWrongAnswers(studentId, filter);
+    const data = await this.wrongAnswerService.findWrongAnswers(memberId, filter);
     return { success: true, data };
   }
 
   @Get('student/:studentId/summary')
   @ApiOperation({ summary: '오답 요약 통계', description: '학생의 오답 요약 통계를 조회합니다.' })
   @ApiResponse({ status: 200, description: '오답 요약', type: WrongAnswerSummaryDto })
-  async getSummary(@Param('studentId', ParseIntPipe) studentId: number) {
-    const data = await this.wrongAnswerService.getSummary(studentId);
+  async getSummary(@Param('studentId', ParseIntPipe) memberId: number) {
+    const data = await this.wrongAnswerService.getSummary(memberId);
     return { success: true, data };
   }
 

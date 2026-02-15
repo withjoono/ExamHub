@@ -17,7 +17,7 @@ import {
 
 @Injectable()
 export class StatisticsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * 성적 추이 조회
@@ -27,16 +27,16 @@ export class StatisticsService {
     params?: TrendRequestDto,
   ): Promise<TrendAnalysisDto> {
     // 학생 존재 확인
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
     // 점수 조회 (시간순 정렬)
-    const whereClause: any = { studentId };
+    const whereClause: any = { memberId: studentId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {
@@ -127,15 +127,15 @@ export class StatisticsService {
     studentId: number,
     params?: CumulativeRequestDto,
   ): Promise<CumulativeAnalysisDto> {
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
-    const whereClause: any = { studentId };
+    const whereClause: any = { memberId: studentId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {
@@ -230,15 +230,15 @@ export class StatisticsService {
     studentId: number,
     params?: SubjectAnalysisRequestDto,
   ): Promise<SubjectAnalysisResponseDto> {
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
 
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
-    const whereClause: any = { studentId };
+    const whereClause: any = { memberId: studentId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {

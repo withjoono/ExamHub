@@ -5,7 +5,7 @@ import { UpdateScoreDto } from './dto/update-score.dto';
 
 @Injectable()
 export class ScoreService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * 점수 저장 (upsert)
@@ -14,10 +14,10 @@ export class ScoreService {
     const { studentId, mockExamId, ...scoreData } = createScoreDto;
 
     // 학생 존재 확인
-    const student = await this.prisma.student.findUnique({
+    const member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
-    if (!student) {
+    if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
 
@@ -35,8 +35,8 @@ export class ScoreService {
     // Upsert 처리
     return this.prisma.studentScore.upsert({
       where: {
-        studentId_mockExamId: {
-          studentId,
+        memberId_mockExamId: {
+          memberId: studentId,
           mockExamId,
         },
       },
@@ -45,13 +45,13 @@ export class ScoreService {
         ...calculatedData,
       },
       create: {
-        studentId,
+        memberId: studentId,
         mockExamId,
         ...scoreData,
         ...calculatedData,
       },
       include: {
-        student: true,
+        member: true,
         mockExam: true,
       },
     });
@@ -95,7 +95,7 @@ export class ScoreService {
    */
   async findByStudent(studentId: number) {
     return this.prisma.studentScore.findMany({
-      where: { studentId },
+      where: { memberId: studentId },
       include: {
         mockExam: true,
       },
@@ -109,13 +109,13 @@ export class ScoreService {
   async findOne(studentId: number, mockExamId: number) {
     const score = await this.prisma.studentScore.findUnique({
       where: {
-        studentId_mockExamId: {
-          studentId,
+        memberId_mockExamId: {
+          memberId: studentId,
           mockExamId,
         },
       },
       include: {
-        student: true,
+        member: true,
         mockExam: true,
       },
     });
@@ -136,7 +136,7 @@ export class ScoreService {
     const score = await this.prisma.studentScore.findUnique({
       where: { id },
       include: {
-        student: true,
+        member: true,
         mockExam: true,
       },
     });
@@ -163,7 +163,7 @@ export class ScoreService {
         ...calculatedData,
       },
       include: {
-        student: true,
+        member: true,
         mockExam: true,
       },
     });
@@ -185,7 +185,7 @@ export class ScoreService {
    */
   async findLatestByStudent(studentId: number) {
     return this.prisma.studentScore.findFirst({
-      where: { studentId },
+      where: { memberId: studentId },
       include: {
         mockExam: true,
       },

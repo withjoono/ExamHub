@@ -6,9 +6,9 @@ datasource db {
   provider = "postgresql"
 }
 
-model Student {
+model Member {
   id                 Int                 @id @default(autoincrement())
-  studentId          String              @unique @map("student_id") @db.VarChar(20)
+  memberId           String              @unique @map("member_id") @db.VarChar(50)
   year               Int
   schoolLevel        String?             @map("school_level") @db.VarChar(10)
   schoolName         String?             @map("school_name") @db.VarChar(100)
@@ -26,9 +26,9 @@ model Student {
   scores             StudentScore[]
   targets            StudentTarget[]
 
-  @@index([studentId])
+  @@index([memberId])
   @@index([year, grade])
-  @@map("eh_students")
+  @@map("eh_auth_member")
 }
 
 model MockExam {
@@ -112,7 +112,7 @@ model ExamQuestion {
 
 model StudentScore {
   id                 Int      @id @default(autoincrement())
-  studentId          Int      @map("student_id")
+  memberId           Int      @map("student_id")
   mockExamId         Int      @map("mock_exam_id")
   koreanSelection    String?  @map("korean_selection") @db.VarChar(20)
   koreanRaw          Int?     @map("korean_raw")
@@ -148,23 +148,23 @@ model StudentScore {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
   mockExam           MockExam @relation(fields: [mockExamId], references: [id])
-  student            Student  @relation(fields: [studentId], references: [id])
+  member             Member   @relation(fields: [memberId], references: [id])
 
-  @@unique([studentId, mockExamId])
-  @@index([studentId])
+  @@unique([memberId, mockExamId])
+  @@index([memberId])
   @@index([mockExamId])
   @@map("eh_student_scores")
 }
 
 model StudentTarget {
   id             Int      @id @default(autoincrement())
-  studentId      Int      @map("student_id")
+  memberId       Int      @map("student_id")
   departmentCode String?  @map("department_code") @db.VarChar(20)
   priority       Int      @default(1)
   createdAt      DateTime @default(now()) @map("created_at")
-  student        Student  @relation(fields: [studentId], references: [id])
+  member         Member   @relation(fields: [memberId], references: [id])
 
-  @@index([studentId])
+  @@index([memberId])
   @@map("eh_student_targets")
 }
 
@@ -339,7 +339,7 @@ model Mentoring {
 model AchievementResult {
   id              Int       @id @default(autoincrement())
   resultId        String    @unique @map("result_id") @db.VarChar(30)
-  studentId       Int       @map("student_id")
+  memberId        Int       @map("student_id")
   missionId       String?   @map("mission_id") @db.VarChar(30)
   date            DateTime? @db.Date
   startTime       DateTime? @map("start_time") @db.Time(6)
@@ -355,16 +355,16 @@ model AchievementResult {
   score           Int?
   focusLevel      Decimal?  @map("focus_level") @db.Decimal(5, 2)
   createdAt       DateTime  @default(now()) @map("created_at")
-  student         Student   @relation(fields: [studentId], references: [id])
+  member          Member    @relation(fields: [memberId], references: [id])
 
-  @@index([studentId])
+  @@index([memberId])
   @@index([date])
   @@map("eh_achievement_results")
 }
 
 model StudentAnswer {
   id              Int          @id @default(autoincrement())
-  studentId       Int          @map("student_id")
+  memberId        Int          @map("student_id")
   mockExamId      Int          @map("mock_exam_id")
   examQuestionId  Int          @map("exam_question_id")
   subjectAreaName String?      @map("subject_area_name") @db.VarChar(50)
@@ -383,12 +383,12 @@ model StudentAnswer {
   updatedAt       DateTime     @updatedAt @map("updated_at")
   examQuestion    ExamQuestion @relation(fields: [examQuestionId], references: [id])
   mockExam        MockExam     @relation(fields: [mockExamId], references: [id])
-  student         Student      @relation(fields: [studentId], references: [id])
+  member          Member      @relation(fields: [memberId], references: [id])
 
-  @@unique([studentId, examQuestionId])
-  @@index([studentId, mockExamId])
-  @@index([studentId, isCorrect])
-  @@index([studentId, subjectAreaName])
+  @@unique([memberId, examQuestionId])
+  @@index([memberId, mockExamId])
+  @@index([memberId, isCorrect])
+  @@index([memberId, subjectAreaName])
   @@map("eh_student_answers")
 }
 

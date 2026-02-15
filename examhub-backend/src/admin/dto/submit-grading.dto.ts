@@ -22,7 +22,7 @@ export class AnswerDto {
 export class SubmitGradingDto {
   @ApiProperty({ example: 1, description: '학생 ID' })
   @IsNumber()
-  studentId: number;
+  memberId: number;
 
   @ApiProperty({ example: 1, description: '시험 ID' })
   @IsNumber()

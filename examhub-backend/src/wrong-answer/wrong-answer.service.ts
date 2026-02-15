@@ -24,15 +24,15 @@ export class WrongAnswerService {
     const { studentId, mockExamId, subjectAreaName, subjectName, answers } = dto;
 
     // 학생 확인 (없으면 자동 생성)
-    let student = await this.prisma.student.findUnique({
+    let member = await this.prisma.member.findUnique({
       where: { id: studentId },
     });
-    if (!student) {
+    if (!member) {
       // 학생이 없으면 자동 생성
-      student = await this.prisma.student.create({
+      member = await this.prisma.member.create({
         data: {
           id: studentId,
-          studentId: `student_${studentId}`,
+          memberId: `eh_${studentId}`,
           year: new Date().getFullYear(),
           name: `학생${studentId}`,
         },
@@ -94,7 +94,7 @@ export class WrongAnswerService {
       });
 
       answersToUpsert.push({
-        studentId,
+        studentId, // Note: This will be mapped to memberId in create
         mockExamId,
         examQuestionId: question.id,
         subjectAreaName: question.subjectAreaName,
@@ -112,8 +112,8 @@ export class WrongAnswerService {
     for (const answerData of answersToUpsert) {
       await this.prisma.studentAnswer.upsert({
         where: {
-          studentId_examQuestionId: {
-            studentId: answerData.studentId,
+          memberId_examQuestionId: {
+            memberId: answerData.studentId,
             examQuestionId: answerData.examQuestionId,
           },
         },
@@ -122,7 +122,10 @@ export class WrongAnswerService {
           isCorrect: answerData.isCorrect,
           earnedScore: answerData.earnedScore,
         },
-        create: answerData,
+        create: {
+          ...answerData,
+          memberId: answerData.studentId,
+        },
       });
     }
 
@@ -155,8 +158,8 @@ export class WrongAnswerService {
       // 기존 점수 조회
       const existingScore = await this.prisma.studentScore.findUnique({
         where: {
-          studentId_mockExamId: {
-            studentId,
+          memberId_mockExamId: {
+            memberId: studentId,
             mockExamId,
           },
         },
@@ -185,21 +188,21 @@ export class WrongAnswerService {
     // 점수 저장 (upsert)
     await this.prisma.studentScore.upsert({
       where: {
-        studentId_mockExamId: {
-          studentId,
+        memberId_mockExamId: {
+          memberId: studentId,
           mockExamId,
         },
       },
       update: scoreUpdateData,
       create: {
-        studentId,
+        memberId: studentId,
         mockExamId,
         ...scoreUpdateData,
       },
     });
 
     return {
-      studentId,
+      memberId: studentId,
       mockExamId,
       subjectAreaName,
       subjectName,
@@ -225,7 +228,7 @@ export class WrongAnswerService {
     const skip = (page - 1) * limit;
 
     // 필터 조건 구성
-    const where: any = { studentId };
+    const where: any = { memberId: studentId };
 
     if (filter.mockExamId) {
       where.mockExamId = filter.mockExamId;
@@ -276,7 +279,7 @@ export class WrongAnswerService {
     // 응답 형식으로 변환
     const items: WrongAnswerDetailDto[] = answers.map((a) => ({
       id: a.id,
-      studentId: a.studentId,
+      memberId: a.memberId,
       mockExamId: a.mockExamId,
       examQuestionId: a.examQuestionId,
       subjectAreaName: a.subjectAreaName || undefined,
@@ -300,7 +303,7 @@ export class WrongAnswerService {
     }));
 
     return {
-      studentId,
+      memberId: studentId,
       items,
       totalCount,
       page,
@@ -316,7 +319,7 @@ export class WrongAnswerService {
     const answer = await this.prisma.studentAnswer.findUnique({
       where: { id },
       include: {
-        student: true,
+        member: true,
         mockExam: true,
         examQuestion: true,
       },
@@ -374,39 +377,39 @@ export class WrongAnswerService {
   async getSummary(studentId: number): Promise<WrongAnswerSummaryDto> {
     // 전체 통계
     const totalAnswers = await this.prisma.studentAnswer.count({
-      where: { studentId },
+      where: { memberId: studentId },
     });
 
     const correctCount = await this.prisma.studentAnswer.count({
-      where: { studentId, isCorrect: true },
+      where: { memberId: studentId, isCorrect: true },
     });
 
     const wrongCount = totalAnswers - correctCount;
 
     const bookmarkedCount = await this.prisma.studentAnswer.count({
-      where: { studentId, isBookmarked: true },
+      where: { memberId: studentId, isBookmarked: true },
     });
 
     const needReviewCount = await this.prisma.studentAnswer.count({
-      where: { studentId, isCorrect: false, reviewCount: 0 },
+      where: { memberId: studentId, isCorrect: false, reviewCount: 0 },
     });
 
     // 과목별 통계
     const bySubjectRaw = await this.prisma.studentAnswer.groupBy({
       by: ['subjectAreaName', 'subjectName'],
-      where: { studentId },
+      where: { memberId: studentId },
       _count: { id: true },
     });
 
     const bySubjectWrong = await this.prisma.studentAnswer.groupBy({
       by: ['subjectAreaName', 'subjectName'],
-      where: { studentId, isCorrect: false },
+      where: { memberId: studentId, isCorrect: false },
       _count: { id: true },
     });
 
     const bySubjectNeedReview = await this.prisma.studentAnswer.groupBy({
       by: ['subjectAreaName', 'subjectName'],
-      where: { studentId, isCorrect: false, reviewCount: 0 },
+      where: { memberId: studentId, isCorrect: false, reviewCount: 0 },
       _count: { id: true },
     });
 
@@ -418,7 +421,7 @@ export class WrongAnswerService {
       subjectMap.set(key, {
         subjectAreaName: item.subjectAreaName || '미분류',
         subjectName: item.subjectName || undefined,
-        totalCount: item._count.id,
+        totalCount: item._count?.id || 0,
         wrongCount: 0,
         needReviewCount: 0,
       });
@@ -428,7 +431,7 @@ export class WrongAnswerService {
       const key = `${item.subjectAreaName || ''}_${item.subjectName || ''}`;
       const existing = subjectMap.get(key);
       if (existing) {
-        existing.wrongCount = item._count.id;
+        existing.wrongCount = item._count?.id || 0;
       }
     }
 
@@ -436,7 +439,7 @@ export class WrongAnswerService {
       const key = `${item.subjectAreaName || ''}_${item.subjectName || ''}`;
       const existing = subjectMap.get(key);
       if (existing) {
-        existing.needReviewCount = item._count.id;
+        existing.needReviewCount = item._count?.id || 0;
       }
     }
 
@@ -446,7 +449,7 @@ export class WrongAnswerService {
     }));
 
     return {
-      studentId,
+      memberId: studentId,
       totalAnswers,
       correctCount,
       wrongCount,
@@ -464,14 +467,14 @@ export class WrongAnswerService {
     // 모의고사별 전체 답안 수
     const totalByExam = await this.prisma.studentAnswer.groupBy({
       by: ['mockExamId'],
-      where: { studentId },
+      where: { memberId: studentId },
       _count: { id: true },
     });
 
     // 모의고사별 오답 수
     const wrongByExam = await this.prisma.studentAnswer.groupBy({
       by: ['mockExamId'],
-      where: { studentId, isCorrect: false },
+      where: { memberId: studentId, isCorrect: false },
       _count: { id: true },
     });
 
@@ -484,7 +487,7 @@ export class WrongAnswerService {
     const mockExamMap = new Map(mockExams.map((m) => [m.id, m]));
 
     // 오답 수 맵 생성
-    const wrongMap = new Map(wrongByExam.map((w) => [w.mockExamId, w._count.id]));
+    const wrongMap = new Map(wrongByExam.map((w) => [w.mockExamId, w._count?.id || 0]));
 
     // 결과 생성
     const exams = totalByExam.map((t) => {
@@ -495,9 +498,9 @@ export class WrongAnswerService {
         mockExamName: mockExam?.name || '알 수 없음',
         year: mockExam?.year || undefined,
         month: mockExam?.month || undefined,
-        totalCount: t._count.id,
+        totalCount: t._count?.id || 0,
         wrongCount,
-        wrongRate: t._count.id > 0 ? Math.round((wrongCount / t._count.id) * 100) : 0,
+        wrongRate: (t._count?.id || 0) > 0 ? Math.round((wrongCount / (t._count?.id || 1)) * 100) : 0,
       };
     });
 
@@ -508,7 +511,7 @@ export class WrongAnswerService {
     });
 
     return {
-      studentId,
+      memberId: studentId,
       exams,
     };
   }
@@ -529,7 +532,7 @@ export class WrongAnswerService {
    */
   async removeByExam(studentId: number, mockExamId: number) {
     return this.prisma.studentAnswer.deleteMany({
-      where: { studentId, mockExamId },
+      where: { memberId: studentId, mockExamId },
     });
   }
 }

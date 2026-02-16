@@ -8,9 +8,12 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    // PostgreSQL 연결 풀 생성
+    // PostgreSQL 연결 풀 생성 (search_path로 hub 스키마 포함 - 다른 앱 TypeORM과 동일 방식)
     const connectionString = process.env.DATABASE_URL;
-    const pool = new Pool({ connectionString });
+    const pool = new Pool({
+      connectionString,
+      options: '-c search_path=examhub,hub',
+    });
     const adapter = new PrismaPg(pool);
 
     super({
@@ -47,8 +50,6 @@ export class PrismaService
     await this.department.deleteMany();
     await this.university.deleteMany();
     await this.subjectChapter.deleteMany();
-    await this.subjectCode.deleteMany();
-    await this.subjectArea.deleteMany();
     await this.mockExam.deleteMany();
     await this.mentoring.deleteMany();
     await this.member.deleteMany();

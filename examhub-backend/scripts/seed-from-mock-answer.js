@@ -77,27 +77,6 @@ async function seed() {
   `);
   console.log('  ✓ eh_mock_exams');
 
-  // eh_subject_areas
-  await c.query(`
-    CREATE TABLE IF NOT EXISTS eh_subject_areas (
-      id SERIAL PRIMARY KEY,
-      code VARCHAR(10) UNIQUE NOT NULL,
-      name VARCHAR(50) NOT NULL
-    );
-  `);
-  console.log('  ✓ eh_subject_areas');
-
-  // eh_subject_codes
-  await c.query(`
-    CREATE TABLE IF NOT EXISTS eh_subject_codes (
-      id SERIAL PRIMARY KEY,
-      subject_area_id INTEGER REFERENCES eh_subject_areas(id),
-      code VARCHAR(10) UNIQUE NOT NULL,
-      name VARCHAR(50) NOT NULL
-    );
-  `);
-  console.log('  ✓ eh_subject_codes');
-
   // eh_subject_chapters
   await c.query(`
     CREATE TABLE IF NOT EXISTS eh_subject_chapters (
@@ -236,27 +215,6 @@ async function seed() {
     studentId = existingStudent.rows[0].id;
     console.log('  ✓ Test student already exists, ID:', studentId);
   }
-
-  // ========== 3. Seed subject areas ==========
-  console.log('\n=== Seeding subject areas ===');
-  const subjectAreas = [
-    { code: 'KOR', name: '국어' },
-    { code: 'MATH', name: '수학' },
-    { code: 'ENG', name: '영어' },
-    { code: 'HIST', name: '한국사' },
-    { code: 'SOC', name: '사회탐구' },
-    { code: 'SCI', name: '과학탐구' },
-    { code: 'FOR', name: '제2외국어' },
-    { code: 'SOC_INT', name: '통합사회' },
-    { code: 'SCI_INT', name: '통합과학' },
-  ];
-  for (const sa of subjectAreas) {
-    await c.query(
-      `INSERT INTO eh_subject_areas (code, name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING`,
-      [sa.code, sa.name]
-    );
-  }
-  console.log('  ✓ Subject areas seeded');
 
   // ========== 4. Seed mock exams from eh_mock_answer ==========
   console.log('\n=== Seeding mock exams ===');
@@ -407,9 +365,6 @@ async function seed() {
 
   r = await c.query('SELECT COUNT(*) FROM eh_exam_questions');
   console.log('  eh_exam_questions:', r.rows[0].count);
-
-  r = await c.query('SELECT COUNT(*) FROM eh_subject_areas');
-  console.log('  eh_subject_areas:', r.rows[0].count);
 
   r = await c.query('SELECT COUNT(*) FROM eh_student_answers');
   console.log('  eh_student_answers:', r.rows[0].count);

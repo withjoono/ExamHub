@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { mockExamApi } from '../api';
-import type { MockExam, SearchMockExamParams, SubjectArea } from '../api/types';
+import type { MockExam, SearchMockExamParams, KyokwaSubject } from '../api/types';
 
 /**
  * 모의고사 목록 조회 훅
@@ -93,32 +93,33 @@ export function useMockExamExists() {
 }
 
 /**
- * 교과 영역 목록 조회 훅
+ * 교과/과목 목록 조회 훅 (hub 공유 테이블)
  */
-export function useSubjectAreas() {
-  const [subjectAreas, setSubjectAreas] = useState<SubjectArea[]>([]);
+export function useKyokwaSubjects(curriculum?: '2015' | '2022') {
+  const [subjects, setSubjects] = useState<KyokwaSubject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSubjectAreas = async () => {
+    const fetchSubjects = async () => {
       try {
         setLoading(true);
-        const data = await mockExamApi.getSubjectAreas();
-        setSubjectAreas(data);
+        const data = await mockExamApi.getKyokwaSubjects(curriculum);
+        setSubjects(data);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '교과 영역을 불러오는데 실패했습니다.');
+        setError(err instanceof Error ? err.message : '교과/과목을 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubjectAreas();
-  }, []);
+    fetchSubjects();
+  }, [curriculum]);
 
-  return { subjectAreas, loading, error };
+  return { subjects, loading, error };
 }
+
 
 
 

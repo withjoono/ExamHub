@@ -6,8 +6,7 @@ import type {
   MockExam,
   SearchMockExamParams,
   MockExamExistsResponse,
-  SubjectArea,
-  SubjectCode,
+  KyokwaSubject,
 } from './types';
 
 export const mockExamApi = {
@@ -41,16 +40,10 @@ export const mockExamApi = {
     api.get<MockExam>(`/api/mock-exams/${id}`),
 
   /**
-   * 교과 영역 목록 조회
+   * 교과/과목 목록 조회 (hub 공유 테이블)
    */
-  getSubjectAreas: () =>
-    api.get<SubjectArea[]>('/api/mock-exams/subject-areas'),
-
-  /**
-   * 세부 과목 코드 목록 조회
-   */
-  getSubjectCodes: (subjectAreaId?: number) =>
-    api.get<SubjectCode[]>('/api/mock-exams/subject-codes', { subjectAreaId }),
+  getKyokwaSubjects: (curriculum?: '2015' | '2022') =>
+    api.get<KyokwaSubject[]>('/api/mock-exams/kyokwa-subjects', { curriculum }),
 };
 
 export default mockExamApi;

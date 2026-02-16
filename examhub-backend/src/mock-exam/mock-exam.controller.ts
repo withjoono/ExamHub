@@ -11,7 +11,7 @@ import { GradeAnswersDto, GradeResultDto } from './dto/grade-answers.dto';
 @ApiTags('모의고사')
 @Controller('api/mock-exams')
 export class MockExamController {
-  constructor(private readonly mockExamService: MockExamService) {}
+  constructor(private readonly mockExamService: MockExamService) { }
 
   @Get()
   @ApiOperation({ summary: '모의고사 목록 조회' })
@@ -46,20 +46,12 @@ export class MockExamController {
     return { success: true, data };
   }
 
-  @Get('subject-areas')
-  @ApiOperation({ summary: '교과 영역 목록 조회' })
-  async getSubjectAreas() {
-    const data = await this.mockExamService.getSubjectAreas();
-    return { success: true, data };
-  }
-
-  @Get('subject-codes')
-  @ApiOperation({ summary: '세부 과목 코드 목록 조회' })
-  @ApiQuery({ name: 'subjectAreaId', required: false, type: Number })
-  async getSubjectCodes(@Query('subjectAreaId') subjectAreaId?: number) {
-    const data = await this.mockExamService.getSubjectCodes(
-      subjectAreaId ? Number(subjectAreaId) : undefined,
-    );
+  @Get('kyokwa-subjects')
+  @ApiOperation({ summary: '교과/과목 목록 조회 (hub 공유 테이블)' })
+  @ApiQuery({ name: 'curriculum', required: false, type: String, description: '교육과정 (2015 | 2022, 기본: 2015)' })
+  async getKyokwaSubjects(@Query('curriculum') curriculum?: string) {
+    const cur = curriculum === '2022' ? '2022' : '2015';
+    const data = await this.mockExamService.getKyokwaSubjects(cur);
     return { success: true, data };
   }
 

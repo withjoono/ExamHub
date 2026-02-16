@@ -25,20 +25,16 @@ export interface MockExamExistsResponse {
   mockExam: MockExam | null;
 }
 
-// === 과목 ===
-export interface SubjectArea {
-  id: number;
-  code: string;
-  name: string;
-  subjectCodes?: SubjectCode[];
-}
-
-export interface SubjectCode {
-  id: number;
-  subjectAreaId: number;
-  code: string;
-  name: string;
-  subjectArea?: SubjectArea;
+// === 교과/과목 (hub 공유 테이블) ===
+export interface KyokwaSubject {
+  id: string;
+  kyokwa: string;
+  kyokwaCode: string;
+  classification: string;
+  classificationCode: number;
+  subjectName: string;
+  subjectCode: number;
+  evaluationMethod: string | null;
 }
 
 // === 점수 ===

@@ -52,24 +52,31 @@ model MockExam {
   @@map("eh_mock_exams")
 }
 
-model SubjectArea {
-  id           Int           @id @default(autoincrement())
-  code         String        @unique @db.VarChar(10)
-  name         String        @db.VarChar(50)
-  subjectCodes SubjectCode[]
+// Hub 공유 테이블 (search_path로 hub 스키마 접근)
+model KyokwaSubject2015 {
+  id                 String  @id @db.VarChar(20)
+  kyokwa             String  @db.VarChar(50)
+  kyokwaCode         String  @map("kyokwa_code") @db.VarChar(10)
+  classification     String  @db.VarChar(50)
+  classificationCode Int     @map("classification_code")
+  subjectName        String  @map("subject_name") @db.VarChar(100)
+  subjectCode        Int     @map("subject_code")
+  evaluationMethod   String? @map("evaluation_method") @db.VarChar(50)
 
-  @@map("eh_subject_areas")
+  @@map("hub_2015_kyokwa_subject")
 }
 
-model SubjectCode {
-  id            Int         @id @default(autoincrement())
-  subjectAreaId Int         @map("subject_area_id")
-  code          String      @unique @db.VarChar(10)
-  name          String      @db.VarChar(50)
-  subjectArea   SubjectArea @relation(fields: [subjectAreaId], references: [id])
+model KyokwaSubject2022 {
+  id                 String  @id @db.VarChar(20)
+  kyokwa             String  @db.VarChar(50)
+  kyokwaCode         String  @map("kyokwa_code") @db.VarChar(10)
+  classification     String  @db.VarChar(50)
+  classificationCode Int     @map("classification_code")
+  subjectName        String  @map("subject_name") @db.VarChar(100)
+  subjectCode        Int     @map("subject_code")
+  evaluationMethod   String? @map("evaluation_method") @db.VarChar(50)
 
-  @@index([subjectAreaId])
-  @@map("eh_subject_codes")
+  @@map("hub_2022_kyokwa_subject")
 }
 
 model SubjectChapter {

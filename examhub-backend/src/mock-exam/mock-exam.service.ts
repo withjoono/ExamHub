@@ -71,17 +71,14 @@ export class MockExamService {
     return { exists: !!mockExam, mockExam: mockExam || null };
   }
 
-  async getSubjectAreas() {
-    return this.prisma.subjectArea.findMany({
-      include: { subjectCodes: true },
-    });
-  }
-
-  async getSubjectCodes(subjectAreaId?: number) {
-    const where = subjectAreaId ? { subjectAreaId } : {};
-    return this.prisma.subjectCode.findMany({
-      where,
-      include: { subjectArea: true },
+  async getKyokwaSubjects(curriculum: '2015' | '2022' = '2015') {
+    if (curriculum === '2022') {
+      return this.prisma.kyokwaSubject2022.findMany({
+        orderBy: [{ kyokwaCode: 'asc' }, { classificationCode: 'asc' }, { subjectCode: 'asc' }],
+      });
+    }
+    return this.prisma.kyokwaSubject2015.findMany({
+      orderBy: [{ kyokwaCode: 'asc' }, { classificationCode: 'asc' }, { subjectCode: 'asc' }],
     });
   }
 

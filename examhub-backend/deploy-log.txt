@@ -1,0 +1,22 @@
+Services to deploy:
+
+descriptor:                  [E:\Dev\github\ExamHub\examhub-backend\app.yaml]
+source:                      [E:\Dev\github\ExamHub\examhub-backend]
+target project:              [ts-back-nest-479305]
+target service:              [examhub-backend]
+target version:              [20260216t223023]
+target url:                  [https://examhub-backend-dot-ts-back-nest-479305.du.r.appspot.com]
+target service account:      [ts-back-nest-479305@appspot.gserviceaccount.com]
+
+
+Beginning deployment of service [examhub-backend]...
+#============================================================#
+#= Uploading 2 files to Google Cloud Storage                =#
+#============================================================#
+File upload done.
+Updating service [examhub-backend]...
+............................................................................................................................failed.
+ERROR: (gcloud.app.deploy) Error Response: [9] Cloud build 899f736e-e3ea-4c9b-9950-1b0bd2bf4751 status: FAILURE
+Failed to download at least one file. Cannot continue.
+
+Full build logs: https://console.cloud.google.com/cloud-build/builds;region=asia-northeast3/899f736e-e3ea-4c9b-9950-1b0bd2bf4751?project=742744456700

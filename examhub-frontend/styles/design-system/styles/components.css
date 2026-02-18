@@ -3,30 +3,9 @@
  * ============================================================ */
 
 /* ═══════════════════════════════════════════
- * RESET & BASE
+ * RESET & BASE — Tailwind v4 이미 preflight 포함
+ * 글로벌 * 리셋 제거 (Tailwind 유틸리티 클래스 충돌 방지)
  * ═══════════════════════════════════════════ */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-    font-family: var(--font-family);
-    font-size: var(--text-base);
-    line-height: var(--leading-normal);
-    color: var(--color-text);
-    background-color: var(--color-bg);
-    letter-spacing: var(--tracking-tight);
-}
 
 /* ═══════════════════════════════════════════
  * HEADER — 토스 스타일 상단바

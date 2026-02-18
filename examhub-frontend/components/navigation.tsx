@@ -78,19 +78,16 @@ export function Navigation() {
   ]
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="gb-header" style={{ backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.92)' }}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-14">
           {/* Left Section - Logo & Title */}
           <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-[#9c3d9a] to-[#5a1559] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">E</span>
+            <Link href="/" className="flex items-center space-x-2" style={{ textDecoration: 'none' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--color-primary)' }}>
+                <span className="text-white font-bold text-sm">E</span>
               </div>
-              <div className="flex flex-col">
-                <span className="text-base font-bold text-gray-900 leading-tight">ExamHub</span>
-                <span className="text-xs text-[#7b1e7a] leading-tight">거북스쿨</span>
-              </div>
+              <span className="text-[15px] font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>ExamHub</span>
             </Link>
           </div>
 
@@ -99,7 +96,7 @@ export function Navigation() {
             {/* 전체 서비스 링크 */}
             <button
               onClick={goToHub}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] transition-colors"
+              className="gb-header-nav-link" style={{ color: 'var(--color-primary)' }}
             >
               <ArrowLeft className="w-4 h-4" />
               <span>전체 서비스</span>
@@ -112,7 +109,7 @@ export function Navigation() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="px-3 py-2 text-sm text-gray-700 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md transition-colors"
+                className="gb-header-nav-link"
               >
                 {item.name}
               </Link>
@@ -179,7 +176,7 @@ export function Navigation() {
             ) : (
               <button
                 onClick={handleLogin}
-                className="px-4 py-1.5 bg-[#7b1e7a] hover:bg-[#5a1559] text-white text-sm font-medium rounded-full transition-colors"
+                className="gb-btn gb-btn-primary gb-btn-sm" style={{ borderRadius: '9999px' }}
               >
                 로그인
               </button>

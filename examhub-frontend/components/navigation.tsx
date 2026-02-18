@@ -27,6 +27,12 @@ export function Navigation() {
         return
       }
 
+      // SSO 코드가 URL에 있으면 SSOListener가 처리하도록 대기 (리다이렉트 하지 않음)
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.has('sso_code')) {
+        return
+      }
+
       // 토큰이 없고, SSO 자동 로그인을 아직 시도하지 않았으면 Hub으로 리다이렉트
       // sessionStorage로 1회만 시도 (무한 리다이렉트 방지)
       const ssoAttempted = sessionStorage.getItem('examhub_sso_attempted')

@@ -1,6 +1,15 @@
 {
   "projects": {
     "default": "examhub-app"
-  }
+  },
+  "targets": {
+    "examhub-app": {
+      "hosting": {
+        "examhub": [
+          "examhub-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
-

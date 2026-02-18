@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { api } from "@/lib/api/client"
 import { getUser, type User } from "@/lib/auth/user"
 
-export default function ScoreInputPage() {
+function ScoreInputPageContent() {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<"raw" | "standard">("raw")
   const [user, setUser] = useState<User | null>(null)
@@ -2239,5 +2239,13 @@ export default function ScoreInputPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ScoreInputPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-gray-500">로딩 중...</div></div>}>
+      <ScoreInputPageContent />
+    </Suspense>
   )
 }

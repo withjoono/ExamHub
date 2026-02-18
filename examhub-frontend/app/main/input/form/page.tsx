@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { getUser, type User } from "@/lib/auth/user"
 import { mockExamApi } from "@/lib/api/mock-exam"
 import { api } from "@/lib/api/client"
 
-export default function MockExamFormPage() {
+function MockExamFormPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
@@ -750,5 +750,13 @@ export default function MockExamFormPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MockExamFormPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-gray-500">로딩 중...</div></div>}>
+      <MockExamFormPageContent />
+    </Suspense>
   )
 }

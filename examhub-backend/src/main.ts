@@ -69,8 +69,8 @@ async function bootstrap() {
     },
   });
 
-  // ExamHub 백엔드 포트: 4003 고정
-  const port = 4003;
+  // ExamHub 백엔드 포트: Cloud Run/App Engine은 PORT 환경변수 사용, 로컬은 4003
+  const port = parseInt(process.env.PORT || '4003', 10);
 
   await app.listen(port, '0.0.0.0');
 

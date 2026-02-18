@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Noto_Sans_KR } from "next/font/google"
+import "@/styles/design-system/index.css"
 import "@/styles/globals.css"
 import { SSOListener } from "@/components/auth/sso-listener"
 
@@ -20,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" data-app="examhub" suppressHydrationWarning>
       <body className={`${notoSansKR.variable} font-sans antialiased`}>
         <SSOListener />
         {children}

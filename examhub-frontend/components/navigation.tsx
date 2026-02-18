@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { ArrowLeft, ChevronDown, Menu, X, Wallet, Bell, Share2, User } from "lucide-react"
+import { ArrowLeft, ChevronDown, Menu, X, Wallet, Bell, Users, User } from "lucide-react"
 import { getUser, cacheUser, clearUserCache, type User as UserType } from "@/lib/auth/user"
 import { redirectToHubLogin, getHubUrl, getHubLoginUrl } from "@/lib/auth/hub-login"
 import { clearTokens } from "@/lib/auth/token-manager"
@@ -78,7 +78,7 @@ export function Navigation() {
   ]
 
   return (
-    <nav className="gb-header" style={{ backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.92)' }}>
+    <nav className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-14">
           {/* Left Section - Logo & Title */}
@@ -96,7 +96,7 @@ export function Navigation() {
             {/* 전체 서비스 링크 */}
             <button
               onClick={goToHub}
-              className="gb-header-nav-link" style={{ color: 'var(--color-primary)' }}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>전체 서비스</span>
@@ -109,7 +109,7 @@ export function Navigation() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="gb-header-nav-link"
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
               >
                 {item.name}
               </Link>
@@ -120,28 +120,27 @@ export function Navigation() {
           <div className="hidden lg:flex items-center space-x-2">
             {/* 결제 아이콘 */}
             <button
-              className="p-2 text-gray-500 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-full transition-colors"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
               title="결제"
             >
-              <Wallet className="w-5 h-5" />
+              <Wallet className="h-5 w-5" />
             </button>
 
             {/* 알림 아이콘 */}
             <button
-              className="p-2 text-gray-500 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-full transition-colors relative"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               title="알림"
             >
-              <Bell className="w-5 h-5" />
-              {/* 알림 뱃지 (필요시) */}
-              {/* <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" /> */}
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            {/* 공유 아이콘 */}
+            {/* 계정연동 아이콘 */}
             <button
-              className="p-2 text-gray-500 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-full transition-colors"
-              title="공유"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              title="계정연동"
             >
-              <Share2 className="w-5 h-5" />
+              <Users className="h-5 w-5" />
             </button>
 
             {/* 로그인/사용자 메뉴 */}
@@ -176,7 +175,7 @@ export function Navigation() {
             ) : (
               <button
                 onClick={handleLogin}
-                className="gb-btn gb-btn-primary gb-btn-sm" style={{ borderRadius: '9999px' }}
+                className="rounded-full bg-purple-700 hover:bg-purple-800 text-white px-4 py-1.5 text-sm font-medium transition-colors"
               >
                 로그인
               </button>
@@ -204,79 +203,81 @@ export function Navigation() {
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white">
-            <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* 전체 서비스 */}
-              <button
-                onClick={goToHub}
-                className="flex items-center space-x-2 w-full px-3 py-2 text-base text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>전체 서비스</span>
-              </button>
-
-              <div className="border-t border-gray-100 my-2" />
-
-              {/* 메뉴 항목들 */}
-              {menuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-3 py-2 text-base text-gray-700 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
-                  onClick={() => setIsMobileMenuOpen(false)}
+        {
+          isMobileMenuOpen && (
+            <div className="lg:hidden border-t border-gray-200 bg-white">
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                {/* 전체 서비스 */}
+                <button
+                  onClick={goToHub}
+                  className="flex items-center space-x-2 w-full px-3 py-2 text-base text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
                 >
-                  {item.name}
-                </Link>
-              ))}
-
-              <div className="border-t border-gray-100 my-2" />
-
-              {/* 모바일 추가 메뉴 */}
-              <div className="flex items-center space-x-4 px-3 py-2">
-                <button className="flex items-center space-x-2 text-gray-600 hover:text-[#7b1e7a]">
-                  <Wallet className="w-5 h-5" />
-                  <span className="text-sm">결제</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>전체 서비스</span>
                 </button>
-                <button className="flex items-center space-x-2 text-gray-600 hover:text-[#7b1e7a]">
-                  <Share2 className="w-5 h-5" />
-                  <span className="text-sm">공유</span>
-                </button>
-              </div>
 
-              {/* 로그인/로그아웃 */}
-              <div className="pt-2">
-                {user ? (
-                  <div className="space-y-2">
-                    <div className="px-3 py-2 text-sm text-gray-700">
-                      <span className="font-medium">{user.name}</span>님
-                    </div>
-                    <button
-                      onClick={goToHub}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
-                    >
-                      거북스쿨
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
-                    >
-                      로그아웃
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleLogin}
-                    className="w-full bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-4 py-2 rounded-full text-sm font-medium"
+                <div className="border-t border-gray-100 my-2" />
+
+                {/* 메뉴 항목들 */}
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block px-3 py-2 text-base text-gray-700 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    로그인
+                    {item.name}
+                  </Link>
+                ))}
+
+                <div className="border-t border-gray-100 my-2" />
+
+                {/* 모바일 추가 메뉴 */}
+                <div className="flex items-center space-x-4 px-3 py-2">
+                  <button className="flex items-center space-x-2 text-gray-600 hover:text-[#7b1e7a]">
+                    <Wallet className="w-5 h-5" />
+                    <span className="text-sm">결제</span>
                   </button>
-                )}
+                  <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-700">
+                    <Users className="w-5 h-5" />
+                    <span className="text-sm">계정연동</span>
+                  </button>
+                </div>
+
+                {/* 로그인/로그아웃 */}
+                <div className="pt-2">
+                  {user ? (
+                    <div className="space-y-2">
+                      <div className="px-3 py-2 text-sm text-gray-700">
+                        <span className="font-medium">{user.name}</span>님
+                      </div>
+                      <button
+                        onClick={goToHub}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+                      >
+                        거북스쿨
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+                      >
+                        로그아웃
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleLogin}
+                      className="w-full bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-4 py-2 rounded-full text-sm font-medium"
+                    >
+                      로그인
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </nav>
+          )
+        }
+      </div >
+    </nav >
   )
 }

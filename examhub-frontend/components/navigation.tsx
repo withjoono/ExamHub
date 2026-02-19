@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { ArrowLeft, ChevronDown, Menu, X, Wallet, Bell, Users, User } from "lucide-react"
+import { LayoutGrid, ChevronDown, Menu, X, Bell, Users, User } from "lucide-react"
+import { WonCircle } from "./icons"
 import { getUser, cacheUser, clearUserCache, type User as UserType } from "@/lib/auth/user"
 import { redirectToHubLogin, getHubUrl, getHubLoginUrl } from "@/lib/auth/hub-login"
 import { clearTokens } from "@/lib/auth/token-manager"
@@ -93,13 +94,13 @@ export function Navigation() {
 
           {/* Center Section - Navigation Menu (Desktop) */}
           <div className="hidden lg:flex items-center space-x-1">
-            {/* 전체 서비스 링크 */}
+            {/* 전체 서비스 아이콘 */}
             <button
               onClick={goToHub}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-purple-700 hover:bg-purple-50 rounded-md transition-colors"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors"
+              title="전체 서비스"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>전체 서비스</span>
+              <LayoutGrid className="w-5 h-5" />
             </button>
 
             <div className="w-px h-5 bg-gray-200 mx-2" />
@@ -120,10 +121,10 @@ export function Navigation() {
           <div className="hidden lg:flex items-center space-x-2">
             {/* 결제 아이콘 */}
             <button
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors"
               title="결제"
             >
-              <Wallet className="h-5 w-5" />
+              <WonCircle className="h-5 w-5" />
             </button>
 
             {/* 알림 아이콘 */}
@@ -207,13 +208,13 @@ export function Navigation() {
           isMobileMenuOpen && (
             <div className="lg:hidden border-t border-gray-200 bg-white">
               <div className="px-2 pt-2 pb-3 space-y-1">
-                {/* 전체 서비스 */}
+                {/* 전체 서비스 아이콘 */}
                 <button
                   onClick={goToHub}
-                  className="flex items-center space-x-2 w-full px-3 py-2 text-base text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-primary hover:bg-primary/10 transition-colors"
+                  title="전체 서비스"
                 >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>전체 서비스</span>
+                  <LayoutGrid className="w-5 h-5" />
                 </button>
 
                 <div className="border-t border-gray-100 my-2" />

@@ -34,15 +34,8 @@ export function Navigation() {
         return
       }
 
-      // 토큰이 없고, SSO 자동 로그인을 아직 시도하지 않았으면 Hub으로 리다이렉트
-      // sessionStorage로 1회만 시도 (무한 리다이렉트 방지)
-      const ssoAttempted = sessionStorage.getItem('examhub_sso_attempted')
-      if (!ssoAttempted) {
-        sessionStorage.setItem('examhub_sso_attempted', 'true')
-        // Hub 로그인 페이지로 이동 (이미 Hub에 로그인되어 있으면 자동으로 SSO 코드 생성 후 복귀)
-        // getHubLoginUrl()은 내부적으로 redirect_uri를 포함함
-        window.location.href = getHubLoginUrl(window.location.pathname)
-      }
+      // 비로그인 상태: 프로모 페이지를 그대로 노출 (자동 리다이렉트 하지 않음)
+      // 사용자가 직접 "로그인" 버튼을 클릭하면 Hub 로그인으로 이동
     }
     fetchUser()
   }, [])

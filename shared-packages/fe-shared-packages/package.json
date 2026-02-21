@@ -1,7 +1,7 @@
 {
   "name": "@geobuk/fe-shared-packages",
   "version": "1.0.0",
-  "description": "거북스쿨 프론트엔드 공유 패키지",
+  "description": "G Skool 프론트엔드 공유 패키지",
   "private": true,
   "type": "module",
   "scripts": {

@@ -155,7 +155,7 @@ export function Navigation() {
                       onClick={goToHub}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
-                      거북스쿨
+                      G Skool
                     </button>
                     <button
                       onClick={handleLogout}
@@ -249,7 +249,7 @@ export function Navigation() {
                         onClick={goToHub}
                         className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
                       >
-                        거북스쿨
+                        G Skool
                       </button>
                       <button
                         onClick={handleLogout}

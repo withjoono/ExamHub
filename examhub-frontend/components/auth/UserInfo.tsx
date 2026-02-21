@@ -49,7 +49,7 @@ export function UserInfo() {
       </div>
       <div className="flex gap-2">
         <Button variant="ghost" size="sm" onClick={goToHub}>
-          거북스쿨
+          G Skool
         </Button>
         <Button variant="outline" size="sm" onClick={handleLogout}>
           로그아웃

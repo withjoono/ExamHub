@@ -107,7 +107,7 @@ export default function MyExamPage() {
         </div>
       </section>
 
-      {/* 거북스쿨 멤버십 섹션 */}
+      {/* G Skool 멤버십 섹션 */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-8 md:p-12 border border-amber-200 relative overflow-hidden">
@@ -115,14 +115,14 @@ export default function MyExamPage() {
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-200/30 rounded-full translate-y-1/2 -translate-x-1/2" />
             <div className="relative z-10 text-center">
               <div className="inline-flex items-center gap-2 px-4 py-1 bg-amber-500/20 text-amber-700 rounded-full text-sm font-medium mb-4">
-                <School className="w-4 h-4" />거북스쿨 멤버십
+                <School className="w-4 h-4" />G Skool 멤버십
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">거북스쿨 회원이신가요?</h3>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">G Skool 회원이신가요?</h3>
               <p className="text-gray-600 mb-6 max-w-xl mx-auto">
-                거북스쿨 멤버십 회원은 My Exam의 모든 프리미엄 기능을<br className="hidden md:block" />추가 비용 없이 무료로 이용할 수 있습니다.
+                G Skool 멤버십 회원은 My Exam의 모든 프리미엄 기능을<br className="hidden md:block" />추가 비용 없이 무료로 이용할 수 있습니다.
               </p>
               <Link href="/membership/gobook" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors font-medium shadow-lg shadow-amber-200">
-                <School className="w-5 h-5" />거북스쿨 멤버십 연동하기<ChevronRight className="w-4 h-4" />
+                <School className="w-5 h-5" />G Skool 멤버십 연동하기<ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function MyExamPage() {
       {/* 푸터 */}
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm">
-          <p>© 2025 My Exam by 거북스쿨. 모의고사 분석 서비스</p>
+          <p>© 2025 My Exam by G Skool. 모의고사 분석 서비스</p>
         </div>
       </footer>
     </>

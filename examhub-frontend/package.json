@@ -1,7 +1,7 @@
 {
   "name": "examhub-frontend",
   "version": "1.0.0",
-  "description": "ExamHub 모의고사 분석 서비스 프론트엔드 | 거북스쿨",
+  "description": "ExamHub 모의고사 분석 서비스 프론트엔드 | G Skool",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3003",

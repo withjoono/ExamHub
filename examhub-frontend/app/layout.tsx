@@ -12,7 +12,7 @@ const notoSansKR = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: "ExamHub - 모의고사 분석",
-  description: "모의고사 성적 입력 및 분석 서비스 | 거북스쿨",
+  description: "모의고사 성적 입력 및 분석 서비스 | G Skool",
 }
 
 export default function RootLayout({

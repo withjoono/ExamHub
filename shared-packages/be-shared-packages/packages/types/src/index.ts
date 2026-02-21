@@ -1,6 +1,6 @@
 /**
  * @geobuk/shared-types
- * 거북스쿨 마이크로서비스 공유 타입 정의
+ * G Skool 마이크로서비스 공유 타입 정의
  */
 
 // API Response Types

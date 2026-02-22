@@ -14,7 +14,7 @@ export class PrismaService
       connectionString,
       options: '-c search_path=examhub,hub',
     });
-    const adapter = new PrismaPg(pool);
+    const adapter = new PrismaPg(pool, { schema: 'examhub' });
 
     super({
       adapter,

@@ -6,7 +6,7 @@
 import { getAccessToken, clearTokens } from './token-manager';
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string | null;
   nickname: string | null;

@@ -6,10 +6,9 @@ import { Type } from 'class-transformer';
  * 목표 대학 추가 요청
  */
 export class CreateTargetDto {
-  @ApiProperty({ description: '학생 ID' })
-  @IsNumber()
-  @Type(() => Number)
-  studentId: number;
+  @ApiProperty({ description: '학생 ID (memberId)' })
+  @IsString()
+  studentId: string;
 
   @ApiProperty({ description: '학과 ID 또는 대학학과코드' })
   @IsNumber()

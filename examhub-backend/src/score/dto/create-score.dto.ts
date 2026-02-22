@@ -9,9 +9,9 @@ import {
 } from 'class-validator';
 
 export class CreateScoreDto {
-  @ApiProperty({ description: '학생 ID' })
-  @IsInt()
-  studentId: number;
+  @ApiProperty({ description: '학생 ID (memberId)' })
+  @IsString()
+  studentId: string;
 
   @ApiProperty({ description: '모의고사 ID' })
   @IsInt()

@@ -41,7 +41,7 @@ export class WrongAnswerController {
   @ApiOperation({ summary: '오답 목록 조회', description: '학생의 오답 목록을 필터링하여 조회합니다.' })
   @ApiResponse({ status: 200, description: '오답 목록', type: WrongAnswerListResponseDto })
   async findWrongAnswers(
-    @Param('studentId', ParseIntPipe) memberId: number,
+    @Param('studentId') memberId: string,
     @Query() filter: FilterWrongAnswerDto,
   ) {
     const data = await this.wrongAnswerService.findWrongAnswers(memberId, filter);
@@ -51,7 +51,7 @@ export class WrongAnswerController {
   @Get('student/:studentId/summary')
   @ApiOperation({ summary: '오답 요약 통계', description: '학생의 오답 요약 통계를 조회합니다.' })
   @ApiResponse({ status: 200, description: '오답 요약', type: WrongAnswerSummaryDto })
-  async getSummary(@Param('studentId', ParseIntPipe) memberId: number) {
+  async getSummary(@Param('studentId') memberId: string) {
     const data = await this.wrongAnswerService.getSummary(memberId);
     return { success: true, data };
   }
@@ -59,7 +59,7 @@ export class WrongAnswerController {
   @Get('student/:studentId/by-exam')
   @ApiOperation({ summary: '모의고사별 오답 현황', description: '학생의 모의고사별 오답 현황을 조회합니다.' })
   @ApiResponse({ status: 200, description: '모의고사별 오답 현황', type: WrongAnswerByExamResponseDto })
-  async getByExam(@Param('studentId', ParseIntPipe) studentId: number) {
+  async getByExam(@Param('studentId') studentId: string) {
     const data = await this.wrongAnswerService.getByExam(studentId);
     return { success: true, data };
   }
@@ -111,7 +111,7 @@ export class WrongAnswerController {
   @ApiOperation({ summary: '모의고사별 답안 전체 삭제', description: '특정 모의고사의 모든 답안을 삭제합니다.' })
   @ApiResponse({ status: 200, description: '삭제 완료' })
   async removeByExam(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Param('mockExamId', ParseIntPipe) mockExamId: number,
   ) {
     const result = await this.wrongAnswerService.removeByExam(studentId, mockExamId);

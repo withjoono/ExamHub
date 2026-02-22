@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { toExamHubMemberId } from '../common/utils/member-id.util';
 import {
   CreateTargetDto,
   UpdateTargetDto,
@@ -26,17 +27,18 @@ export class TargetService {
   /**
    * 목표 대학 목록 조회
    */
-  async findByStudent(studentId: number): Promise<TargetListResponseDto> {
+  async findByStudent(studentId: string): Promise<TargetListResponseDto> {
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
+    const numericId = member.id;
 
     const targets = await this.prisma.studentTarget.findMany({
-      where: { memberId: studentId },
+      where: { memberId: numericId },
       orderBy: { priority: 'asc' },
     });
 
@@ -74,7 +76,7 @@ export class TargetService {
     }
 
     return {
-      studentId,
+      studentId: numericId,
       targets: targetDtos,
       totalCount: targetDtos.length,
       maxCount: MAX_TARGETS,
@@ -87,9 +89,9 @@ export class TargetService {
   async create(createDto: CreateTargetDto): Promise<TargetUniversityDto> {
     const { studentId, departmentId, priority = 1 } = createDto;
 
-    // 학생 확인
+    // 학생 확인 (memberId로 조회)
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
@@ -108,7 +110,7 @@ export class TargetService {
 
     // 최대 개수 확인
     const existingCount = await this.prisma.studentTarget.count({
-      where: { memberId: studentId },
+      where: { memberId: member.id },
     });
 
     if (existingCount >= MAX_TARGETS) {
@@ -120,7 +122,7 @@ export class TargetService {
     // 중복 확인
     const existing = await this.prisma.studentTarget.findFirst({
       where: {
-        memberId: studentId,
+        memberId: member.id,
         departmentCode: department.code,
       },
     });
@@ -132,7 +134,7 @@ export class TargetService {
     // 생성
     const target = await this.prisma.studentTarget.create({
       data: {
-        memberId: studentId,
+        memberId: member.id,
         departmentCode: department.code,
         priority,
       },
@@ -241,19 +243,20 @@ export class TargetService {
    * 목표 대학 비교 분석
    */
   async getComparison(
-    studentId: number,
+    studentId: string,
     params?: ComparisonRequestDto,
   ): Promise<TargetComparisonResponseDto> {
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
+    const numericId = member.id;
 
     // 목표 대학 조회
-    const targetWhere: any = { memberId: studentId };
+    const targetWhere: any = { memberId: numericId };
     if (params?.targetId) {
       targetWhere.id = params.targetId;
     }
@@ -265,7 +268,7 @@ export class TargetService {
 
     if (targets.length === 0) {
       return {
-        studentId,
+        studentId: numericId,
         period: { start: '', end: '' },
         totalExams: 0,
         comparisons: [],
@@ -273,7 +276,7 @@ export class TargetService {
     }
 
     // 학생 점수 조회
-    const scoreWhere: any = { memberId: studentId };
+    const scoreWhere: any = { memberId: numericId };
     if (params?.startYear || params?.endYear) {
       scoreWhere.mockExam = {};
       if (params.startYear) {
@@ -298,7 +301,7 @@ export class TargetService {
 
     if (scores.length === 0) {
       return {
-        studentId,
+        studentId: numericId,
         period: { start: '', end: '' },
         totalExams: 0,
         comparisons: [],
@@ -391,7 +394,7 @@ export class TargetService {
     }
 
     return {
-      studentId,
+      studentId: numericId,
       period: {
         start: `${firstExam.year}년 ${firstExam.month}월`,
         end: `${lastExam.year}년 ${lastExam.month}월`,

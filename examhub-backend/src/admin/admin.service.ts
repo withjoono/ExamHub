@@ -4,6 +4,7 @@ import { MockExamService } from '../mock-exam/mock-exam.service';
 import { CreateMockExamDto } from './dto/create-mock-exam.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { SubmitGradingDto } from './dto/submit-grading.dto';
+import { toExamHubMemberId } from '../common/utils/member-id.util';
 
 @Injectable()
 export class AdminService {
@@ -229,9 +230,11 @@ export class AdminService {
   }
 
   // Get grading status by student
-  async getGradingByStudent(studentId: number) {
+  async getGradingByStudent(studentId: string) {
+    const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
+    if (!member) return [];
     return this.prisma.studentScore.findMany({
-      where: { memberId: studentId },
+      where: { memberId: member.id },
       include: {
         mockExam: {
           select: {

@@ -10,7 +10,7 @@ import {
 @ApiTags('누적 분석')
 @Controller('api/statistics')
 export class StatisticsController {
-  constructor(private readonly statisticsService: StatisticsService) {}
+  constructor(private readonly statisticsService: StatisticsService) { }
 
   @Get('trend/:studentId')
   @ApiOperation({ summary: '성적 추이 조회 - 시험별 성적 변화' })
@@ -24,7 +24,7 @@ export class StatisticsController {
     type: TrendAnalysisDto,
   })
   async getTrend(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Query('startYear') startYear?: string,
     @Query('endYear') endYear?: string,
     @Query('subject') subject?: string,
@@ -50,7 +50,7 @@ export class StatisticsController {
     type: CumulativeAnalysisDto,
   })
   async getCumulative(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Query('startYear') startYear?: string,
     @Query('endYear') endYear?: string,
   ) {
@@ -73,7 +73,7 @@ export class StatisticsController {
     type: SubjectAnalysisResponseDto,
   })
   async getBySubject(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Query('subject') subject?: string,
     @Query('startYear') startYear?: string,
     @Query('endYear') endYear?: string,

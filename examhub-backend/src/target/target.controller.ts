@@ -24,7 +24,7 @@ import {
 @ApiTags('목표 대학')
 @Controller('api/targets')
 export class TargetController {
-  constructor(private readonly targetService: TargetService) {}
+  constructor(private readonly targetService: TargetService) { }
 
   @Get(':studentId')
   @ApiOperation({ summary: '목표 대학 목록 조회' })
@@ -33,7 +33,7 @@ export class TargetController {
     description: '목표 대학 목록',
     type: TargetListResponseDto,
   })
-  async findByStudent(@Param('studentId', ParseIntPipe) studentId: number) {
+  async findByStudent(@Param('studentId') studentId: string) {
     const data = await this.targetService.findByStudent(studentId);
     return { success: true, data };
   }
@@ -84,7 +84,7 @@ export class TargetController {
     type: TargetComparisonResponseDto,
   })
   async getComparison(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Query('startYear') startYear?: string,
     @Query('endYear') endYear?: string,
     @Query('targetId') targetId?: string,

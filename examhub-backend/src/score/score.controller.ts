@@ -18,7 +18,7 @@ import { ScoreResponseDto } from './dto/score-response.dto';
 @ApiTags('점수')
 @Controller('api/scores')
 export class ScoreController {
-  constructor(private readonly scoreService: ScoreService) {}
+  constructor(private readonly scoreService: ScoreService) { }
 
   @Post()
   @ApiOperation({ summary: '점수 저장 (원점수/표준점수)' })
@@ -31,7 +31,7 @@ export class ScoreController {
   @Get('student/:studentId')
   @ApiOperation({ summary: '학생의 모든 점수 조회' })
   @ApiResponse({ status: 200, description: '점수 목록', type: [ScoreResponseDto] })
-  async findByStudent(@Param('studentId', ParseIntPipe) studentId: number) {
+  async findByStudent(@Param('studentId') studentId: string) {
     const data = await this.scoreService.findByStudent(studentId);
     return { success: true, data };
   }
@@ -39,7 +39,7 @@ export class ScoreController {
   @Get('student/:studentId/latest')
   @ApiOperation({ summary: '학생의 최근 점수 조회' })
   @ApiResponse({ status: 200, description: '최근 점수', type: ScoreResponseDto })
-  async findLatestByStudent(@Param('studentId', ParseIntPipe) studentId: number) {
+  async findLatestByStudent(@Param('studentId') studentId: string) {
     const data = await this.scoreService.findLatestByStudent(studentId);
     return { success: true, data };
   }
@@ -48,7 +48,7 @@ export class ScoreController {
   @ApiOperation({ summary: '특정 학생의 특정 모의고사 점수 조회' })
   @ApiResponse({ status: 200, description: '점수 상세', type: ScoreResponseDto })
   async findOne(
-    @Param('studentId', ParseIntPipe) studentId: number,
+    @Param('studentId') studentId: string,
     @Param('mockExamId', ParseIntPipe) mockExamId: number,
   ) {
     const data = await this.scoreService.findOne(studentId, mockExamId);

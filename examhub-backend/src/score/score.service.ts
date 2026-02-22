@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateScoreDto } from './dto/create-score.dto';
 import { UpdateScoreDto } from './dto/update-score.dto';
+import { toExamHubMemberId } from '../common/utils/member-id.util';
 
 @Injectable()
 export class ScoreService {
@@ -13,9 +14,10 @@ export class ScoreService {
   async create(createScoreDto: CreateScoreDto) {
     const { studentId, mockExamId, ...scoreData } = createScoreDto;
 
-    // 학생 존재 확인
+    // 학생 존재 확인 (memberId로 조회)
+    const ehMemberId = toExamHubMemberId(studentId);
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: ehMemberId },
     });
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
@@ -36,7 +38,7 @@ export class ScoreService {
     return this.prisma.studentScore.upsert({
       where: {
         memberId_mockExamId: {
-          memberId: studentId,
+          memberId: member.id,
           mockExamId,
         },
       },
@@ -45,7 +47,7 @@ export class ScoreService {
         ...calculatedData,
       },
       create: {
-        memberId: studentId,
+        memberId: member.id,
         mockExamId,
         ...scoreData,
         ...calculatedData,
@@ -93,9 +95,11 @@ export class ScoreService {
   /**
    * 학생의 모든 점수 조회
    */
-  async findByStudent(studentId: number) {
+  async findByStudent(studentId: string) {
+    const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
+    if (!member) return [];
     return this.prisma.studentScore.findMany({
-      where: { memberId: studentId },
+      where: { memberId: member.id },
       include: {
         mockExam: true,
       },
@@ -106,11 +110,15 @@ export class ScoreService {
   /**
    * 특정 학생의 특정 모의고사 점수 조회
    */
-  async findOne(studentId: number, mockExamId: number) {
+  async findOne(studentId: string, mockExamId: number) {
+    const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
+    if (!member) {
+      throw new NotFoundException(`학생 ${studentId}를 찾을 수 없습니다.`);
+    }
     const score = await this.prisma.studentScore.findUnique({
       where: {
         memberId_mockExamId: {
-          memberId: studentId,
+          memberId: member.id,
           mockExamId,
         },
       },
@@ -183,9 +191,11 @@ export class ScoreService {
   /**
    * 학생의 최근 점수 조회
    */
-  async findLatestByStudent(studentId: number) {
+  async findLatestByStudent(studentId: string) {
+    const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
+    if (!member) return null;
     return this.prisma.studentScore.findFirst({
-      where: { memberId: studentId },
+      where: { memberId: member.id },
       include: {
         mockExam: true,
       },

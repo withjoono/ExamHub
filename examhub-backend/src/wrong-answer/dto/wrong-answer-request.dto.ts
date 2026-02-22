@@ -33,9 +33,9 @@ export class WrongAnswerItemDto {
  * 답안 일괄 채점 요청 DTO
  */
 export class WrongAnswerGradeDto {
-  @ApiProperty({ description: '학생 ID' })
-  @IsInt()
-  studentId: number;
+  @ApiProperty({ description: '학생 ID (memberId)' })
+  @IsString()
+  studentId: string;
 
   @ApiProperty({ description: '모의고사 ID' })
   @IsInt()

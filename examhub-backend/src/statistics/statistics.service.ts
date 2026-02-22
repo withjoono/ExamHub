@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { toExamHubMemberId } from '../common/utils/member-id.util';
 import {
   TrendRequestDto,
   CumulativeRequestDto,
@@ -23,20 +24,21 @@ export class StatisticsService {
    * 성적 추이 조회
    */
   async getTrend(
-    studentId: number,
+    studentId: string,
     params?: TrendRequestDto,
   ): Promise<TrendAnalysisDto> {
-    // 학생 존재 확인
+    // 학생 존재 확인 (memberId로 조회)
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
+    const numericId = member.id;
 
     // 점수 조회 (시간순 정렬)
-    const whereClause: any = { memberId: studentId };
+    const whereClause: any = { memberId: numericId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {
@@ -61,7 +63,7 @@ export class StatisticsService {
 
     if (scores.length === 0) {
       return {
-        studentId,
+        studentId: numericId,
         periodStart: '',
         periodEnd: '',
         totalExams: 0,
@@ -111,7 +113,7 @@ export class StatisticsService {
     const lastExam = scores[scores.length - 1].mockExam;
 
     return {
-      studentId,
+      studentId: numericId,
       periodStart: `${firstExam.year}년 ${firstExam.month}월`,
       periodEnd: `${lastExam.year}년 ${lastExam.month}월`,
       totalExams: scores.length,
@@ -124,18 +126,19 @@ export class StatisticsService {
    * 누적 분석
    */
   async getCumulative(
-    studentId: number,
+    studentId: string,
     params?: CumulativeRequestDto,
   ): Promise<CumulativeAnalysisDto> {
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
+    const numericId = member.id;
 
-    const whereClause: any = { memberId: studentId };
+    const whereClause: any = { memberId: numericId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {
@@ -160,7 +163,7 @@ export class StatisticsService {
 
     if (scores.length === 0) {
       return {
-        studentId,
+        studentId: numericId,
         totalExams: 0,
         subjectStats: [],
         overallAvgGrade: 0,
@@ -213,7 +216,7 @@ export class StatisticsService {
     const overallTrend = this.calculateOverallTrendDirection(scores);
 
     return {
-      studentId,
+      studentId: numericId,
       totalExams: scores.length,
       subjectStats,
       overallAvgGrade,
@@ -227,18 +230,19 @@ export class StatisticsService {
    * 과목별 상세 분석
    */
   async getBySubject(
-    studentId: number,
+    studentId: string,
     params?: SubjectAnalysisRequestDto,
   ): Promise<SubjectAnalysisResponseDto> {
     const member = await this.prisma.member.findUnique({
-      where: { id: studentId },
+      where: { memberId: toExamHubMemberId(studentId) },
     });
 
     if (!member) {
       throw new NotFoundException(`학생 ID ${studentId}를 찾을 수 없습니다.`);
     }
+    const numericId = member.id;
 
-    const whereClause: any = { memberId: studentId };
+    const whereClause: any = { memberId: numericId };
     if (params?.startYear || params?.endYear) {
       whereClause.mockExam = {};
       if (params.startYear) {
@@ -285,7 +289,7 @@ export class StatisticsService {
     }
 
     return {
-      studentId,
+      studentId: numericId,
       requestedSubject: params?.subject,
       analyses,
     };

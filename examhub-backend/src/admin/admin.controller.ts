@@ -18,7 +18,7 @@ import { SubmitGradingDto } from './dto/submit-grading.dto';
 @ApiTags('Admin')
 @Controller('api/admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   // Mock Exam CRUD
   @Post('mock-exams')
@@ -89,7 +89,7 @@ export class AdminController {
 
   @Get('grading/student/:studentId')
   @ApiOperation({ summary: '학생별 채점 결과 조회' })
-  async getGradingByStudent(@Param('studentId', ParseIntPipe) studentId: number) {
+  async getGradingByStudent(@Param('studentId') studentId: string) {
     return this.adminService.getGradingByStudent(studentId);
   }
 }

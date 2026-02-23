@@ -6,12 +6,28 @@ import { FilterUniversityDto } from './dto/filter-university.dto';
 @ApiTags('대학')
 @Controller('api/universities')
 export class UniversityController {
-  constructor(private readonly universityService: UniversityService) {}
+  constructor(private readonly universityService: UniversityService) { }
 
   @Get()
   @ApiOperation({ summary: '대학 목록 조회' })
   async findAll() {
     const data = await this.universityService.findAll();
+    return { success: true, data };
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: '대학명 검색 (자동완성)' })
+  @ApiQuery({ name: 'q', required: true, description: '검색어' })
+  async searchUniversities(@Query('q') query: string) {
+    const data = await this.universityService.searchUniversities(query);
+    return { success: true, data };
+  }
+
+  @Get('departments/search')
+  @ApiOperation({ summary: '모집단위/계열 검색' })
+  @ApiQuery({ name: 'q', required: true, description: '검색어 (예: 의대, 컴퓨터)' })
+  async searchDepartments(@Query('q') query: string) {
+    const data = await this.universityService.searchDepartments(query);
     return { success: true, data };
   }
 
@@ -65,14 +81,11 @@ export class UniversityController {
     const data = await this.universityService.findById(id);
     return { success: true, data };
   }
+
+  @Get(':id/departments')
+  @ApiOperation({ summary: '대학별 학과 목록 조회' })
+  async getDepartmentsByUniversity(@Param('id', ParseIntPipe) id: number) {
+    const data = await this.universityService.getDepartmentsByUniversityId(id);
+    return { success: true, data };
+  }
 }
-
-
-
-
-
-
-
-
-
-

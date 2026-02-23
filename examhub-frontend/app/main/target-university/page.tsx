@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -171,9 +172,11 @@ export default function TargetUniversityPage() {
 
             {/* Action Button */}
             <div className="flex justify-end mt-6">
-              <Button className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2 rounded-lg">
-                목표대학 설정하기 →
-              </Button>
+              <Link href="/main/target-university/settings">
+                <Button className="bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-6 py-2 rounded-lg">
+                  목표대학 설정하기 →
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

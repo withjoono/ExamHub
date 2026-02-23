@@ -4,7 +4,7 @@ import { FilterUniversityDto } from './dto/filter-university.dto';
 
 @Injectable()
 export class UniversityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * 모든 대학 목록 조회
@@ -185,11 +185,106 @@ export class UniversityService {
     // 환산율 적용
     return Math.round(totalScore * Number(university.conversionRate) * 100) / 100;
   }
+
+  /**
+   * 대학명 검색 (자동완성용)
+   */
+  async searchUniversities(query: string) {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    return this.prisma.university.findMany({
+      where: {
+        name: {
+          contains: query.trim(),
+        },
+      },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        region: true,
+      },
+      orderBy: { name: 'asc' },
+      take: 20,
+    });
+  }
+
+  /**
+   * 특정 대학의 학과(모집단위) 목록 조회
+   */
+  async getDepartmentsByUniversityId(universityId: number) {
+    const university = await this.prisma.university.findUnique({
+      where: { id: universityId },
+    });
+
+    if (!university) {
+      throw new NotFoundException(`대학 ID ${universityId}를 찾을 수 없습니다.`);
+    }
+
+    const departments = await this.prisma.department.findMany({
+      where: { universityId },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        category: true,
+        subCategory: true,
+        admissionType: true,
+        quota: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return {
+      university: {
+        id: university.id,
+        name: university.name,
+        region: university.region,
+      },
+      departments,
+    };
+  }
+
+  /**
+   * 학과명/계열 검색 (모집단위 검색)
+   */
+  async searchDepartments(query: string) {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const q = query.trim();
+
+    // 학과명 또는 subCategory에 검색어가 포함된 모집단위 조회
+    const departments = await this.prisma.department.findMany({
+      where: {
+        OR: [
+          { name: { contains: q } },
+          { subCategory: { contains: q } },
+          { category: { contains: q } },
+        ],
+      },
+      include: {
+        university: {
+          select: {
+            id: true,
+            name: true,
+            region: true,
+          },
+        },
+      },
+      orderBy: [
+        { university: { name: 'asc' } },
+        { name: 'asc' },
+      ],
+      take: 100,
+    });
+
+    return departments;
+  }
 }
-
-
-
-
 
 
 

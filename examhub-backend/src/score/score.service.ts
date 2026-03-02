@@ -315,18 +315,45 @@ export class ScoreService {
           }
         }
       } else if (rawScore != null && subjectName) {
-        // === 경로 B: 원점수만 존재 → 표점 변환 (백분위/등급 스킵) ===
+        // === 경로 B: 원점수만 존재 → 표점 변환 + 백분위/등급 조회 ===
         hasAnyRaw = true;
         const areaName = def.areaName || (score as any)[def.selectionField];
 
-        // 원점수 → 표점 변환 조회
-        const rawConversion = await this.prisma.scoreConversionRaw2015.findFirst({
-          where: { mockExamId, subject: areaName, commonScore: rawScore },
+        // 원점수 → 표점 변환 조회 (exact match 먼저, 없으면 max 사용)
+        let rawConversion = await this.prisma.scoreConversionRaw2015.findFirst({
+          where: { mockExamId, subject: areaName, subjectType: subjectName, commonScore: rawScore },
         });
 
+        // 원점수가 테이블 범위를 초과 → 최고 표점 사용
+        if (!rawConversion) {
+          rawConversion = await this.prisma.scoreConversionRaw2015.findFirst({
+            where: { mockExamId, subject: areaName, subjectType: subjectName },
+            orderBy: { standardScore: 'desc' },
+          });
+        }
+
         if (rawConversion?.standardScore != null) {
-          stdScoresForRaw.push(rawConversion.standardScore);
-          updateData[def.stdField] = rawConversion.standardScore;
+          const convertedStd = rawConversion.standardScore;
+          stdScoresForRaw.push(convertedStd);
+          updateData[def.stdField] = convertedStd;
+
+          // 변환된 표점으로 백분위/등급 조회 (scoreConversion2015)
+          let stdConversion = await this.prisma.scoreConversion2015.findFirst({
+            where: { mockExamId, subject: subjectName, standardScore: convertedStd },
+          });
+
+          // 표점이 변환표 범위 초과 → 최고점 엔트리 사용
+          if (!stdConversion) {
+            stdConversion = await this.prisma.scoreConversion2015.findFirst({
+              where: { mockExamId, subject: subjectName },
+              orderBy: { standardScore: 'desc' },
+            });
+          }
+
+          if (stdConversion) {
+            if (stdConversion.percentile != null) updateData[def.pctField] = Number(stdConversion.percentile);
+            if (stdConversion.grade != null) updateData[def.gradeField] = stdConversion.grade;
+          }
         }
       }
     }
@@ -385,6 +412,16 @@ export class ScoreService {
       // 경로 B: 원점수→변환표점 기반 (표준점수가 없을 때만)
       const totalRawStdSum = stdScoresForRaw.reduce((sum, s) => sum + s, 0);
       updateData.totalStandardSum = totalRawStdSum;
+
+      // 백분위 합계 (경로B에서도 백분위가 산출되므로)
+      const pctFields = ['koreanPercentile', 'mathPercentile', 'inquiry1Percentile', 'inquiry2Percentile'];
+      const pcts = pctFields
+        .map(f => updateData[f] ?? (score as any)[f])
+        .filter(p => p != null)
+        .map(Number);
+      if (pcts.length > 0) {
+        updateData.totalPercentileSum = pcts.reduce((sum, p) => sum + p, 0);
+      }
 
       // 상위누백 (topCumulativeRaw) — 임시 성격
       if (englishGrade != null) {

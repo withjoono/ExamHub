@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * G Skool 로그인 버튼 컴포넌트
+ * T Skool 로그인 버튼 컴포넌트
  * Hub 로그인 페이지로 리디렉트
  */
 
@@ -28,7 +28,7 @@ export function LoginButton({
       className={className}
       onClick={() => redirectToHubLogin(returnPath)}
     >
-      G Skool 계정으로 로그인
+      T Skool 계정으로 로그인
     </Button>
   );
 }

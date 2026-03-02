@@ -1269,7 +1269,7 @@ function ScoreInputPageContent() {
     const [inquiry2Category, setInquiry2Category] = useState<"사탐" | "과탐">("과탐")
 
     const socialSubjects = ["생활과윤리", "윤리와사상", "한국지리", "세계지리", "동아시아사", "세계사", "경제", "정치와법", "사회·문화"]
-    const scienceSubjects = ["물리학I", "화학I", "생명과학I", "지구과학I", "물리학II", "화학II", "생명과학II", "지구과학II"]
+    const scienceSubjects = ["물리학 I", "화학 I", "생명과학 I", "지구과학 I", "물리학 II", "화학 II", "생명과학 II", "지구과학 II"]
 
     const [standardScores, setStandardScores] = useState({
       korean: { standard: "", grade: "", percentile: "" },

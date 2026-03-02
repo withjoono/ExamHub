@@ -21,6 +21,12 @@ import {
   ChevronRight,
   BookOpen,
   AlertCircle,
+  Search,
+  Mountain,
+  Crosshair,
+  Handshake,
+  Users,
+  Building2,
 } from "lucide-react"
 
 // ========== 타입 ==========
@@ -575,6 +581,177 @@ function PromoPage() {
                     <div className="flex items-center gap-2 text-sm"><CheckCircle2 className="w-4 h-4 text-purple-300" />수시 · 정시 분석</div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 모토 배너 */}
+      <section className="py-12 md:py-16 bg-gradient-to-r from-[#7b1e7a] via-[#9c3d9a] to-[#7b1e7a] relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-yellow-300/10 rounded-full blur-3xl" />
+        </div>
+        <div className="relative max-w-4xl mx-auto px-4 text-center">
+          <div className="mb-4">
+            <span className="text-5xl md:text-6xl">🔥</span>
+          </div>
+          <h2 className="text-2xl md:text-4xl font-extrabold text-white mb-3 tracking-tight">
+            &ldquo;<span className="bg-gradient-to-r from-amber-300 to-yellow-200 text-transparent bg-clip-text">내가 푸는 단 한 문제도 버리지 않도록!</span>&rdquo;
+          </h2>
+          <p className="text-white/70 text-sm md:text-base max-w-lg mx-auto">
+            ExamHub는 당신이 풀었던 모든 문제를 기억하고, 분석하고, 성장의 발판으로 만듭니다.
+          </p>
+        </div>
+      </section>
+
+      {/* 추가 기능 홍보 */}
+      <section className="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="text-center mb-14">
+            <span className="inline-block px-4 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-bold mb-4">✨ 더 강력한 기능들</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+              단순 채점을 넘어,<br /><span className="text-[#7b1e7a]">진짜 실력 향상까지</span>
+            </h2>
+            <p className="text-gray-500 text-lg">ExamHub만의 심층 분석 도구들을 만나보세요</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* 취약분석 */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+              <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6">
+                <Search className="w-10 h-10 text-white/90 mb-3" />
+                <h3 className="text-xl font-bold text-white">🔍 취약점 분석</h3>
+                <p className="text-red-100 text-sm mt-1">나의 약점을 정확히 파악하세요</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  세부과목별·난이도별·유형별·문제형태별·단원별·배점별로<br />
+                  오답 패턴을 레이더 차트와 바 차트로 시각화합니다.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-red-400" />6가지 차원의 다차원 취약점 분석</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-red-400" />레이더 차트로 취약점 한눈에 파악</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-red-400" />가장 취약한 유형·단원 자동 감지</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 오답노트 활용 */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-6">
+                <BookOpen className="w-10 h-10 text-white/90 mb-3" />
+                <h3 className="text-xl font-bold text-white">📖 오답노트 활용</h3>
+                <p className="text-orange-100 text-sm mt-1">틀린 문제를 다시 풀어 완전 정복</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  시험별·과목별·유형별·난이도별·배점별로 오답을 정리하고,<br />
+                  선별된 문제로 다시 시험을 볼 수 있습니다.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-orange-400" />시험별·범위별 오답 문항 자동 정리</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-orange-400" />오답 문제로 재시험 구성 (예정)</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-orange-400" />복습 횟수·북마크 관리</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 목표대학 기능 */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6">
+                <Mountain className="w-10 h-10 text-white/90 mb-3" />
+                <h3 className="text-xl font-bold text-white">⛰️ 목표대학 설정</h3>
+                <p className="text-emerald-100 text-sm mt-1">고지를 보고 달려라!</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  목표 대학을 설정하면, 매 시험마다 목표 대학 등급컷과<br />
+                  내 성적의 거리를 시각적으로 보여줍니다.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-emerald-400" />목표 대학 등급컷 vs 내 성적 비교</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-emerald-400" />시험별 접근도 추이 그래프</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-emerald-400" />부족한 과목 자동 안내</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 대학 예측 */}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+              <div className="bg-gradient-to-r from-[#7b1e7a] to-[#5a1559] p-6">
+                <Crosshair className="w-10 h-10 text-white/90 mb-3" />
+                <h3 className="text-xl font-bold text-white">🎯 대학 합격 예측</h3>
+                <p className="text-purple-200 text-sm mt-1">내 성적으로 어디까지 갈 수 있을까?</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  최신 입시 데이터를 기반으로 합격 가능 대학을 예측하고,<br />
+                  안정·적정·소신 지원 대학까지 분류합니다.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-purple-400" />정시 합격 가능 대학 자동 분류</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-purple-400" />안정·적정·소신 3단계 지원 가이드</div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500"><CheckCircle2 className="w-4 h-4 text-purple-400" />시험별 예측 변화 추이 확인</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 사설모의고사 협업 제안 */}
+      <section className="py-16 md:py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-amber-400/20 rounded-full text-amber-300 text-sm font-bold mb-5">
+                  <Handshake className="w-4 h-4" />
+                  파트너 모집
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-4 leading-tight">
+                  사설 모의고사 기관이신가요?<br />
+                  <span className="text-amber-300">ExamHub와 함께하세요!</span>
+                </h2>
+                <p className="text-gray-400 text-sm md:text-base leading-relaxed mb-6">
+                  귀사의 모의고사를 ExamHub 플랫폼에 등록하면,<br />
+                  학생들이 자동채점·성적분석·취약분석까지 원스톱으로 이용할 수 있습니다.<br />
+                  사설 모의고사의 가치를 극대화하고, 더 많은 학생에게 도달하세요.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                    <div className="w-10 h-10 bg-amber-400/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Users className="w-5 h-5 text-amber-300" />
+                    </div>
+                    <div>
+                      <div className="text-white text-sm font-bold">학생 유치</div>
+                      <div className="text-gray-400 text-xs">플랫폼 노출 확대</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                    <div className="w-10 h-10 bg-emerald-400/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <BarChart3 className="w-5 h-5 text-emerald-300" />
+                    </div>
+                    <div>
+                      <div className="text-white text-sm font-bold">분석 제공</div>
+                      <div className="text-gray-400 text-xs">자동 성적분석 포함</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/10 rounded-xl p-3">
+                    <div className="w-10 h-10 bg-blue-400/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Building2 className="w-5 h-5 text-blue-300" />
+                    </div>
+                    <div>
+                      <div className="text-white text-sm font-bold">브랜드 강화</div>
+                      <div className="text-gray-400 text-xs">전문 플랫폼 파트너</div>
+                    </div>
+                  </div>
+                </div>
+                <a href="mailto:contact@examhub.kr" className="inline-flex items-center gap-2 px-7 py-3.5 bg-amber-400 text-gray-900 rounded-xl hover:bg-amber-300 transition-colors font-bold text-sm shadow-lg">
+                  <Handshake className="w-5 h-5" />협업 문의하기<ArrowRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>

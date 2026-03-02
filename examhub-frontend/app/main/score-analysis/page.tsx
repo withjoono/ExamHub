@@ -442,19 +442,19 @@ export default function MockExamScoreAnalysisPage() {
 
                   // 조합별 분석
                   const combinations: { name: string; totalStandard: number; avgPercentile: number; avgGrade: number }[] = []
-                  const korS = selectedScore.koreanStandard || 0
-                  const matS = selectedScore.mathStandard || 0
-                  const inq1S = selectedScore.inquiry1Standard || 0
-                  const inq2S = selectedScore.inquiry2Standard || 0
-                  const korP = selectedScore.koreanPercentile || 0
-                  const matP = selectedScore.mathPercentile || 0
-                  const inq1P = selectedScore.inquiry1Percentile || 0
-                  const inq2P = selectedScore.inquiry2Percentile || 0
-                  const korG = selectedScore.koreanGrade || 0
-                  const matG = selectedScore.mathGrade || 0
-                  const engG = selectedScore.englishGrade || 0
-                  const inq1G = selectedScore.inquiry1Grade || 0
-                  const inq2G = selectedScore.inquiry2Grade || 0
+                  const korS = Number(selectedScore.koreanStandard) || 0
+                  const matS = Number(selectedScore.mathStandard) || 0
+                  const inq1S = Number(selectedScore.inquiry1Standard) || 0
+                  const inq2S = Number(selectedScore.inquiry2Standard) || 0
+                  const korP = Number(selectedScore.koreanPercentile) || 0
+                  const matP = Number(selectedScore.mathPercentile) || 0
+                  const inq1P = Number(selectedScore.inquiry1Percentile) || 0
+                  const inq2P = Number(selectedScore.inquiry2Percentile) || 0
+                  const korG = Number(selectedScore.koreanGrade) || 0
+                  const matG = Number(selectedScore.mathGrade) || 0
+                  const engG = Number(selectedScore.englishGrade) || 0
+                  const inq1G = Number(selectedScore.inquiry1Grade) || 0
+                  const inq2G = Number(selectedScore.inquiry2Grade) || 0
 
                   if (korS && matS && (inq1S || inq2S)) {
                     combinations.push({

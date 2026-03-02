@@ -125,8 +125,17 @@ export class WrongAnswerService {
           earnedScore: answerData.earnedScore,
         },
         create: {
-          ...answerData,
           memberId: answerData.studentId,
+          mockExamId: answerData.mockExamId,
+          examQuestionId: answerData.examQuestionId,
+          subjectAreaName: answerData.subjectAreaName,
+          subjectName: answerData.subjectName,
+          questionNumber: answerData.questionNumber,
+          selectedAnswer: answerData.selectedAnswer,
+          correctAnswer: answerData.correctAnswer,
+          isCorrect: answerData.isCorrect,
+          score: answerData.score,
+          earnedScore: answerData.earnedScore,
         },
       });
     }

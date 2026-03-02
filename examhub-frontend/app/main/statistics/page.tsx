@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { getUser, type User } from "@/lib/auth/user"
 import { api } from "@/lib/api/client"
+import { ExamCategorySelector, useExamCategory } from "@/components/ExamCategorySelector"
 
 /* ───── Types ───── */
 interface ExamDataPoint {
@@ -194,6 +195,7 @@ export default function StatisticsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const { category, setCategory, isActive } = useExamCategory()
   const [trend, setTrend] = useState<TrendAnalysis | null>(null)
   const [cumulative, setCumulative] = useState<CumulativeAnalysis | null>(null)
   const [loading, setLoading] = useState(true)
@@ -268,7 +270,7 @@ export default function StatisticsPage() {
           <span className="text-[#7b1e7a] font-medium">성적 추이</span>
         </div>
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">성적 추이 분석</h1>
           <select
             value={selectedYear}
@@ -280,55 +282,59 @@ export default function StatisticsPage() {
           </select>
         </div>
 
-        {error && <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-300 mb-6">{error}</div>}
+        <ExamCategorySelector onCategoryChange={setCategory} selectedCategory={category} />
 
-        {loading ? (
-          <div className="flex items-center justify-center py-20"><span className="text-gray-500">데이터 로딩 중...</span></div>
-        ) : noData ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <p className="text-gray-600 mb-4">아직 저장된 성적이 없습니다.</p>
-            <button onClick={() => router.push("/main/input")} className="px-6 py-2 bg-[#7b1e7a] text-white rounded-md hover:bg-[#5a165a]">
-              모의고사 입력하기
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Summary cards */}
-            {cumulative && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <SummaryCard title="총 시험 횟수" value={`${cumulative.totalExams}회`} />
-                <SummaryCard title="전체 평균 등급" value={`${cumulative.overallAvgGrade.toFixed(1)}등급`}
-                  color={gradeTextColor(Math.round(cumulative.overallAvgGrade))} />
-                <SummaryCard title="성적 안정성" value={stabilityLabel(cumulative.stability)}
-                  sub={cumulative.stability === "high" ? "🟢" : cumulative.stability === "medium" ? "🟡" : "🔴"} />
-                <SummaryCard title="전체 추세"
-                  value={`${trendIcon(cumulative.overallTrend === "improving" ? "up" : cumulative.overallTrend === "declining" ? "down" : "stable")} ${cumulative.overallTrend === "improving" ? "상승 중" : cumulative.overallTrend === "declining" ? "하락 중" : "유지"}`} />
-              </div>
-            )}
+        {!isActive ? null : (<>
+          {error && <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-300 mb-6">{error}</div>}
 
-            {/* Tab nav */}
-            <div className="flex border-b border-gray-200 mb-6">
-              {([
-                ["overview", "📈 전체 추이"],
-                ["cumulative-pct", "🎯 상위누백 추이"],
-                ["heatmap", "🔥 등급 히트맵"],
-                ["subjects", "📚 과목별 분석"],
-              ] as const).map(([key, label]) => (
-                <button key={key} onClick={() => setActiveTab(key)}
-                  className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === key ? "border-[#7b1e7a] text-[#7b1e7a]" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
-                  {label}
-                </button>
-              ))}
+          {loading ? (
+            <div className="flex items-center justify-center py-20"><span className="text-gray-500">데이터 로딩 중...</span></div>
+          ) : noData ? (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div className="text-4xl mb-4">📊</div>
+              <p className="text-gray-600 mb-4">아직 저장된 성적이 없습니다.</p>
+              <button onClick={() => router.push("/main/input")} className="px-6 py-2 bg-[#7b1e7a] text-white rounded-md hover:bg-[#5a165a]">
+                모의고사 입력하기
+              </button>
             </div>
+          ) : (
+            <>
+              {/* Summary cards */}
+              {cumulative && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <SummaryCard title="총 시험 횟수" value={`${cumulative.totalExams}회`} />
+                  <SummaryCard title="전체 평균 등급" value={`${cumulative.overallAvgGrade.toFixed(1)}등급`}
+                    color={gradeTextColor(Math.round(cumulative.overallAvgGrade))} />
+                  <SummaryCard title="성적 안정성" value={stabilityLabel(cumulative.stability)}
+                    sub={cumulative.stability === "high" ? "🟢" : cumulative.stability === "medium" ? "🟡" : "🔴"} />
+                  <SummaryCard title="전체 추세"
+                    value={`${trendIcon(cumulative.overallTrend === "improving" ? "up" : cumulative.overallTrend === "declining" ? "down" : "stable")} ${cumulative.overallTrend === "improving" ? "상승 중" : cumulative.overallTrend === "declining" ? "하락 중" : "유지"}`} />
+                </div>
+              )}
 
-            {/* Tab content */}
-            {activeTab === "overview" && trend && <OverviewTab trend={trend} examLabels={examLabels} />}
-            {activeTab === "cumulative-pct" && trend && <CumulativePctTab trend={trend} examLabels={examLabels} />}
-            {activeTab === "heatmap" && trend && <HeatmapTab trend={trend} />}
-            {activeTab === "subjects" && trend && cumulative && <SubjectsTab trend={trend} cumulative={cumulative} examLabels={examLabels} />}
-          </>
-        )}
+              {/* Tab nav */}
+              <div className="flex border-b border-gray-200 mb-6">
+                {([
+                  ["overview", "📈 전체 추이"],
+                  ["cumulative-pct", "🎯 상위누백 추이"],
+                  ["heatmap", "🔥 등급 히트맵"],
+                  ["subjects", "📚 과목별 분석"],
+                ] as const).map(([key, label]) => (
+                  <button key={key} onClick={() => setActiveTab(key)}
+                    className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === key ? "border-[#7b1e7a] text-[#7b1e7a]" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab content */}
+              {activeTab === "overview" && trend && <OverviewTab trend={trend} examLabels={examLabels} />}
+              {activeTab === "cumulative-pct" && trend && <CumulativePctTab trend={trend} examLabels={examLabels} />}
+              {activeTab === "heatmap" && trend && <HeatmapTab trend={trend} />}
+              {activeTab === "subjects" && trend && cumulative && <SubjectsTab trend={trend} cumulative={cumulative} examLabels={examLabels} />}
+            </>
+          )}
+        </>)}
       </div>
     </div>
   )

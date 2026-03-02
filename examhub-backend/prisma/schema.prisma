@@ -39,6 +39,7 @@ model MockExam {
   year                    Int?
   month                   Int?
   type                    String?                   @db.VarChar(20)
+  category                String                    @default("official") @db.VarChar(20)
   createdAt               DateTime                  @default(now()) @map("created_at")
   admissionCutoffs        AdmissionCutoff[]
   questions               ExamQuestion[]
@@ -53,7 +54,7 @@ model MockExam {
   studentScores           StudentScore[]
 
   @@index([code])
-  @@index([grade, year, month])
+  @@index([category, grade, year, month])
   @@map("eh_mock_exams")
 }
 

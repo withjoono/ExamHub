@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getUser, type User } from "@/lib/auth/user"
 import { api } from "@/lib/api/client"
+import { ExamCategorySelector, useExamCategory } from "@/components/ExamCategorySelector"
 
 interface MockExamInfo {
   id: number
@@ -100,6 +101,7 @@ export default function MockExamScoreAnalysisPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const { category, setCategory, isActive } = useExamCategory()
 
   const [scoreRecords, setScoreRecords] = useState<ScoreRecord[]>([])
   const [selectedScoreId, setSelectedScoreId] = useState<number | null>(null)
@@ -279,329 +281,333 @@ export default function MockExamScoreAnalysisPage() {
           <span className="text-[#7b1e7a] font-medium">성적분석</span>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">성적 분석</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">성적 분석</h1>
 
-        {error && (
-          <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-300 mb-6">{error}</div>
-        )}
+        <ExamCategorySelector onCategoryChange={setCategory} selectedCategory={category} />
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-gray-500">데이터 로딩 중...</div>
-          </div>
-        ) : scoreRecords.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <p className="text-gray-600 mb-4">아직 저장된 성적이 없습니다.</p>
-            <p className="text-sm text-gray-500 mb-6">모의고사를 채점하면 성적이 자동으로 기록됩니다.</p>
-            <button
-              onClick={() => router.push('/main/input')}
-              className="px-6 py-2 bg-[#7b1e7a] text-white rounded-md hover:bg-[#5a165a] transition-colors"
-            >
-              모의고사 입력하기
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* 모의고사 선택 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">모의고사 선택</label>
-              <select
-                value={selectedScoreId ?? ''}
-                onChange={(e) => {
-                  const id = Number(e.target.value)
-                  setSelectedScoreId(id)
-                  setSelectedScore(scoreRecords.find(s => s.id === id) || null)
-                }}
-                className="border border-gray-300 rounded-md px-4 py-2 bg-white text-gray-900 focus:ring-[#7b1e7a] focus:border-[#7b1e7a]"
-              >
-                {scoreRecords.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.mockExam?.name ?? `모의고사 #${s.mockExamId}`} ({s.mockExam?.year}년 {s.mockExam?.month}월)
-                  </option>
-                ))}
-              </select>
+        {!isActive ? null : (<>
+          {error && (
+            <div className="bg-red-100 text-red-800 p-4 rounded-md border border-red-300 mb-6">{error}</div>
+          )}
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-gray-500">데이터 로딩 중...</div>
             </div>
-
-            {analysisLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-gray-500">분석 중...</div>
+          ) : scoreRecords.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <div className="text-4xl mb-4">📊</div>
+              <p className="text-gray-600 mb-4">아직 저장된 성적이 없습니다.</p>
+              <p className="text-sm text-gray-500 mb-6">모의고사를 채점하면 성적이 자동으로 기록됩니다.</p>
+              <button
+                onClick={() => router.push('/main/input')}
+                className="px-6 py-2 bg-[#7b1e7a] text-white rounded-md hover:bg-[#5a165a] transition-colors"
+              >
+                모의고사 입력하기
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* 모의고사 선택 */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">모의고사 선택</label>
+                <select
+                  value={selectedScoreId ?? ''}
+                  onChange={(e) => {
+                    const id = Number(e.target.value)
+                    setSelectedScoreId(id)
+                    setSelectedScore(scoreRecords.find(s => s.id === id) || null)
+                  }}
+                  className="border border-gray-300 rounded-md px-4 py-2 bg-white text-gray-900 focus:ring-[#7b1e7a] focus:border-[#7b1e7a]"
+                >
+                  {scoreRecords.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.mockExam?.name ?? `모의고사 #${s.mockExamId}`} ({s.mockExam?.year}년 {s.mockExam?.month}월)
+                    </option>
+                  ))}
+                </select>
               </div>
-            ) : (
-              <>
-                {/* 내 성적 테이블 */}
-                {selectedScore && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                    <div className="p-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">📝 내 성적</h2>
-                      {selectedScore.totalStandardSum && (
-                        <div className="flex space-x-4 mb-4">
-                          <span className="text-sm bg-[#f5e6f5] text-[#7b1e7a] px-3 py-1 rounded-full">
-                            표준점수 합계: <strong>{selectedScore.totalStandardSum}</strong>
-                          </span>
-                          {selectedScore.totalPercentileSum && (
-                            <span className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                              백분위 합계: <strong>{Number(selectedScore.totalPercentileSum).toFixed(1)}</strong>
+
+              {analysisLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-gray-500">분석 중...</div>
+                </div>
+              ) : (
+                <>
+                  {/* 내 성적 테이블 */}
+                  {selectedScore && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                      <div className="p-6">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">📝 내 성적</h2>
+                        {selectedScore.totalStandardSum && (
+                          <div className="flex space-x-4 mb-4">
+                            <span className="text-sm bg-[#f5e6f5] text-[#7b1e7a] px-3 py-1 rounded-full">
+                              표준점수 합계: <strong>{selectedScore.totalStandardSum}</strong>
                             </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="border-b bg-gray-50">
-                              <th className="text-left p-3 text-sm font-medium text-gray-700">구분</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">
-                                국어
-                                {selectedScore.koreanSelection && <div className="text-xs text-gray-400">{selectedScore.koreanSelection}</div>}
-                              </th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">
-                                수학
-                                {selectedScore.mathSelection && <div className="text-xs text-gray-400">{selectedScore.mathSelection}</div>}
-                              </th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">영어</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">
-                                탐구1
-                                {selectedScore.inquiry1Selection && <div className="text-xs text-gray-400">{selectedScore.inquiry1Selection}</div>}
-                              </th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">
-                                탐구2
-                                {selectedScore.inquiry2Selection && <div className="text-xs text-gray-400">{selectedScore.inquiry2Selection}</div>}
-                              </th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">한국사</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">
-                                제2외국어
-                                {selectedScore.foreignSelection && <div className="text-xs text-gray-400">{selectedScore.foreignSelection}</div>}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {extractScoreTable(selectedScore).map((row, i) => (
-                              <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                <td className="p-3 text-sm font-medium text-gray-900 bg-gray-100">{row.label}</td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.korean as number) : 'text-gray-900'}`}>
-                                  {row.korean ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.math as number) : 'text-gray-900'}`}>
-                                  {row.math ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.english as number) : 'text-gray-900'}`}>
-                                  {row.english ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.inquiry1 as number) : 'text-gray-900'}`}>
-                                  {row.inquiry1 ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.inquiry2 as number) : 'text-gray-900'}`}>
-                                  {row.inquiry2 ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.history as number) : 'text-gray-900'}`}>
-                                  {row.history ?? '-'}
-                                </td>
-                                <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.foreign as number) : 'text-gray-900'}`}>
-                                  {row.foreign ?? '-'}
-                                </td>
+                            {selectedScore.totalPercentileSum && (
+                              <span className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                                백분위 합계: <strong>{Number(selectedScore.totalPercentileSum).toFixed(1)}</strong>
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="border-b bg-gray-50">
+                                <th className="text-left p-3 text-sm font-medium text-gray-700">구분</th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">
+                                  국어
+                                  {selectedScore.koreanSelection && <div className="text-xs text-gray-400">{selectedScore.koreanSelection}</div>}
+                                </th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">
+                                  수학
+                                  {selectedScore.mathSelection && <div className="text-xs text-gray-400">{selectedScore.mathSelection}</div>}
+                                </th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">영어</th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">
+                                  탐구1
+                                  {selectedScore.inquiry1Selection && <div className="text-xs text-gray-400">{selectedScore.inquiry1Selection}</div>}
+                                </th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">
+                                  탐구2
+                                  {selectedScore.inquiry2Selection && <div className="text-xs text-gray-400">{selectedScore.inquiry2Selection}</div>}
+                                </th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">한국사</th>
+                                <th className="text-center p-3 text-sm font-medium text-gray-700">
+                                  제2외국어
+                                  {selectedScore.foreignSelection && <div className="text-xs text-gray-400">{selectedScore.foreignSelection}</div>}
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {extractScoreTable(selectedScore).map((row, i) => (
+                                <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                  <td className="p-3 text-sm font-medium text-gray-900 bg-gray-100">{row.label}</td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.korean as number) : 'text-gray-900'}`}>
+                                    {row.korean ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.math as number) : 'text-gray-900'}`}>
+                                    {row.math ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.english as number) : 'text-gray-900'}`}>
+                                    {row.english ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.inquiry1 as number) : 'text-gray-900'}`}>
+                                    {row.inquiry1 ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.inquiry2 as number) : 'text-gray-900'}`}>
+                                    {row.inquiry2 ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.history as number) : 'text-gray-900'}`}>
+                                    {row.history ?? '-'}
+                                  </td>
+                                  <td className={`p-3 text-sm text-center ${row.label === '등급' ? gradeColor(row.foreign as number) : 'text-gray-900'}`}>
+                                    {row.foreign ?? '-'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* 성취수준 분석 - 클라이언트 계산 */}
-                {selectedScore && (() => {
-                  // 과목별 등급/백분위 추출
-                  const subjects: { name: string; grade?: number; percentile?: number; standard?: number }[] = [
-                    { name: "국어", grade: selectedScore.koreanGrade, percentile: selectedScore.koreanPercentile, standard: selectedScore.koreanStandard },
-                    { name: "수학", grade: selectedScore.mathGrade, percentile: selectedScore.mathPercentile, standard: selectedScore.mathStandard },
-                    { name: "영어", grade: selectedScore.englishGrade },
-                    { name: selectedScore.inquiry1Selection || "탐구1", grade: selectedScore.inquiry1Grade, percentile: selectedScore.inquiry1Percentile, standard: selectedScore.inquiry1Standard },
-                    { name: selectedScore.inquiry2Selection || "탐구2", grade: selectedScore.inquiry2Grade, percentile: selectedScore.inquiry2Percentile, standard: selectedScore.inquiry2Standard },
-                    { name: "한국사", grade: selectedScore.historyGrade },
-                  ].filter(s => s.grade != null)
+                  {/* 성취수준 분석 - 클라이언트 계산 */}
+                  {selectedScore && (() => {
+                    // 과목별 등급/백분위 추출
+                    const subjects: { name: string; grade?: number; percentile?: number; standard?: number }[] = [
+                      { name: "국어", grade: selectedScore.koreanGrade, percentile: selectedScore.koreanPercentile, standard: selectedScore.koreanStandard },
+                      { name: "수학", grade: selectedScore.mathGrade, percentile: selectedScore.mathPercentile, standard: selectedScore.mathStandard },
+                      { name: "영어", grade: selectedScore.englishGrade },
+                      { name: selectedScore.inquiry1Selection || "탐구1", grade: selectedScore.inquiry1Grade, percentile: selectedScore.inquiry1Percentile, standard: selectedScore.inquiry1Standard },
+                      { name: selectedScore.inquiry2Selection || "탐구2", grade: selectedScore.inquiry2Grade, percentile: selectedScore.inquiry2Percentile, standard: selectedScore.inquiry2Standard },
+                      { name: "한국사", grade: selectedScore.historyGrade },
+                    ].filter(s => s.grade != null)
 
-                  const avgGrade = subjects.length > 0
-                    ? subjects.reduce((sum, s) => sum + (s.grade || 0), 0) / subjects.length
-                    : 0
+                    const avgGrade = subjects.length > 0
+                      ? subjects.reduce((sum, s) => sum + (s.grade || 0), 0) / subjects.length
+                      : 0
 
-                  const getStatus = (g: number) => {
-                    if (g <= 2) return "excellent"
-                    if (g <= 4) return "good"
-                    if (g <= 6) return "average"
-                    if (g <= 7) return "belowAverage"
-                    return "poor"
-                  }
-                  const getMessage = (g: number) => {
-                    if (g <= 2) return "매우 우수한 성적입니다. 현재 수준을 유지하세요!"
-                    if (g <= 4) return "양호한 성적입니다. 조금만 더 노력하면 상위권에 진입할 수 있습니다."
-                    if (g <= 6) return "보통 수준입니다. 취약 부분을 집중적으로 보완하세요."
-                    if (g <= 7) return "보완이 필요한 과목입니다. 기본 개념부터 다시 정리해보세요."
-                    return "집중적인 학습이 필요합니다."
-                  }
+                    const getStatus = (g: number) => {
+                      if (g <= 2) return "excellent"
+                      if (g <= 4) return "good"
+                      if (g <= 6) return "average"
+                      if (g <= 7) return "belowAverage"
+                      return "poor"
+                    }
+                    const getMessage = (g: number) => {
+                      if (g <= 2) return "매우 우수한 성적입니다. 현재 수준을 유지하세요!"
+                      if (g <= 4) return "양호한 성적입니다. 조금만 더 노력하면 상위권에 진입할 수 있습니다."
+                      if (g <= 6) return "보통 수준입니다. 취약 부분을 집중적으로 보완하세요."
+                      if (g <= 7) return "보완이 필요한 과목입니다. 기본 개념부터 다시 정리해보세요."
+                      return "집중적인 학습이 필요합니다."
+                    }
 
-                  // 조합별 분석
-                  const combinations: { name: string; totalStandard: number; avgPercentile: number; avgGrade: number }[] = []
-                  const korS = Number(selectedScore.koreanStandard) || 0
-                  const matS = Number(selectedScore.mathStandard) || 0
-                  const inq1S = Number(selectedScore.inquiry1Standard) || 0
-                  const inq2S = Number(selectedScore.inquiry2Standard) || 0
-                  const korP = Number(selectedScore.koreanPercentile) || 0
-                  const matP = Number(selectedScore.mathPercentile) || 0
-                  const inq1P = Number(selectedScore.inquiry1Percentile) || 0
-                  const inq2P = Number(selectedScore.inquiry2Percentile) || 0
-                  const korG = Number(selectedScore.koreanGrade) || 0
-                  const matG = Number(selectedScore.mathGrade) || 0
-                  const engG = Number(selectedScore.englishGrade) || 0
-                  const inq1G = Number(selectedScore.inquiry1Grade) || 0
-                  const inq2G = Number(selectedScore.inquiry2Grade) || 0
+                    // 조합별 분석
+                    const combinations: { name: string; totalStandard: number; avgPercentile: number; avgGrade: number }[] = []
+                    const korS = Number(selectedScore.koreanStandard) || 0
+                    const matS = Number(selectedScore.mathStandard) || 0
+                    const inq1S = Number(selectedScore.inquiry1Standard) || 0
+                    const inq2S = Number(selectedScore.inquiry2Standard) || 0
+                    const korP = Number(selectedScore.koreanPercentile) || 0
+                    const matP = Number(selectedScore.mathPercentile) || 0
+                    const inq1P = Number(selectedScore.inquiry1Percentile) || 0
+                    const inq2P = Number(selectedScore.inquiry2Percentile) || 0
+                    const korG = Number(selectedScore.koreanGrade) || 0
+                    const matG = Number(selectedScore.mathGrade) || 0
+                    const engG = Number(selectedScore.englishGrade) || 0
+                    const inq1G = Number(selectedScore.inquiry1Grade) || 0
+                    const inq2G = Number(selectedScore.inquiry2Grade) || 0
 
-                  if (korS && matS && (inq1S || inq2S)) {
-                    combinations.push({
-                      name: "국수탐",
-                      totalStandard: korS + matS + inq1S + inq2S,
-                      avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
-                      avgGrade: [korG, matG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, inq1G, inq2G].filter(Boolean).length,
-                    })
-                  }
-                  if (korS && (inq1S || inq2S) && engG) {
-                    combinations.push({
-                      name: "국영탐",
-                      totalStandard: korS + inq1S + inq2S,
-                      avgPercentile: [korP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, inq1P, inq2P].filter(Boolean).length,
-                      avgGrade: [korG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, engG, inq1G, inq2G].filter(Boolean).length,
-                    })
-                  }
-                  if (korS && matS && engG && (inq1S || inq2S)) {
-                    combinations.push({
-                      name: "국수영탐",
-                      totalStandard: korS + matS + inq1S + inq2S,
-                      avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
-                      avgGrade: [korG, matG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, engG, inq1G, inq2G].filter(Boolean).length,
-                    })
-                  }
+                    if (korS && matS && (inq1S || inq2S)) {
+                      combinations.push({
+                        name: "국수탐",
+                        totalStandard: korS + matS + inq1S + inq2S,
+                        avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
+                        avgGrade: [korG, matG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, inq1G, inq2G].filter(Boolean).length,
+                      })
+                    }
+                    if (korS && (inq1S || inq2S) && engG) {
+                      combinations.push({
+                        name: "국영탐",
+                        totalStandard: korS + inq1S + inq2S,
+                        avgPercentile: [korP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, inq1P, inq2P].filter(Boolean).length,
+                        avgGrade: [korG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, engG, inq1G, inq2G].filter(Boolean).length,
+                      })
+                    }
+                    if (korS && matS && engG && (inq1S || inq2S)) {
+                      combinations.push({
+                        name: "국수영탐",
+                        totalStandard: korS + matS + inq1S + inq2S,
+                        avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
+                        avgGrade: [korG, matG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, engG, inq1G, inq2G].filter(Boolean).length,
+                      })
+                    }
 
-                  return (
-                    <>
-                      {/* 성취수준 분석 */}
-                      {subjects.length > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                          <div className="p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">🎯 성취수준 분석</h2>
-                            <div className="bg-[#fdf5fd] border border-[#d4a5d3] rounded-lg p-4 mb-6">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="text-sm text-gray-600">전체 평균 등급</span>
-                                  <span className={`ml-3 text-2xl font-bold ${gradeColor(Math.round(avgGrade))}`}>
-                                    {avgGrade.toFixed(1)}등급
-                                  </span>
-                                </div>
-                              </div>
-                              <p className="mt-3 text-sm text-gray-700">{getMessage(avgGrade)}</p>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {subjects.map((item, i) => (
-                                <div key={i} className="border border-gray-200 rounded-lg p-4">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="font-medium text-gray-900">{item.name}</span>
-                                    <span className={`text-xs px-2 py-1 rounded-full ${statusColor(getStatus(item.grade!))}`}>
-                                      {statusLabel(getStatus(item.grade!))}
+                    return (
+                      <>
+                        {/* 성취수준 분석 */}
+                        {subjects.length > 0 && (
+                          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                            <div className="p-6">
+                              <h2 className="text-lg font-semibold text-gray-900 mb-4">🎯 성취수준 분석</h2>
+                              <div className="bg-[#fdf5fd] border border-[#d4a5d3] rounded-lg p-4 mb-6">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <span className="text-sm text-gray-600">전체 평균 등급</span>
+                                    <span className={`ml-3 text-2xl font-bold ${gradeColor(Math.round(avgGrade))}`}>
+                                      {avgGrade.toFixed(1)}등급
                                     </span>
                                   </div>
-                                  <div className="flex items-center space-x-4">
-                                    <span className={`text-xl ${gradeColor(item.grade)}`}>{item.grade}등급</span>
-                                    {item.percentile != null && (
-                                      <span className="text-sm text-gray-500">백분위 {item.percentile}</span>
-                                    )}
-                                  </div>
-                                  <p className="mt-2 text-xs text-gray-500">{getMessage(item.grade!)}</p>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 조합별 분석 */}
-                      {combinations.length > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                          <div className="p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">🔀 조합별 분석</h2>
-                            <div className="overflow-x-auto">
-                              <table className="w-full border-collapse">
-                                <thead>
-                                  <tr className="border-b bg-gray-50">
-                                    <th className="text-left p-3 text-sm font-medium text-gray-700">조합</th>
-                                    <th className="text-center p-3 text-sm font-medium text-gray-700">표준점수 합</th>
-                                    <th className="text-center p-3 text-sm font-medium text-gray-700">평균 백분위</th>
-                                    <th className="text-center p-3 text-sm font-medium text-gray-700">평균 등급</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {combinations.map((c, i) => (
-                                    <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                      <td className="p-3 text-sm font-medium text-gray-900">{c.name}</td>
-                                      <td className="p-3 text-sm text-center text-gray-900">{c.totalStandard}</td>
-                                      <td className="p-3 text-sm text-center text-gray-900">{c.avgPercentile.toFixed(1)}</td>
-                                      <td className="p-3 text-sm text-center">
-                                        <span className="px-2 py-1 rounded-full bg-[#f5e6f5] text-[#7b1e7a] font-bold">
-                                          {c.avgGrade.toFixed(1)}등급
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 과목별 백분위 (세로 바 차트) */}
-                      {subjects.filter(s => s.percentile != null).length > 0 && (
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                          <div className="p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-6">📈 과목별 백분위</h2>
-                            <div className="flex items-end justify-center gap-6" style={{ height: '280px' }}>
-                              {subjects
-                                .filter(s => s.percentile != null)
-                                .map((s, i) => {
-                                  const colors = ['#7b1e7a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899']
-                                  return (
-                                    <div key={i} className="flex flex-col items-center gap-1" style={{ width: '60px' }}>
-                                      <span className="text-sm font-bold text-gray-900">{s.percentile}</span>
-                                      <div
-                                        className="w-10 rounded-t-md transition-all"
-                                        style={{
-                                          height: `${Math.max((s.percentile! / 100) * 220, 8)}px`,
-                                          backgroundColor: colors[i % colors.length],
-                                        }}
-                                      />
-                                      <span className="text-xs text-gray-600 text-center mt-1 leading-tight">{s.name}</span>
-                                      <span className={`text-xs ${gradeColor(s.grade)}`}>{s.grade}등급</span>
+                                <p className="mt-3 text-sm text-gray-700">{getMessage(avgGrade)}</p>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {subjects.map((item, i) => (
+                                  <div key={i} className="border border-gray-200 rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="font-medium text-gray-900">{item.name}</span>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${statusColor(getStatus(item.grade!))}`}>
+                                        {statusLabel(getStatus(item.grade!))}
+                                      </span>
                                     </div>
-                                  )
-                                })}
+                                    <div className="flex items-center space-x-4">
+                                      <span className={`text-xl ${gradeColor(item.grade)}`}>{item.grade}등급</span>
+                                      {item.percentile != null && (
+                                        <span className="text-sm text-gray-500">백분위 {item.percentile}</span>
+                                      )}
+                                    </div>
+                                    <p className="mt-2 text-xs text-gray-500">{getMessage(item.grade!)}</p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </>
-                  )
-                })()}
+                        )}
 
-                {/* 모든 분석 결과가 비어있을 때 */}
-                {!summary && !achievement && !combination && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                    <div className="text-4xl mb-4">📋</div>
-                    <p className="text-gray-600">선택한 모의고사의 분석 데이터가 아직 없습니다.</p>
-                    <p className="text-sm text-gray-500 mt-2">성적을 입력하면 자동으로 분석됩니다.</p>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+                        {/* 조합별 분석 */}
+                        {combinations.length > 0 && (
+                          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                            <div className="p-6">
+                              <h2 className="text-lg font-semibold text-gray-900 mb-4">🔀 조합별 분석</h2>
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                  <thead>
+                                    <tr className="border-b bg-gray-50">
+                                      <th className="text-left p-3 text-sm font-medium text-gray-700">조합</th>
+                                      <th className="text-center p-3 text-sm font-medium text-gray-700">표준점수 합</th>
+                                      <th className="text-center p-3 text-sm font-medium text-gray-700">평균 백분위</th>
+                                      <th className="text-center p-3 text-sm font-medium text-gray-700">평균 등급</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {combinations.map((c, i) => (
+                                      <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                        <td className="p-3 text-sm font-medium text-gray-900">{c.name}</td>
+                                        <td className="p-3 text-sm text-center text-gray-900">{c.totalStandard}</td>
+                                        <td className="p-3 text-sm text-center text-gray-900">{c.avgPercentile.toFixed(1)}</td>
+                                        <td className="p-3 text-sm text-center">
+                                          <span className="px-2 py-1 rounded-full bg-[#f5e6f5] text-[#7b1e7a] font-bold">
+                                            {c.avgGrade.toFixed(1)}등급
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 과목별 백분위 (세로 바 차트) */}
+                        {subjects.filter(s => s.percentile != null).length > 0 && (
+                          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                            <div className="p-6">
+                              <h2 className="text-lg font-semibold text-gray-900 mb-6">📈 과목별 백분위</h2>
+                              <div className="flex items-end justify-center gap-6" style={{ height: '280px' }}>
+                                {subjects
+                                  .filter(s => s.percentile != null)
+                                  .map((s, i) => {
+                                    const colors = ['#7b1e7a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899']
+                                    return (
+                                      <div key={i} className="flex flex-col items-center gap-1" style={{ width: '60px' }}>
+                                        <span className="text-sm font-bold text-gray-900">{s.percentile}</span>
+                                        <div
+                                          className="w-10 rounded-t-md transition-all"
+                                          style={{
+                                            height: `${Math.max((s.percentile! / 100) * 220, 8)}px`,
+                                            backgroundColor: colors[i % colors.length],
+                                          }}
+                                        />
+                                        <span className="text-xs text-gray-600 text-center mt-1 leading-tight">{s.name}</span>
+                                        <span className={`text-xs ${gradeColor(s.grade)}`}>{s.grade}등급</span>
+                                      </div>
+                                    )
+                                  })}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
+
+                  {/* 모든 분석 결과가 비어있을 때 */}
+                  {!summary && !achievement && !combination && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+                      <div className="text-4xl mb-4">📋</div>
+                      <p className="text-gray-600">선택한 모의고사의 분석 데이터가 아직 없습니다.</p>
+                      <p className="text-sm text-gray-500 mt-2">성적을 입력하면 자동으로 분석됩니다.</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </>)}
       </div>
     </div>
   )

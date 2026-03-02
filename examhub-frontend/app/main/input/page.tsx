@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { ChevronDown, Loader2, CheckCircle, XCircle, AlertCircle, FileText } from "lucide-react"
 import { api } from "@/lib/api/client"
 import { getUser } from "@/lib/auth/user"
+import { ExamCategorySelector, useExamCategory } from "@/components/ExamCategorySelector"
 
 // 학년 코드 변환 (고1 -> H1)
 const gradeToCode = (grade: string): string => {
@@ -28,6 +29,7 @@ interface MockExamItem {
 
 export default function MockExamInputPage() {
   const router = useRouter()
+  const { category, setCategory, isActive } = useExamCategory()
   const [selectedGrade, setSelectedGrade] = useState("")
   const [selectedYear, setSelectedYear] = useState("")
   const [selectedExamId, setSelectedExamId] = useState("")
@@ -215,9 +217,11 @@ export default function MockExamInputPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">모의고사 입력</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">모의고사 입력</h1>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <ExamCategorySelector onCategoryChange={setCategory} selectedCategory={category} />
+
+        {isActive && <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           {/* Mock Exam Selection Section */}
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
@@ -415,7 +419,7 @@ export default function MockExamInputPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   )

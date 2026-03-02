@@ -33,6 +33,13 @@ function MockExamFormPageContent() {
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [gradeResults, setGradeResults] = useState<any[]>([])
 
+  // 쿼리 파라미터 없으면 모의고사 선택 페이지로 리다이렉트
+  useEffect(() => {
+    if (!year || !grade || !month) {
+      router.replace('/main/input')
+    }
+  }, [year, grade, month, router])
+
   // 모의고사 ID 조회
   useEffect(() => {
     async function fetchMockExam() {

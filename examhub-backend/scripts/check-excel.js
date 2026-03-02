@@ -5,14 +5,28 @@ async function main() {
     try {
         await pool.query('SET search_path TO examhub');
         const res = await pool.query(`
-            SELECT e.code, e.name, count(*) as cnt
-            FROM eh_2015_cumulative_top_pct c
-            JOIN eh_mock_exams e ON c.mock_exam_id = e.id
-            GROUP BY e.code, e.name ORDER BY e.code
+            SELECT DISTINCT subject FROM eh_score_conversion_standard 
+            WHERE mock_exam_id = 11 ORDER BY subject
         `);
-        res.rows.forEach(r => console.log(`${r.code} ${r.name}: ${r.cnt} rows`));
-        const total = await pool.query('SELECT count(*) as cnt FROM eh_2015_cumulative_top_pct');
-        console.log(`Total: ${total.rows[0].cnt}`);
+        console.log('Subjects for mockExamId=11:');
+        res.rows.forEach(r => console.log('  ', JSON.stringify(r.subject)));
+
+        // Check a sample
+        const sample = await pool.query(`
+            SELECT subject, standard_score, percentile, grade 
+            FROM eh_score_conversion_standard 
+            WHERE mock_exam_id = 11 AND subject = '국어'
+            ORDER BY standard_score DESC LIMIT 3
+        `);
+        console.log('\nSample 국어:', sample.rows);
+
+        const sample2 = await pool.query(`
+            SELECT subject, standard_score, percentile, grade 
+            FROM eh_score_conversion_standard 
+            WHERE mock_exam_id = 11 AND subject = '화법과작문'
+            ORDER BY standard_score DESC LIMIT 3
+        `);
+        console.log('Sample 화법과작문:', sample2.rows);
     } finally { await pool.end(); }
 }
 main().catch(console.error);

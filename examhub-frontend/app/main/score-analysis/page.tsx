@@ -409,114 +409,186 @@ export default function MockExamScoreAnalysisPage() {
                   </div>
                 )}
 
-                {/* 성취수준 분석 */}
-                {achievement && achievement.achievements.length > 0 && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                    <div className="p-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">🎯 성취수준 분석</h2>
+                {/* 성취수준 분석 - 클라이언트 계산 */}
+                {selectedScore && (() => {
+                  // 과목별 등급/백분위 추출
+                  const subjects: { name: string; grade?: number; percentile?: number; standard?: number }[] = [
+                    { name: "국어", grade: selectedScore.koreanGrade, percentile: selectedScore.koreanPercentile, standard: selectedScore.koreanStandard },
+                    { name: "수학", grade: selectedScore.mathGrade, percentile: selectedScore.mathPercentile, standard: selectedScore.mathStandard },
+                    { name: "영어", grade: selectedScore.englishGrade },
+                    { name: selectedScore.inquiry1Selection || "탐구1", grade: selectedScore.inquiry1Grade, percentile: selectedScore.inquiry1Percentile, standard: selectedScore.inquiry1Standard },
+                    { name: selectedScore.inquiry2Selection || "탐구2", grade: selectedScore.inquiry2Grade, percentile: selectedScore.inquiry2Percentile, standard: selectedScore.inquiry2Standard },
+                    { name: "한국사", grade: selectedScore.historyGrade },
+                  ].filter(s => s.grade != null)
 
-                      {/* 전체 등급 & 추천 */}
-                      <div className="bg-[#fdf5fd] border border-[#d4a5d3] rounded-lg p-4 mb-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-sm text-gray-600">전체 평균 등급</span>
-                            <span className={`ml-3 text-2xl font-bold ${gradeColor(Math.round(achievement.overallGrade))}`}>
-                              {(achievement.overallGrade ?? 0).toFixed(1)}등급
-                            </span>
-                          </div>
-                        </div>
-                        {achievement.recommendation && (
-                          <p className="mt-3 text-sm text-gray-700">{achievement.recommendation}</p>
-                        )}
-                      </div>
+                  const avgGrade = subjects.length > 0
+                    ? subjects.reduce((sum, s) => sum + (s.grade || 0), 0) / subjects.length
+                    : 0
 
-                      {/* 과목별 성취 */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {achievement.achievements.map((item, i) => (
-                          <div key={i} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium text-gray-900">{item.subject}</span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${statusColor(item.status)}`}>
-                                {statusLabel(item.status)}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-4">
-                              <span className={`text-xl ${gradeColor(item.grade)}`}>{item.grade}등급</span>
-                              {item.percentile != null && (
-                                <span className="text-sm text-gray-500">백분위 {item.percentile}</span>
-                              )}
-                            </div>
-                            <p className="mt-2 text-xs text-gray-500">{item.message}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  const getStatus = (g: number) => {
+                    if (g <= 2) return "excellent"
+                    if (g <= 4) return "good"
+                    if (g <= 6) return "average"
+                    if (g <= 7) return "belowAverage"
+                    return "poor"
+                  }
+                  const getMessage = (g: number) => {
+                    if (g <= 2) return "매우 우수한 성적입니다. 현재 수준을 유지하세요!"
+                    if (g <= 4) return "양호한 성적입니다. 조금만 더 노력하면 상위권에 진입할 수 있습니다."
+                    if (g <= 6) return "보통 수준입니다. 취약 부분을 집중적으로 보완하세요."
+                    if (g <= 7) return "보완이 필요한 과목입니다. 기본 개념부터 다시 정리해보세요."
+                    return "집중적인 학습이 필요합니다."
+                  }
 
-                {/* 조합별 분석 */}
-                {combination && combination.combinations.length > 0 && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                    <div className="p-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">🔀 조합별 분석</h2>
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="border-b bg-gray-50">
-                              <th className="text-left p-3 text-sm font-medium text-gray-700">조합</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">표준점수 합</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">백분위 합</th>
-                              <th className="text-center p-3 text-sm font-medium text-gray-700">추정 등급</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {combination.combinations.map((c, i) => (
-                              <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                                <td className="p-3 text-sm font-medium text-gray-900">{c.name}</td>
-                                <td className="p-3 text-sm text-center text-gray-900">{c.totalStandard}</td>
-                                <td className="p-3 text-sm text-center text-gray-900">{(c.totalPercentile ?? 0).toFixed(1)}</td>
-                                <td className="p-3 text-sm text-center">
-                                  <span className="px-2 py-1 rounded-full bg-[#f5e6f5] text-[#7b1e7a] font-bold">
-                                    {c.estimatedGrade}
+                  // 조합별 분석
+                  const combinations: { name: string; totalStandard: number; avgPercentile: number; avgGrade: number }[] = []
+                  const korS = selectedScore.koreanStandard || 0
+                  const matS = selectedScore.mathStandard || 0
+                  const inq1S = selectedScore.inquiry1Standard || 0
+                  const inq2S = selectedScore.inquiry2Standard || 0
+                  const korP = selectedScore.koreanPercentile || 0
+                  const matP = selectedScore.mathPercentile || 0
+                  const inq1P = selectedScore.inquiry1Percentile || 0
+                  const inq2P = selectedScore.inquiry2Percentile || 0
+                  const korG = selectedScore.koreanGrade || 0
+                  const matG = selectedScore.mathGrade || 0
+                  const engG = selectedScore.englishGrade || 0
+                  const inq1G = selectedScore.inquiry1Grade || 0
+                  const inq2G = selectedScore.inquiry2Grade || 0
+
+                  if (korS && matS && (inq1S || inq2S)) {
+                    combinations.push({
+                      name: "국수탐",
+                      totalStandard: korS + matS + inq1S + inq2S,
+                      avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
+                      avgGrade: [korG, matG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, inq1G, inq2G].filter(Boolean).length,
+                    })
+                  }
+                  if (korS && (inq1S || inq2S) && engG) {
+                    combinations.push({
+                      name: "국영탐",
+                      totalStandard: korS + inq1S + inq2S,
+                      avgPercentile: [korP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, inq1P, inq2P].filter(Boolean).length,
+                      avgGrade: [korG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, engG, inq1G, inq2G].filter(Boolean).length,
+                    })
+                  }
+                  if (korS && matS && engG && (inq1S || inq2S)) {
+                    combinations.push({
+                      name: "국수영탐",
+                      totalStandard: korS + matS + inq1S + inq2S,
+                      avgPercentile: [korP, matP, inq1P, inq2P].filter(Boolean).reduce((a, b) => a + b, 0) / [korP, matP, inq1P, inq2P].filter(Boolean).length,
+                      avgGrade: [korG, matG, engG, inq1G, inq2G].filter(Boolean).reduce((a, b) => a + b, 0) / [korG, matG, engG, inq1G, inq2G].filter(Boolean).length,
+                    })
+                  }
+
+                  return (
+                    <>
+                      {/* 성취수준 분석 */}
+                      {subjects.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                          <div className="p-6">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-4">🎯 성취수준 분석</h2>
+                            <div className="bg-[#fdf5fd] border border-[#d4a5d3] rounded-lg p-4 mb-6">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="text-sm text-gray-600">전체 평균 등급</span>
+                                  <span className={`ml-3 text-2xl font-bold ${gradeColor(Math.round(avgGrade))}`}>
+                                    {avgGrade.toFixed(1)}등급
                                   </span>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 과목별 성적 시각화 (바 차트) */}
-                {summary && summary.subjects.length > 0 && (
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-                    <div className="p-6">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4">📈 과목별 백분위</h2>
-                      <div className="space-y-3">
-                        {summary.subjects
-                          .filter(s => s.percentile != null)
-                          .map((s, i) => (
-                            <div key={i} className="flex items-center space-x-4">
-                              <div className="w-20 text-sm text-gray-700 text-right font-medium">{s.subject}</div>
-                              <div className="flex-1 bg-gray-200 rounded-full h-7 relative">
-                                <div
-                                  className="bg-[#7b1e7a] h-7 rounded-full flex items-center justify-end pr-3 transition-all"
-                                  style={{ width: `${Math.max(s.percentile!, 8)}%` }}
-                                >
-                                  <span className="text-xs text-white font-medium">{s.percentile}</span>
                                 </div>
                               </div>
-                              <div className={`w-12 text-center text-sm ${gradeColor(s.grade)}`}>
-                                {s.grade != null ? `${s.grade}등급` : '-'}
-                              </div>
+                              <p className="mt-3 text-sm text-gray-700">{getMessage(avgGrade)}</p>
                             </div>
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                              {subjects.map((item, i) => (
+                                <div key={i} className="border border-gray-200 rounded-lg p-4">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="font-medium text-gray-900">{item.name}</span>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${statusColor(getStatus(item.grade!))}`}>
+                                      {statusLabel(getStatus(item.grade!))}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-4">
+                                    <span className={`text-xl ${gradeColor(item.grade)}`}>{item.grade}등급</span>
+                                    {item.percentile != null && (
+                                      <span className="text-sm text-gray-500">백분위 {item.percentile}</span>
+                                    )}
+                                  </div>
+                                  <p className="mt-2 text-xs text-gray-500">{getMessage(item.grade!)}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 조합별 분석 */}
+                      {combinations.length > 0 && (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                          <div className="p-6">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-4">🔀 조합별 분석</h2>
+                            <div className="overflow-x-auto">
+                              <table className="w-full border-collapse">
+                                <thead>
+                                  <tr className="border-b bg-gray-50">
+                                    <th className="text-left p-3 text-sm font-medium text-gray-700">조합</th>
+                                    <th className="text-center p-3 text-sm font-medium text-gray-700">표준점수 합</th>
+                                    <th className="text-center p-3 text-sm font-medium text-gray-700">평균 백분위</th>
+                                    <th className="text-center p-3 text-sm font-medium text-gray-700">평균 등급</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {combinations.map((c, i) => (
+                                    <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                      <td className="p-3 text-sm font-medium text-gray-900">{c.name}</td>
+                                      <td className="p-3 text-sm text-center text-gray-900">{c.totalStandard}</td>
+                                      <td className="p-3 text-sm text-center text-gray-900">{c.avgPercentile.toFixed(1)}</td>
+                                      <td className="p-3 text-sm text-center">
+                                        <span className="px-2 py-1 rounded-full bg-[#f5e6f5] text-[#7b1e7a] font-bold">
+                                          {c.avgGrade.toFixed(1)}등급
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 과목별 백분위 (세로 바 차트) */}
+                      {subjects.filter(s => s.percentile != null).length > 0 && (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+                          <div className="p-6">
+                            <h2 className="text-lg font-semibold text-gray-900 mb-6">📈 과목별 백분위</h2>
+                            <div className="flex items-end justify-center gap-6" style={{ height: '280px' }}>
+                              {subjects
+                                .filter(s => s.percentile != null)
+                                .map((s, i) => {
+                                  const colors = ['#7b1e7a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899']
+                                  return (
+                                    <div key={i} className="flex flex-col items-center gap-1" style={{ width: '60px' }}>
+                                      <span className="text-sm font-bold text-gray-900">{s.percentile}</span>
+                                      <div
+                                        className="w-10 rounded-t-md transition-all"
+                                        style={{
+                                          height: `${Math.max((s.percentile! / 100) * 220, 8)}px`,
+                                          backgroundColor: colors[i % colors.length],
+                                        }}
+                                      />
+                                      <span className="text-xs text-gray-600 text-center mt-1 leading-tight">{s.name}</span>
+                                      <span className={`text-xs ${gradeColor(s.grade)}`}>{s.grade}등급</span>
+                                    </div>
+                                  )
+                                })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
 
                 {/* 모든 분석 결과가 비어있을 때 */}
                 {!summary && !achievement && !combination && (

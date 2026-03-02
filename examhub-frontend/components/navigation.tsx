@@ -12,6 +12,7 @@ interface MenuItem {
   name: string
   href: string
   children?: MenuItem[]
+  comingSoon?: boolean
 }
 
 export function Navigation() {
@@ -71,9 +72,8 @@ export function Navigation() {
       name: "대학예측",
       href: "/main/prediction",
       children: [
-        { name: "목표 대학 설정", href: "/main/target-university/settings" },
-        { name: "대학예측", href: "/main/prediction" },
-        { name: "목표대학", href: "/main/target-university" },
+        { name: "목표대학 설정", href: "/main/target-university/settings", comingSoon: true },
+        { name: "대학 예측", href: "/main/prediction", comingSoon: true },
       ],
     },
     { name: "누적분석", href: "/main/statistics" },
@@ -125,16 +125,29 @@ export function Navigation() {
                   </button>
                   {openSubmenu === item.name && (
                     <div className="absolute left-0 top-full mt-0.5 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-[#7b1e7a] transition-colors"
-                          onClick={() => setOpenSubmenu(null)}
-                        >
-                          {child.name}
-                        </Link>
-                      ))}
+                      {item.children.map((child) =>
+                        child.comingSoon ? (
+                          <button
+                            key={child.name}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-[#7b1e7a] transition-colors"
+                            onClick={() => {
+                              setOpenSubmenu(null)
+                              alert('3월 첫 모의고사 이후 서비스 실행됩니다')
+                            }}
+                          >
+                            {child.name}
+                          </button>
+                        ) : (
+                          <Link
+                            key={child.name}
+                            href={child.href}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-[#7b1e7a] transition-colors"
+                            onClick={() => setOpenSubmenu(null)}
+                          >
+                            {child.name}
+                          </Link>
+                        )
+                      )}
                     </div>
                   )}
                 </div>
@@ -195,7 +208,7 @@ export function Navigation() {
                       onClick={goToHub}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
-                      G Skool
+                      T Skool
                     </button>
                     <button
                       onClick={handleLogout}
@@ -265,16 +278,29 @@ export function Navigation() {
                       </button>
                       {mobileOpenSubmenu === item.name && (
                         <div className="pl-4 space-y-0.5">
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.name}
-                              href={child.href}
-                              className="block px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              {child.name}
-                            </Link>
-                          ))}
+                          {item.children.map((child) =>
+                            child.comingSoon ? (
+                              <button
+                                key={child.name}
+                                className="block w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false)
+                                  alert('3월 첫 모의고사 이후 서비스 실행됩니다')
+                                }}
+                              >
+                                {child.name}
+                              </button>
+                            ) : (
+                              <Link
+                                key={child.name}
+                                href={child.href}
+                                className="block px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {child.name}
+                              </Link>
+                            )
+                          )}
                         </div>
                       )}
                     </div>
@@ -295,7 +321,7 @@ export function Navigation() {
                 {/* 모바일 추가 메뉴 */}
                 <div className="flex items-center space-x-4 px-3 py-2">
                   <button className="flex items-center space-x-2 text-gray-600 hover:text-[#7b1e7a]">
-                    <Wallet className="w-5 h-5" />
+                    <WonCircle className="w-5 h-5" />
                     <span className="text-sm">결제</span>
                   </button>
                   <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-700">
@@ -315,7 +341,7 @@ export function Navigation() {
                         onClick={goToHub}
                         className="w-full px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 rounded-md"
                       >
-                        G Skool
+                        T Skool
                       </button>
                       <button
                         onClick={handleLogout}

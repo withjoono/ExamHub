@@ -52,6 +52,7 @@ interface ScoreRecord {
 function Dashboard({ user }: { user: User }) {
   const [scores, setScores] = useState<ScoreRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedSubject, setSelectedSubject] = useState('국어')
 
   useEffect(() => {
     async function load() {
@@ -145,73 +146,77 @@ function Dashboard({ user }: { user: User }) {
           <div className="space-y-6">
             {/* 요약 통계 카드 */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 border-b-4 border-b-[#7b1e7a]/30 p-5 text-center shadow-md">
                 <div className="text-xs text-gray-400 mb-1">응시 모의고사</div>
                 <div className="text-3xl font-extrabold text-[#7b1e7a]">{scores.length}</div>
                 <div className="text-xs text-gray-400 mt-1">회</div>
               </div>
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 border-b-4 border-b-blue-300 p-5 text-center shadow-md">
                 <div className="text-xs text-gray-400 mb-1">최근 평균 등급</div>
                 <div className={`text-3xl font-extrabold`} style={{ color: gradeBarColor(latestAvg) }}>{latestAvg.toFixed(1)}</div>
                 <div className="text-xs text-gray-400 mt-1">등급</div>
               </div>
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 text-center shadow-sm">
+              <div className="bg-white rounded-2xl border border-gray-200 border-b-4 border-b-emerald-300 p-5 text-center shadow-md">
                 <div className="text-xs text-gray-400 mb-1">최근 표준점수 합</div>
                 <div className="text-3xl font-extrabold text-gray-900">{latestTotal || '-'}</div>
                 <div className="text-xs text-gray-400 mt-1">점</div>
               </div>
             </div>
 
-            {/* 최근 시험 과목별 등급 차트 */}
-            {latest && (
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">📊 최근 시험 과목별 등급</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">{latest.mockExam?.name || `모의고사 #${latest.mockExamId}`} · {latest.mockExam?.year}년 {latest.mockExam?.month}월</p>
+            {/* 최근 시험 과목별 등급 차트 - SVG */}
+            {latest && (() => {
+              const subjects = [
+                { name: "국어", grade: Number(latest.koreanGrade) || 0 },
+                { name: "수학", grade: Number(latest.mathGrade) || 0 },
+                { name: "영어", grade: Number(latest.englishGrade) || 0 },
+                { name: "탐구1", grade: Number(latest.inquiry1Grade) || 0 },
+                { name: "탐구2", grade: Number(latest.inquiry2Grade) || 0 },
+                { name: "한국사", grade: Number(latest.historyGrade) || 0 },
+              ].filter(s => s.grade > 0)
+              const colors = ['#7b1e7a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1']
+              const svgW = 360
+              const svgH = 200
+              const barW = 36
+              const gap = (svgW - subjects.length * barW) / (subjects.length + 1)
+              return (
+                <div className="bg-gradient-to-b from-white to-gray-50 rounded-2xl border border-gray-200 border-b-4 border-b-purple-300 shadow-md overflow-hidden">
+                  <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-gray-900">📊 최근 시험 과목별 등급</h2>
+                      <p className="text-xs text-gray-400 mt-0.5">{latest.mockExam?.name || `모의고사 #${latest.mockExamId}`} · {latest.mockExam?.year}년 {latest.mockExam?.month}월</p>
+                    </div>
+                    <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
+                      상세보기<ChevronRight className="w-4 h-4" />
+                    </Link>
                   </div>
-                  <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
-                    상세보기<ChevronRight className="w-4 h-4" />
-                  </Link>
+                  <div className="p-6 flex justify-center">
+                    <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full" style={{ maxWidth: '500px', maxHeight: '260px' }}>
+                      {[1, 3, 5, 7, 9].map(g => {
+                        const y = 20 + ((10 - g) / 9) * 150
+                        return (
+                          <g key={g}>
+                            <line x1={0} y1={y} x2={svgW} y2={y} stroke="#f3f4f6" strokeWidth={1} strokeDasharray="4,4" />
+                            <text x={svgW - 2} y={y - 3} textAnchor="end" fontSize={8} fill="#d1d5db">{g}등급</text>
+                          </g>
+                        )
+                      })}
+                      {subjects.map((s, i) => {
+                        const barHeight = Math.max(((10 - s.grade) / 9) * 150, 12)
+                        const x = gap + i * (barW + gap)
+                        const y = 20 + 150 - barHeight
+                        return (
+                          <g key={s.name}>
+                            <rect x={x} y={y} width={barW} height={barHeight} rx={6} fill={colors[i % colors.length]} opacity={0.9} />
+                            <text x={x + barW / 2} y={y - 6} textAnchor="middle" fontSize={11} fontWeight="bold" fill={colors[i % colors.length]}>{s.grade}등급</text>
+                            <text x={x + barW / 2} y={svgH - 5} textAnchor="middle" fontSize={10} fill="#6b7280" fontWeight="500">{s.name}</text>
+                          </g>
+                        )
+                      })}
+                    </svg>
+                  </div>
                 </div>
-                <div className="p-6">
-                  {(() => {
-                    const subjects = [
-                      { name: "국어", grade: Number(latest.koreanGrade) || 0 },
-                      { name: "수학", grade: Number(latest.mathGrade) || 0 },
-                      { name: "영어", grade: Number(latest.englishGrade) || 0 },
-                      { name: "탐구1", grade: Number(latest.inquiry1Grade) || 0 },
-                      { name: "탐구2", grade: Number(latest.inquiry2Grade) || 0 },
-                      { name: "한국사", grade: Number(latest.historyGrade) || 0 },
-                    ].filter(s => s.grade > 0)
-
-                    return (
-                      <div className="flex items-end justify-center gap-6" style={{ height: '220px' }}>
-                        {subjects.map((s, i) => {
-                          const colors = ['#7b1e7a', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1']
-                          // 등급이 낮을수록(좋을수록) 높은 바
-                          const barHeight = Math.max(((10 - s.grade) / 9) * 100, 10)
-                          return (
-                            <div key={s.name} className="flex flex-col items-center gap-1" style={{ width: '56px' }}>
-                              <span className="text-xs font-bold" style={{ color: colors[i % colors.length] }}>{s.grade}등급</span>
-                              <div
-                                className="w-10 rounded-t-lg transition-all duration-700"
-                                style={{
-                                  height: `${barHeight}%`,
-                                  backgroundColor: colors[i % colors.length],
-                                  opacity: 0.85,
-                                }}
-                              />
-                              <span className="text-xs text-gray-600 text-center mt-1 font-medium">{s.name}</span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })()}
-                </div>
-              </div>
-            )}
+              )
+            })()}
 
             {/* 성적 추이 그래프 */}
             {scores.length >= 1 && (() => {
@@ -337,40 +342,85 @@ function Dashboard({ user }: { user: User }) {
                 return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null
               })
 
+              // 과목별 백분위 데이터
+              const allSubjectPercentiles: { [key: string]: { color: string; data: (number | null)[] } } = {
+                '국어': { color: '#7b1e7a', data: ordered.map(s => Number(s.koreanPercentile) || null) },
+                '수학': { color: '#3b82f6', data: ordered.map(s => Number(s.mathPercentile) || null) },
+                '탐구1': { color: '#f59e0b', data: ordered.map(s => Number(s.inquiry1Percentile) || null) },
+                '탐구2': { color: '#ef4444', data: ordered.map(s => Number(s.inquiry2Percentile) || null) },
+              }
+              const availableSubjects = Object.entries(allSubjectPercentiles).filter(([, v]) => v.data.some(d => d != null)).map(([k]) => k)
+              const selectedDs = allSubjectPercentiles[selectedSubject]
+
               return (
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-gray-900">📈 성적 추이</h2>
-                    <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
-                      상세보기<ChevronRight className="w-4 h-4" />
-                    </Link>
+                <div className="space-y-6">
+                  {/* 차트 1: 과목별 백분위 추이 */}
+                  <div className="bg-gradient-to-b from-white to-gray-50 rounded-2xl border border-gray-200 border-b-4 border-b-blue-300 shadow-md overflow-hidden">
+                    <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                      <h2 className="text-base font-bold text-gray-900">📊 과목별 백분위 추이</h2>
+                      <select
+                        value={selectedSubject}
+                        onChange={e => setSelectedSubject(e.target.value)}
+                        className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#7b1e7a]/30"
+                      >
+                        {availableSubjects.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="p-5">
+                      {selectedDs && (
+                        <LineChart
+                          title=""
+                          datasets={[{ name: selectedSubject, color: selectedDs.color, data: selectedDs.data }]}
+                          yMin={0}
+                          yMax={100}
+                          yLabel="백분위"
+                          yTicks={[0, 25, 50, 75, 100]}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <LineChart
-                      title="과목별 백분위 추이"
-                      datasets={subjectPercentileData}
-                      yMin={0}
-                      yMax={100}
-                      yLabel="백분위"
-                      yTicks={[0, 25, 50, 75, 100]}
-                    />
-                    <LineChart
-                      title="백분위 평균 추이"
-                      datasets={[{ name: '평균 백분위', color: '#10b981', data: avgPercentileData }]}
-                      yMin={0}
-                      yMax={100}
-                      yLabel="백분위"
-                      yTicks={[0, 25, 50, 75, 100]}
-                    />
-                    <LineChart
-                      title="국영수탐 평균등급 추이"
-                      datasets={[{ name: '평균 등급', color: '#7b1e7a', data: avgGradeData }]}
-                      yMin={1}
-                      yMax={9}
-                      yLabel="등급"
-                      invertY
-                      yTicks={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
-                    />
+
+                  {/* 차트 2: 백분위 평균 추이 */}
+                  <div className="bg-gradient-to-b from-white to-gray-50 rounded-2xl border border-gray-200 border-b-4 border-b-emerald-300 shadow-md overflow-hidden">
+                    <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                      <h2 className="text-base font-bold text-gray-900">📈 백분위 평균 추이</h2>
+                      <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
+                        상세보기<ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                    <div className="p-5">
+                      <LineChart
+                        title=""
+                        datasets={[{ name: '평균 백분위', color: '#10b981', data: avgPercentileData }]}
+                        yMin={0}
+                        yMax={100}
+                        yLabel="백분위"
+                        yTicks={[0, 25, 50, 75, 100]}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 차트 3: 국영수탐 평균등급 추이 */}
+                  <div className="bg-gradient-to-b from-white to-gray-50 rounded-2xl border border-gray-200 border-b-4 border-b-amber-300 shadow-md overflow-hidden">
+                    <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                      <h2 className="text-base font-bold text-gray-900">🎯 국영수탐 평균등급 추이</h2>
+                      <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
+                        상세보기<ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                    <div className="p-5">
+                      <LineChart
+                        title=""
+                        datasets={[{ name: '평균 등급', color: '#7b1e7a', data: avgGradeData }]}
+                        yMin={1}
+                        yMax={9}
+                        yLabel="등급"
+                        invertY
+                        yTicks={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
+                      />
+                    </div>
                   </div>
                 </div>
               )

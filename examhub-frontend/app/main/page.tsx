@@ -38,8 +38,10 @@ interface ScoreRecord {
   englishGrade?: number
   inquiry1Grade?: number
   inquiry1Standard?: number
+  inquiry1Percentile?: number
   inquiry2Grade?: number
   inquiry2Standard?: number
+  inquiry2Percentile?: number
   historyGrade?: number
   totalStandardSum?: number
   totalPercentileSum?: number
@@ -212,71 +214,167 @@ function Dashboard({ user }: { user: User }) {
             )}
 
             {/* 성적 추이 그래프 */}
-            {scores.length >= 1 && (
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-gray-900">📈 성적 추이</h2>
-                  <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
-                    상세보기<ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="p-6">
-                  {/* 평균 등급 추이 */}
-                  <div className="mb-8">
-                    <h3 className="text-sm font-bold text-gray-600 mb-4">평균 등급 추이</h3>
-                    <div className="flex items-end gap-5 justify-center" style={{ height: '180px' }}>
-                      {scores.slice().reverse().map((score) => {
-                        const avg = calcAvgGrade(score)
-                        // 등급이 낮을수록(좋을수록) 높은 바
-                        const barHeight = avg > 0 ? Math.max(((10 - avg) / 9) * 100, 10) : 0
+            {scores.length >= 1 && (() => {
+              const ordered = scores.slice().reverse()
+              const chartW = 400
+              const chartH = 200
+              const padL = 45
+              const padR = 20
+              const padT = 20
+              const padB = 30
+              const w = chartW - padL - padR
+              const h = chartH - padT - padB
+              const n = ordered.length
+
+              // helper: SVG line chart
+              const LineChart = ({
+                title,
+                datasets,
+                yMin,
+                yMax,
+                yLabel,
+                invertY,
+                yTicks,
+              }: {
+                title: string
+                datasets: { name: string; color: string; data: (number | null)[] }[]
+                yMin: number
+                yMax: number
+                yLabel: string
+                invertY?: boolean
+                yTicks?: number[]
+              }) => {
+                const ticks = yTicks || Array.from({ length: 5 }, (_, i) => yMin + ((yMax - yMin) * i) / 4)
+                const getX = (i: number) => padL + (n > 1 ? (i / (n - 1)) * w : w / 2)
+                const getY = (v: number) => {
+                  const ratio = (v - yMin) / (yMax - yMin)
+                  return invertY ? padT + ratio * h : padT + (1 - ratio) * h
+                }
+
+                return (
+                  <div className="mb-8 last:mb-0">
+                    <h3 className="text-sm font-bold text-gray-700 mb-3">{title}</h3>
+                    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full" style={{ maxHeight: '240px' }}>
+                      {/* 배경 그리드 */}
+                      {ticks.map((t) => (
+                        <g key={t}>
+                          <line x1={padL} y1={getY(t)} x2={chartW - padR} y2={getY(t)} stroke="#e5e7eb" strokeWidth={1} />
+                          <text x={padL - 6} y={getY(t) + 4} textAnchor="end" fontSize={10} fill="#9ca3af">{invertY ? t : t.toFixed(0)}</text>
+                        </g>
+                      ))}
+                      {/* X축 라벨 */}
+                      {ordered.map((s, i) => (
+                        <text key={s.id} x={getX(i)} y={chartH - 5} textAnchor="middle" fontSize={10} fill="#9ca3af">
+                          {s.mockExam?.month || '?'}월
+                        </text>
+                      ))}
+                      {/* Y축 라벨 */}
+                      <text x={8} y={padT + h / 2} textAnchor="middle" fontSize={9} fill="#9ca3af" transform={`rotate(-90, 8, ${padT + h / 2})`}>{yLabel}</text>
+                      {/* 데이터 선 */}
+                      {datasets.map((ds) => {
+                        const points = ds.data.map((v, i) => v != null ? { x: getX(i), y: getY(v), v } : null)
+                        const validPoints = points.filter(p => p != null) as { x: number; y: number; v: number }[]
+                        if (validPoints.length === 0) return null
+                        const pathD = validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
                         return (
-                          <div key={score.id} className="flex flex-col items-center gap-1 flex-1 max-w-[80px]">
-                            <span className="text-xs font-bold" style={{ color: gradeBarColor(avg) }}>{avg.toFixed(1)}</span>
-                            <div
-                              className="w-10 rounded-t-lg transition-all duration-500"
-                              style={{
-                                height: `${barHeight}%`,
-                                backgroundColor: gradeBarColor(avg),
-                                opacity: 0.85,
-                              }}
-                            />
-                            <span className="text-[10px] text-gray-400 mt-1 text-center leading-tight">
-                              {score.mockExam?.month || '?'}월
-                            </span>
-                          </div>
+                          <g key={ds.name}>
+                            <polyline fill="none" stroke={ds.color} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" points={validPoints.map(p => `${p.x},${p.y}`).join(' ')} />
+                            {validPoints.map((p, i) => (
+                              <g key={i}>
+                                <circle cx={p.x} cy={p.y} r={4} fill="white" stroke={ds.color} strokeWidth={2} />
+                                <text x={p.x} y={p.y - 8} textAnchor="middle" fontSize={9} fontWeight="bold" fill={ds.color}>
+                                  {invertY ? p.v.toFixed(1) : Math.round(p.v)}
+                                </text>
+                              </g>
+                            ))}
+                          </g>
                         )
                       })}
-                    </div>
-                  </div>
-
-                  {/* 표준점수 합계 추이 */}
-                  {scores.some(s => Number(s.totalStandardSum) > 0) && (
-                    <div className="pt-6 border-t border-gray-100">
-                      <h3 className="text-sm font-bold text-gray-600 mb-4">표준점수 합계 추이</h3>
-                      <div className="flex items-end gap-5 justify-center" style={{ height: '160px' }}>
-                        {scores.slice().reverse().map((score) => {
-                          const total = Number(score.totalStandardSum) || 0
-                          const maxTotal = Math.max(...scores.map(s => Number(s.totalStandardSum) || 0), 1)
-                          const barHeight = total > 0 ? Math.max((total / maxTotal) * 100, 8) : 0
-                          return (
-                            <div key={score.id} className="flex flex-col items-center gap-1 flex-1 max-w-[80px]">
-                              <span className="text-xs font-bold text-gray-700">{total || '-'}</span>
-                              <div
-                                className="w-10 rounded-t-lg bg-gradient-to-t from-[#7b1e7a] to-[#c96ac7] transition-all duration-500"
-                                style={{ height: `${barHeight}%` }}
-                              />
-                              <span className="text-[10px] text-gray-400 mt-1 text-center leading-tight">
-                                {score.mockExam?.month || '?'}월
-                              </span>
-                            </div>
-                          )
-                        })}
+                    </svg>
+                    {/* 범례 */}
+                    {datasets.length > 1 && (
+                      <div className="flex items-center justify-center gap-4 mt-2">
+                        {datasets.map(ds => (
+                          <div key={ds.name} className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ds.color }} />
+                            <span className="text-xs text-gray-500">{ds.name}</span>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )
+              }
+
+              // 차트 1: 과목별 백분위 추이
+              const subjectPercentileData = [
+                { name: '국어', color: '#7b1e7a', data: ordered.map(s => Number(s.koreanPercentile) || null) },
+                { name: '수학', color: '#3b82f6', data: ordered.map(s => Number(s.mathPercentile) || null) },
+                { name: '탐구1', color: '#f59e0b', data: ordered.map(s => Number(s.inquiry1Standard) ? (Number(s.inquiry1Percentile) || null) : null) },
+                { name: '탐구2', color: '#ef4444', data: ordered.map(s => Number(s.inquiry2Standard) ? (Number(s.inquiry2Percentile) || null) : null) },
+              ].filter(ds => ds.data.some(v => v != null))
+
+              // 차트 2: 백분위 평균 추이
+              const avgPercentileData = ordered.map(s => {
+                const vals = [
+                  Number(s.koreanPercentile) || 0,
+                  Number(s.mathPercentile) || 0,
+                  Number(s.inquiry1Percentile) || 0,
+                  Number(s.inquiry2Percentile) || 0,
+                ].filter(v => v > 0)
+                return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+              })
+
+              // 차트 3: 국영수탐 평균등급 추이
+              const avgGradeData = ordered.map(s => {
+                const vals = [
+                  Number(s.koreanGrade) || 0,
+                  Number(s.mathGrade) || 0,
+                  Number(s.englishGrade) || 0,
+                  Number(s.inquiry1Grade) || 0,
+                  Number(s.inquiry2Grade) || 0,
+                ].filter(v => v > 0)
+                return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null
+              })
+
+              return (
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-gray-900">📈 성적 추이</h2>
+                    <Link href="/main/score-analysis" className="text-sm text-[#7b1e7a] hover:underline flex items-center gap-1 font-medium">
+                      상세보기<ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                  <div className="p-6">
+                    <LineChart
+                      title="과목별 백분위 추이"
+                      datasets={subjectPercentileData}
+                      yMin={0}
+                      yMax={100}
+                      yLabel="백분위"
+                      yTicks={[0, 25, 50, 75, 100]}
+                    />
+                    <LineChart
+                      title="백분위 평균 추이"
+                      datasets={[{ name: '평균 백분위', color: '#10b981', data: avgPercentileData }]}
+                      yMin={0}
+                      yMax={100}
+                      yLabel="백분위"
+                      yTicks={[0, 25, 50, 75, 100]}
+                    />
+                    <LineChart
+                      title="국영수탐 평균등급 추이"
+                      datasets={[{ name: '평균 등급', color: '#7b1e7a', data: avgGradeData }]}
+                      yMin={1}
+                      yMax={9}
+                      yLabel="등급"
+                      invertY
+                      yTicks={[1, 2, 3, 4, 5, 6, 7, 8, 9]}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
 
             {/* 새 모의고사 CTA */}
             <div className="bg-gradient-to-r from-[#7b1e7a] to-[#9c3d9a] rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">

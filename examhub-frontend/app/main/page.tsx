@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { getUser, type User } from "@/lib/auth/user"
 import { api } from "@/lib/api/client"
+import { Footer } from "@/components/footer"
 import {
   FileText,
   BarChart3,
@@ -445,6 +446,7 @@ function Dashboard({ user }: { user: User }) {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   )
 }
@@ -839,11 +841,7 @@ function PromoPage() {
       </section>
 
       {/* 푸터 */}
-      <footer className="bg-gray-900 text-gray-400 py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-sm">
-          <p>© 2025 ExamHub by T Skool. 모의고사 분석 서비스</p>
-        </div>
-      </footer>
+      <Footer />
     </>
   )
 }

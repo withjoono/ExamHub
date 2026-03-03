@@ -98,12 +98,17 @@ export class ScoreService {
   async findByStudent(studentId: string) {
     const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
     if (!member) return [];
-    return this.prisma.studentScore.findMany({
+    const scores = await this.prisma.studentScore.findMany({
       where: { memberId: member.id },
       include: {
         mockExam: true,
       },
-      orderBy: [{ mockExam: { year: 'desc' } }, { mockExam: { month: 'desc' } }],
+    });
+    // Prisma 7 driver adapter에서 relation orderBy 미지원 → 앱 레벨 정렬
+    return scores.sort((a, b) => {
+      const yearDiff = (b.mockExam?.year ?? 0) - (a.mockExam?.year ?? 0);
+      if (yearDiff !== 0) return yearDiff;
+      return (b.mockExam?.month ?? 0) - (a.mockExam?.month ?? 0);
     });
   }
 
@@ -188,13 +193,19 @@ export class ScoreService {
   async findLatestByStudent(studentId: string) {
     const member = await this.prisma.member.findUnique({ where: { memberId: toExamHubMemberId(studentId) } });
     if (!member) return null;
-    return this.prisma.studentScore.findFirst({
+    const scores = await this.prisma.studentScore.findMany({
       where: { memberId: member.id },
       include: {
         mockExam: true,
       },
-      orderBy: [{ mockExam: { year: 'desc' } }, { mockExam: { month: 'desc' } }],
     });
+    // Prisma 7 driver adapter에서 relation orderBy 미지원 → 앱 레벨 정렬
+    scores.sort((a, b) => {
+      const yearDiff = (b.mockExam?.year ?? 0) - (a.mockExam?.year ?? 0);
+      if (yearDiff !== 0) return yearDiff;
+      return (b.mockExam?.month ?? 0) - (a.mockExam?.month ?? 0);
+    });
+    return scores[0] ?? null;
   }
 
   /**

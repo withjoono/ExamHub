@@ -12,7 +12,7 @@
  * 앱 목록: Hub, ExamHub, Jungsi (MySanggibu, Grinalda 등 추가 시 동일 적용)
  */
 
-const HUB_URL = "https://www.geobukschool.kr";
+const HUB_URL = "https://www.tskool.kr";
 
 export const Footer = () => {
   return (

@@ -25,6 +25,8 @@ async function bootstrap() {
     // 거북스쿨 Hub
     'https://geobukschool.kr',
     'https://www.geobukschool.kr',
+    'https://tskool.kr',
+    'https://www.tskool.kr',
   ];
 
   // 환경 변수로 추가 origin 허용

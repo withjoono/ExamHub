@@ -7,7 +7,7 @@
 // Hub는 외부 서비스로 포트 3000 사용 (ExamHub와 별개)
 const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || (
   process.env.NODE_ENV === 'production'
-    ? 'https://geobukschool.kr'
+    ? 'https://www.tskool.kr'
     : 'http://localhost:3000'
 );
 

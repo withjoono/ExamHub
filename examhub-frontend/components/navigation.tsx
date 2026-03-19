@@ -66,19 +66,10 @@ export function Navigation() {
   // ExamHub 메뉴 항목
   const menuItems: MenuItem[] = [
     { name: "ExamHub 홈", href: "/" },
-    { name: "입력", href: "/main/input" },
-    { name: "성적분석", href: "/main/score-analysis" },
-    {
-      name: "대학예측",
-      href: "/main/prediction",
-      children: [
-        { name: "목표대학 설정", href: "/main/target-university/settings", comingSoon: true },
-        { name: "대학 예측", href: "/main/prediction", comingSoon: true },
-      ],
-    },
-    { name: "누적분석", href: "/main/statistics" },
-    { name: "취약분석", href: "/main/weakness-analysis" },
-    { name: "오답노트", href: "/main/wrong-answers" },
+    { name: "시험 출제", href: "/main/create-exam", comingSoon: true },
+    { name: "채점 관리", href: "/main/grading", comingSoon: true },
+    { name: "성적 분석", href: "/main/analysis", comingSoon: true },
+    { name: "학생 관리", href: "/main/students", comingSoon: true },
   ]
 
   return (
@@ -88,10 +79,10 @@ export function Navigation() {
           {/* Left Section - Logo & Title */}
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-2" style={{ textDecoration: 'none' }}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--color-primary)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#2563eb]">
                 <span className="text-white font-bold text-sm">E</span>
               </div>
-              <span className="text-[15px] font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>ExamHub</span>
+              <span className="text-[15px] font-bold tracking-tight text-[#2563eb]">ExamHub</span>
             </Link>
           </div>
 
@@ -151,6 +142,14 @@ export function Navigation() {
                     </div>
                   )}
                 </div>
+              ) : item.comingSoon ? (
+                <button
+                  key={item.name}
+                  onClick={() => alert('곧 오픈될 예정입니다!')}
+                  className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  {item.name}
+                </button>
               ) : (
                 <Link
                   key={item.name}
@@ -222,7 +221,7 @@ export function Navigation() {
             ) : (
               <button
                 onClick={handleLogin}
-                className="rounded-full bg-purple-700 hover:bg-purple-800 text-white px-4 py-1.5 text-sm font-medium transition-colors"
+                className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 text-sm font-medium transition-colors"
               >
                 로그인
               </button>
@@ -305,14 +304,27 @@ export function Navigation() {
                       )}
                     </div>
                   ) : (
+                    item.comingSoon ? (
+                    <button
+                      key={item.name}
+                      className="block w-full text-left px-3 py-2 text-base text-gray-700 hover:text-[#2563eb] hover:bg-gray-50 rounded-md"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        alert('곧 오픈될 예정입니다!')
+                      }}
+                    >
+                      {item.name}
+                    </button>
+                    ) : (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="block px-3 py-2 text-base text-gray-700 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                      className="block px-3 py-2 text-base text-gray-700 hover:text-[#2563eb] hover:bg-gray-50 rounded-md"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.name}
                     </Link>
+                    )
                   )
                 )}
 
@@ -353,7 +365,7 @@ export function Navigation() {
                   ) : (
                     <button
                       onClick={handleLogin}
-                      className="w-full bg-[#7b1e7a] hover:bg-[#5a1559] text-white px-4 py-2 rounded-full text-sm font-medium"
+                      className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-4 py-2 rounded-full text-sm font-medium"
                     >
                       로그인
                     </button>

@@ -16,9 +16,9 @@ async function bootstrap() {
     'http://localhost:3003',
     // 거북스쿨 Hub (SSO 연동용)
     'http://localhost:3000',
-    // Firebase Hosting
-    'https://examhub-app.web.app',
-    'https://examhub-app.firebaseapp.com',
+    // Firebase Hosting (ts-front-479305 → examhub-front)
+    'https://examhub-front.web.app',
+    'https://examhub-front.firebaseapp.com',
     // Production domains
     'https://examhub.kr',
     'https://www.examhub.kr',

@@ -66,10 +66,9 @@ export function Navigation() {
   // ExamHub 메뉴 항목
   const menuItems: MenuItem[] = [
     { name: "ExamHub 홈", href: "/" },
-    { name: "시험 출제", href: "/main/create-exam", comingSoon: true },
-    { name: "채점 관리", href: "/main/grading", comingSoon: true },
-    { name: "성적 분석", href: "/main/analysis", comingSoon: true },
-    { name: "학생 관리", href: "/main/students", comingSoon: true },
+    { name: "정답 입력", href: "/main/input" },
+    { name: "성적 분석", href: "/main/score-analysis" },
+    { name: "오답 노트", href: "/main/wrong-answers" },
   ]
 
   return (
@@ -120,10 +119,10 @@ export function Navigation() {
                         child.comingSoon ? (
                           <button
                             key={child.name}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-[#7b1e7a] transition-colors"
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#2563eb] transition-colors"
                             onClick={() => {
                               setOpenSubmenu(null)
-                              alert('3월 첫 모의고사 이후 서비스 실행됩니다')
+                              alert('곧 오픈될 예정입니다!')
                             }}
                           >
                             {child.name}
@@ -132,7 +131,7 @@ export function Navigation() {
                           <Link
                             key={child.name}
                             href={child.href}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-[#7b1e7a] transition-colors"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-[#2563eb] transition-colors"
                             onClick={() => setOpenSubmenu(null)}
                           >
                             {child.name}
@@ -232,7 +231,7 @@ export function Navigation() {
           <div className="lg:hidden flex items-center space-x-2">
             {/* 모바일 아이콘들 */}
             <button
-              className="p-2 text-gray-500 hover:text-[#7b1e7a]"
+              className="p-2 text-gray-500 hover:text-[#2563eb]"
               title="알림"
             >
               <Bell className="w-5 h-5" />
@@ -240,7 +239,7 @@ export function Navigation() {
 
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-700 hover:text-[#7b1e7a] p-2"
+              className="text-gray-700 hover:text-[#2563eb] p-2"
               aria-label="메뉴 열기"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -270,7 +269,7 @@ export function Navigation() {
                     <div key={item.name}>
                       <button
                         onClick={() => setMobileOpenSubmenu(mobileOpenSubmenu === item.name ? null : item.name)}
-                        className="flex items-center justify-between w-full px-3 py-2 text-base text-gray-700 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                        className="flex items-center justify-between w-full px-3 py-2 text-base text-gray-700 hover:text-[#2563eb] hover:bg-gray-50 rounded-md"
                       >
                         <span>{item.name}</span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${mobileOpenSubmenu === item.name ? 'rotate-180' : ''}`} />
@@ -281,10 +280,10 @@ export function Navigation() {
                             child.comingSoon ? (
                               <button
                                 key={child.name}
-                                className="block w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                                className="block w-full text-left px-3 py-2 text-sm text-gray-600 hover:text-[#2563eb] hover:bg-gray-50 rounded-md"
                                 onClick={() => {
                                   setIsMobileMenuOpen(false)
-                                  alert('3월 첫 모의고사 이후 서비스 실행됩니다')
+                                  alert('곧 오픈될 예정입니다!')
                                 }}
                               >
                                 {child.name}
@@ -293,7 +292,7 @@ export function Navigation() {
                               <Link
                                 key={child.name}
                                 href={child.href}
-                                className="block px-3 py-2 text-sm text-gray-600 hover:text-[#7b1e7a] hover:bg-gray-50 rounded-md"
+                                className="block px-3 py-2 text-sm text-gray-600 hover:text-[#2563eb] hover:bg-gray-50 rounded-md"
                                 onClick={() => setIsMobileMenuOpen(false)}
                               >
                                 {child.name}
@@ -332,11 +331,11 @@ export function Navigation() {
 
                 {/* 모바일 추가 메뉴 */}
                 <div className="flex items-center space-x-4 px-3 py-2">
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-[#7b1e7a]">
+                  <button className="flex items-center space-x-2 text-gray-600 hover:text-[#2563eb]">
                     <WonCircle className="w-5 h-5" />
                     <span className="text-sm">결제</span>
                   </button>
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-purple-700">
+                  <button className="flex items-center space-x-2 text-gray-600 hover:text-[#2563eb]">
                     <Users className="w-5 h-5" />
                     <span className="text-sm">계정연동</span>
                   </button>

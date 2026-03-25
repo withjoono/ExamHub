@@ -11,23 +11,23 @@ const notoSansKR = Noto_Sans_KR({
 })
 
 export const metadata: Metadata = {
-  title: "ExamHub - 내가 푸는 단 한 문제도 이제 버리지 않도록!",
-  description: "모의고사 정답을 입력하면 자동채점, 성적분석, 취약점분석, 오답노트, 대학예측까지! | 거북스쿨",
+  title: "ExamHub - 선생님이 출제, 학생이 입력, 자동으로 채점!",
+  description: "선생님이 출제한 시험에 정답만 입력하면 자동 채점, 성적 분석, 오답 노트까지! | 거북스쿨",
   icons: {
     icon: "/images/mascot.png",
     apple: "/images/mascot.png",
   },
   openGraph: {
-    title: "ExamHub - 내가 푸는 단 한 문제도 이제 버리지 않도록!",
-    description: "모의고사 정답을 입력하면 자동채점, 성적분석, 취약점분석, 오답노트, 대학예측까지!",
+    title: "ExamHub - 선생님이 출제, 학생이 입력, 자동으로 채점!",
+    description: "선생님이 출제한 시험에 정답만 입력하면 자동 채점, 성적 분석, 오답 노트까지!",
     images: [{ url: "/images/og-image.png", width: 1200, height: 630, alt: "ExamHub 거북쌤" }],
     siteName: "ExamHub",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ExamHub - 내가 푸는 단 한 문제도 이제 버리지 않도록!",
-    description: "모의고사 정답을 입력하면 자동채점, 성적분석, 취약점분석, 오답노트, 대학예측까지!",
+    title: "ExamHub - 선생님이 출제, 학생이 입력, 자동으로 채점!",
+    description: "선생님이 출제한 시험에 정답만 입력하면 자동 채점, 성적 분석, 오답 노트까지!",
     images: ["/images/og-image.png"],
   },
 }

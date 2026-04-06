@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "geobuk-shared/ui"
+import { Button } from "geobuk-shared/ui"
 
 export default function TargetUniversityPage() {
   // Sample data for the chart
@@ -191,3 +191,4 @@ export default function TargetUniversityPage() {
     </div>
   )
 }
+

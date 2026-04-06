@@ -2,10 +2,10 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "geobuk-shared/ui"
+import { Input } from "geobuk-shared/ui"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "geobuk-shared/ui"
 import { api } from "@/lib/api/client"
 import { getUser, type User } from "@/lib/auth/user"
 
@@ -2329,3 +2329,4 @@ export default function ScoreInputPage() {
     </Suspense>
   )
 }
+

@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "geobuk-shared/ui"
+import { Card, CardContent } from "geobuk-shared/ui"
 import { ChevronRight, Loader2 } from "lucide-react"
 import { useUniversityOptions, useFilteredUniversities } from "@/lib/hooks"
 
@@ -262,3 +262,4 @@ export default function MockAnalysisPredictionPage() {
     </div>
   )
 }
+

@@ -6,7 +6,7 @@
  */
 
 import { redirectToHubLogin, redirectToHubRegister } from '@/lib/auth/hub-login';
-import { Button } from '@/components/ui/button';
+import { Button } from 'geobuk-shared/ui';
 
 interface LoginButtonProps {
   returnPath?: string;
@@ -50,3 +50,4 @@ export function RegisterButton({
     </Button>
   );
 }
+

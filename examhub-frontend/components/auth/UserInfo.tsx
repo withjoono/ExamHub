@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { getUser, cacheUser, clearUserCache, type User } from '@/lib/auth/user';
 import { clearTokens } from '@/lib/auth/token-manager';
 import { getHubUrl } from '@/lib/auth/hub-login';
-import { Button } from '@/components/ui/button';
+import { Button } from 'geobuk-shared/ui';
 
 export function UserInfo() {
   const [user, setUserState] = useState<User | null>(null);
@@ -58,3 +58,4 @@ export function UserInfo() {
     </div>
   );
 }
+

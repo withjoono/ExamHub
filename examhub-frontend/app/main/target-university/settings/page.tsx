@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Button } from "geobuk-shared/ui"
+import { Card, CardContent, CardHeader, CardTitle } from "geobuk-shared/ui"
+import { Input } from "geobuk-shared/ui"
 import { Badge } from "@/components/ui/badge"
 import { api } from "@/lib/api/client"
 import { getUser, type User } from "@/lib/auth/user"
@@ -482,3 +482,4 @@ export default function TargetUniversitySettingsPage() {
         </div>
     )
 }
+
